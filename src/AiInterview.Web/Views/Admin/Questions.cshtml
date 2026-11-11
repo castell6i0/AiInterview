@@ -1,0 +1,24 @@
+@model AdminQuestionsVm
+@{ ViewData["Title"] = "Ngân hàng câu hỏi"; }
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3"><h1>Ngân hàng câu hỏi</h1><a asp-action="Question" class="btn btn-primary">Thêm câu hỏi</a></div>
+@await Html.PartialAsync("_Nav")
+@await Html.PartialAsync("_Alerts")
+<form asp-action="Questions" method="get" class="row g-2 mb-4">
+    <div class="col-md-6"><label for="search" class="visually-hidden">Nội dung, kỹ năng hoặc loại công ty</label><input id="search" name="search" value="@Model.Search" class="form-control" placeholder="Nội dung, kỹ năng hoặc loại công ty" maxlength="200" /></div>
+    <div class="col-md-4"><label asp-for="PositionId" class="visually-hidden">Vị trí</label><select asp-for="PositionId" asp-items="@(new SelectList(Model.Positions, "Id", "Name"))" class="form-select"><option value="">Tất cả vị trí</option></select></div>
+    <div class="col-md-2"><button class="btn btn-primary" type="submit">Lọc câu hỏi</button></div>
+</form>
+@foreach (var question in Model.Questions)
+{
+    <div class="card mb-3"><div class="card-body"><div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
+        <div class="flex-grow-1"><p class="text-muted small mb-2">@question.Position.Name · @ClassroomUi.Label(question.Level) · @ClassroomUi.Label(question.Language) · @ClassroomUi.Label(question.Kind) · @question.CompanyType</p><p style="white-space:pre-wrap">@question.Content</p>
+            <div class="d-flex flex-wrap gap-1">@foreach (var tag in question.Tags) { <span class="badge bg-light text-dark border">@tag.Skill.Name</span> } <span class="badge @(question.IsActive ? "bg-success" : "bg-secondary")">@(question.IsActive ? "Đang dùng" : "Đã tắt")</span></div>
+        </div><div class="d-flex gap-2"><a asp-action="Question" asp-route-id="@question.Id" class="btn btn-outline-primary btn-sm">Sửa</a><form asp-action="DeleteQuestion" method="post"><input name="id" type="hidden" value="@question.Id" /><button class="btn btn-outline-danger btn-sm" type="submit">Xóa</button></form></div>
+    </div></div></div>
+}
+@if (Model.Questions.Count == 0) { <p>Không tìm thấy câu hỏi phù hợp.</p> }
+<nav class="d-flex align-items-center justify-content-between mt-4" aria-label="Phân trang câu hỏi">
+    @if (Model.Page > 1) { <a asp-action="Questions" asp-route-search="@Model.Search" asp-route-positionId="@Model.PositionId" asp-route-page="@(Model.Page - 1)" class="btn btn-outline-secondary">← Trang trước</a> } else { <span></span> }
+    <span>Trang @Model.Page / @Model.TotalPages</span>
+    @if (Model.Page < Model.TotalPages) { <a asp-action="Questions" asp-route-search="@Model.Search" asp-route-positionId="@Model.PositionId" asp-route-page="@(Model.Page + 1)" class="btn btn-outline-secondary">Trang sau →</a> } else { <span></span> }
+</nav>

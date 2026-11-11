@@ -1,0 +1,34 @@
+@model AssignmentDetailVm
+@{ ViewData["Title"] = Model.Assignment.Title; }
+<a asp-action="Details" asp-route-id="@Model.Assignment.ClassId" class="mb-3 btn btn-soft btn-sm">← @Model.Assignment.Class.Name</a>
+<h1>@Model.Assignment.Title</h1>
+@if (TempData["ClassMessage"] is string message) { <div class="alert alert-success" role="status">@message</div> }
+@if (TempData["ClassError"] is string error) { <div class="alert alert-danger" role="alert">@error</div> }
+<div class="card mb-4"><div class="card-body">
+    <p class="text-muted">@Model.Assignment.Position.Name · @ClassroomUi.Label(Model.Assignment.Level) · @ClassroomUi.Label(Model.Assignment.Language) · @ClassroomUi.Label(Model.Assignment.Kind) · @Model.Assignment.QuestionCount câu chính</p>
+    <p style="white-space:pre-wrap">@Model.Assignment.Instructions</p>
+    <p><strong>Hạn nộp:</strong> @ClassroomUi.Date(Model.Assignment.DueAt) (UTC+7) · Rubric #@Model.Assignment.RubricVersionId</p>
+    @if (Model.Assignment.Class.IsActive) { <a href="/Interviews/Create?assignmentId=@Model.Assignment.Id" class="btn btn-primary">Bắt đầu luyện cho bài tập này</a> }
+    else { <p class="text-muted">Lớp đã đóng, không tiếp nhận bài nộp mới.</p> }
+</div></div>
+<h2 class="h4">Nộp buổi đã hoàn thành</h2>
+<p class="text-muted">Chọn buổi tạo sau khi giao bài, đúng cấu hình và rubric, trả lời đủ tất cả câu chính. Buổi kết thúc sớm hoặc bỏ qua câu chưa đủ điều kiện. Mỗi buổi chỉ nộp một lần cho một bài tập; được luyện lại để nộp lần tiếp theo. Bài nộp sau hạn được đánh dấu muộn.</p>
+@if (Model.EligibleSessions.Count == 0) { <p>Chưa có buổi đủ điều kiện. Bắt đầu từ nút ở trên để lấy đúng cấu hình bài tập.</p> }
+else if (Model.Assignment.Class.IsActive)
+{
+    <form asp-action="Submit" method="post" class="row g-2 mb-4">
+        <input type="hidden" name="assignmentId" value="@Model.Assignment.Id" />
+        <div class="col-md-9"><label for="sessionId" class="form-label">Buổi phỏng vấn</label><select name="sessionId" id="sessionId" class="form-select" required>
+            @foreach (var session in Model.EligibleSessions) { <option value="@session.Id">@ClassroomUi.Date(session.CreatedAt) · @session.Evaluation?.OverallScore.ToString("0.0")/10</option> }
+        </select></div>
+        <div class="col-md-3 d-flex align-items-end"><button class="btn btn-primary" type="submit">Nộp bài</button></div>
+    </form>
+}
+<h2 class="h4">Lịch sử nộp bài</h2>
+<div class="table-responsive"><table class="table align-middle"><thead><tr><th>Lần</th><th>Thời gian (UTC+7)</th><th>Trạng thái</th><th>Điểm</th><th></th></tr></thead><tbody>
+@foreach (var submission in Model.Submissions)
+{
+    <tr><td>@submission.AttemptNumber</td><td>@ClassroomUi.Date(submission.SubmittedAt)</td><td>@(submission.IsLate ? "Nộp muộn" : "Đúng hạn")</td><td>@submission.Session.Evaluation?.OverallScore.ToString("0.0")/10</td><td><a href="/Interviews/Report/@submission.SessionId" class="btn btn-soft btn-sm">Xem báo cáo</a></td></tr>
+}
+@if (Model.Submissions.Count == 0) { <tr><td colspan="5">Chưa có bài nộp.</td></tr> }
+</tbody></table></div>

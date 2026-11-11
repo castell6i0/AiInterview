@@ -1,0 +1,94 @@
+@{
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+    var action = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+    var signedIn = User.Identity?.IsAuthenticated == true;
+    var userName = User.Identity?.Name ?? "";
+    var userInitial = string.IsNullOrWhiteSpace(userName) ? "U" : userName[0].ToString().ToUpperInvariant();
+    var historyActive = controller == "Dashboard" && action == "History"
+        || controller == "Interviews" && action is "Report" or "Replay" or "Compare";
+    string Current(bool active) => active ? "page" : null!;
+    string Active(bool active) => active ? "active" : "";
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Luyện phỏng vấn IT và theo dõi tiến bộ của bạn." />
+    <title>@ViewData["Title"] · InterviewLab</title>
+    <link rel="icon" type="image/svg+xml" href="~/favicon.svg" />
+    <link rel="stylesheet" href="~/lib/bootstrap/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body class="@(signedIn ? "workspace" : "public-page")">
+<a class="skip-link" href="#main">Đến nội dung</a>
+@if (signedIn)
+{
+    <aside class="sidebar" id="appNav">
+        <a class="brand" href="/" aria-label="InterviewLab — trang chủ"><span class="brand-mark" aria-hidden="true">il</span>InterviewLab<span class="brand-dot" aria-hidden="true">.</span></a>
+        <div class="nav-caption">Không gian của bạn</div>
+        <nav aria-label="Điều hướng chính">
+            @if (User.IsInRole(Roles.Student))
+            {
+                <a class="nav-item @Active(controller == "Dashboard" && !historyActive)" aria-current="@Current(controller == "Dashboard" && !historyActive)" href="/Dashboard"><span class="nav-icon" aria-hidden="true">◫</span>Tổng quan</a>
+                <a class="nav-item @Active(controller == "Interviews" && !historyActive)" aria-current="@Current(controller == "Interviews" && !historyActive)" href="/Interviews/Create"><span class="nav-icon" aria-hidden="true">◎</span>Luyện phỏng vấn</a>
+                <a class="nav-item @Active(historyActive)" aria-current="@Current(historyActive)" href="/Dashboard/History"><span class="nav-icon" aria-hidden="true">↗</span>Lịch sử &amp; tiến bộ</a>
+                <a class="nav-item @Active(controller == "Profile")" aria-current="@Current(controller == "Profile")" href="/Profile"><span class="nav-icon" aria-hidden="true">▤</span>Hồ sơ · CV · JD</a>
+                <a class="nav-item @Active(controller == "Classes")" aria-current="@Current(controller == "Classes")" href="/Classes"><span class="nav-icon" aria-hidden="true">◇</span>Lớp của tôi</a>
+            }
+            @if (User.IsInRole(Roles.Lecturer))
+            {
+                <a class="nav-item @Active(controller == "Lecturer")" aria-current="@Current(controller == "Lecturer")" href="/Lecturer"><span class="nav-icon" aria-hidden="true">◫</span>Lớp giảng dạy</a>
+            }
+            @if (User.IsInRole(Roles.Admin))
+            {
+                var usersActive = controller == "Admin" && action is "Users" or "CreateUser" or "EditUser" or "DeleteUser" or "UserAccess";
+                var positionsActive = controller == "Admin" && action is "Positions" or "Position" or "DeletePosition";
+                var questionsActive = controller == "Admin" && action is "Questions" or "Question" or "DeleteQuestion";
+                <a class="nav-item @Active(controller == "Admin" && action == "Index")" aria-current="@Current(controller == "Admin" && action == "Index")" href="/Admin"><span class="nav-icon" aria-hidden="true">◫</span>Tổng quan quản trị</a>
+                <a class="nav-item @Active(usersActive)" aria-current="@Current(usersActive)" href="/Admin/Users"><span class="nav-icon" aria-hidden="true">◇</span>Người dùng</a>
+                <a class="nav-item @Active(positionsActive)" aria-current="@Current(positionsActive)" href="/Admin/Positions"><span class="nav-icon" aria-hidden="true">▤</span>Vị trí ứng tuyển</a>
+                <a class="nav-item @Active(questionsActive)" aria-current="@Current(questionsActive)" href="/Admin/Questions"><span class="nav-icon" aria-hidden="true">?</span>Ngân hàng câu hỏi</a>
+                <a class="nav-item @Active(controller == "Admin" && action == "Rubric")" aria-current="@Current(controller == "Admin" && action == "Rubric")" href="/Admin/Rubric"><span class="nav-icon" aria-hidden="true">≋</span>Tiêu chí &amp; trọng số</a>
+            }
+            <div class="nav-caption mt-4">Cài đặt &amp; hỗ trợ</div>
+            <a class="nav-item @Active(controller == "AiSettings")" aria-current="@Current(controller == "AiSettings")" href="/AiSettings"><span class="nav-icon" aria-hidden="true">⚙</span>Cài đặt AI</a>
+            <a class="nav-item @Active(controller == "Home" && action == "Help")" aria-current="@Current(controller == "Home" && action == "Help")" href="/Home/Help"><span class="nav-icon" aria-hidden="true">?</span>Hướng dẫn sử dụng</a>
+            <a class="nav-item @Active(controller == "Home" && action == "Privacy")" aria-current="@Current(controller == "Home" && action == "Privacy")" href="/Home/Privacy"><span class="nav-icon" aria-hidden="true">♧</span>Dữ liệu của bạn</a>
+        </nav>
+        <div class="sidebar-account">
+            <div class="sidebar-user">
+                <span class="avatar" aria-hidden="true">@userInitial</span>
+                <div><strong>@(User.IsInRole(Roles.Admin) ? "Quản trị viên" : User.IsInRole(Roles.Lecturer) ? "Giảng viên" : "Sinh viên")</strong><div class="user-email" title="@userName">@userName</div></div>
+            </div>
+            <form asp-controller="Account" asp-action="Logout" method="post"><button class="logout-button" type="submit">Đăng xuất ↗</button></form>
+        </div>
+    </aside>
+    <div class="workspace-content">
+        <header class="app-header">
+            <button class="btn btn-sm btn-outline-secondary mobile-menu" type="button" aria-label="Mở hoặc đóng menu điều hướng" aria-expanded="false" aria-controls="appNav" id="menuToggle">☰</button>
+            <div class="header-path"><span class="header-context">Không gian học tập /</span><strong>@ViewData["Title"]</strong></div>
+        </header>
+        <main id="main" class="page-content">
+            @if (TempData["Message"] is string message) { <div class="alert alert-info" role="status">@message</div> }
+            @RenderBody()
+        </main>
+        <footer class="app-footer"><span>InterviewLab · Luyện phỏng vấn IT</span><a class="btn btn-soft btn-sm" href="/Home/Privacy">Quyền riêng tư</a></footer>
+    </div>
+}
+else
+{
+    <header class="public-header container">
+        <a class="brand" href="/"><span class="brand-mark" aria-hidden="true">il</span>InterviewLab<span class="brand-dot" aria-hidden="true">.</span></a>
+        <nav class="d-flex flex-wrap align-items-center gap-2" aria-label="Hướng dẫn và tài khoản"><a class="btn btn-soft btn-sm" href="/Home/Help" aria-current="@Current(controller == "Home" && action == "Help")">Hướng dẫn</a><a class="btn btn-soft btn-sm" href="/Account/Login" aria-current="@Current(controller == "Account" && action == "Login")">Đăng nhập</a><a class="btn btn-primary btn-sm" href="/Account/Register">Bắt đầu luyện tập →</a></nav>
+    </header>
+    <main id="main">@RenderBody()</main>
+    <footer class="container public-footer"><span>InterviewLab · Luyện phỏng vấn IT</span><a class="btn btn-soft btn-sm" href="/Home/Privacy">Dữ liệu &amp; quyền riêng tư</a></footer>
+}
+<script src="~/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="~/lib/chart/chart.umd.min.js"></script>
+<script src="~/js/site.js" asp-append-version="true"></script>
+<script src="~/js/request-feedback.js" asp-append-version="true"></script>
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

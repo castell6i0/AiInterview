@@ -1,0 +1,12 @@
+@model List<Classroom>
+@{ ViewData["Title"] = "Lớp giảng dạy"; }
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4"><div><h1>Lớp giảng dạy</h1><p class="text-muted mb-0">Theo dõi luyện tập, giao bài và góp ý cho sinh viên.</p></div><a asp-action="Create" class="btn btn-primary">Tạo lớp mới</a></div>
+@if (Model.Count == 0) { <div class="card"><div class="card-body">Tạo lớp đầu tiên rồi chia sẻ mã tham gia cho sinh viên.</div></div> }
+<div class="row g-3">@foreach (var classroom in Model)
+{
+    <div class="col-md-6 col-xl-4"><div class="card h-100"><div class="card-body">
+        <span class="badge @(classroom.IsActive ? "bg-success" : "bg-secondary") mb-2">@(classroom.IsActive ? "Đang mở" : "Đã đóng")</span>
+        <h2 class="h4">@classroom.Name</h2><p>@classroom.Members.Count sinh viên · Mã lớp <strong>@classroom.JoinCode</strong></p>
+        <a asp-action="Details" asp-route-id="@classroom.Id" class="btn btn-outline-primary">Mở dashboard lớp</a>
+    </div></div></div>
+}</div>

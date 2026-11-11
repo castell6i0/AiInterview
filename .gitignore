@@ -1,0 +1,17 @@
+**/bin/
+**/obj/
+.vs/
+*.user
+*.suo
+**/appsettings.Local.json
+**/App_Data/
+**/TestResults/
+*.log
+.env
+
+*.zip
+**/secrets.json
+*.mdf
+*.ldf
+*.bak
+dependency-*.json

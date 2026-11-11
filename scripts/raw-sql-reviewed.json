@@ -1,0 +1,12 @@
+[
+  {
+    "path": "src/AiInterview.Infrastructure/Persistence/Migrations/20261110030924_AddSecurityLimitsAndAiUsage.cs",
+    "sha256": "75BE0FF9099DE9BEED7421E2A59DDD3600F9E345212B4F8398F529AF77BABD9D",
+    "reason": "DDL migration constants only; preflight existing length violations without data loss; DatabaseSecurityTests exercises migration, rollback and enforcement."
+  },
+  {
+    "path": "src/AiInterview.Web/Services/LocalDbStartup.cs",
+    "sha256": "184B9741F2477951F83353D3EC1994F7E4862BB1E26B2B6221030708CA2DE915",
+    "reason": "Infrastructure readiness SELECT 1 constant, no user-input SQL; LocalDbStartupTests covers named LocalDB startup."
+  }
+]

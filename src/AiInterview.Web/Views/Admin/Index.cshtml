@@ -1,0 +1,17 @@
+@model AdminIndexVm
+@{ ViewData["Title"] = "Quản trị hệ thống"; }
+<h1>Quản trị hệ thống</h1><p class="text-muted">Quản lý quyền truy cập, nội dung luyện tập và tiêu chí đánh giá.</p>
+@await Html.PartialAsync("_Nav")
+@await Html.PartialAsync("_Alerts")
+<a asp-controller="AiUsage" asp-action="Index" class="btn btn-soft mb-3">Xem sử dụng AI theo tài khoản và ngày →</a>
+<div class="row g-3 mb-4">
+    <div class="col-md-4"><div class="card h-100"><div class="card-body"><p class="text-muted mb-1">Người dùng</p><strong class="fs-2">@Model.UserCount</strong><div class="mt-2"><a asp-action="Users" class="btn btn-soft btn-sm">Quản lý tài khoản →</a></div></div></div></div>
+    <div class="col-md-4"><div class="card h-100"><div class="card-body"><p class="text-muted mb-1">Buổi phỏng vấn</p><strong class="fs-2">@Model.SessionCount</strong><p class="small text-muted mb-0">Tổng số buổi ở mọi trạng thái</p></div></div></div>
+    <div class="col-md-4"><div class="card h-100"><div class="card-body"><p class="text-muted mb-1">Câu hỏi ngân hàng</p><strong class="fs-2">@Model.QuestionCount</strong><div class="mt-2"><a asp-action="Questions" class="btn btn-soft btn-sm">Bổ sung câu hỏi →</a></div></div></div></div>
+</div>
+<div class="card"><div class="card-body"><h2 class="h4">Sử dụng AI</h2><div class="row g-3">
+    <div class="col-sm-6 col-lg-3"><div class="text-muted">Lượt gọi, gồm retry</div><strong class="fs-4">@Model.AiRequestCount.ToString("N0")</strong></div>
+    <div class="col-sm-6 col-lg-3"><div class="text-muted">Token đầu vào đã ghi nhận</div><strong class="fs-4">@Model.ReportedInputTokens.ToString("N0")</strong></div>
+    <div class="col-sm-6 col-lg-3"><div class="text-muted">Token đầu ra đã ghi nhận</div><strong class="fs-4">@Model.ReportedOutputTokens.ToString("N0")</strong></div>
+    <div class="col-sm-6 col-lg-3"><div class="text-muted">Chi phí có dữ liệu (ước tính)</div><strong class="fs-4">@Model.KnownEstimatedCostUsd.ToString("0.0000") USD</strong></div>
+</div><p class="small text-muted mt-3 mb-0">Có @Model.UnknownCostCount lượt chưa xác định chi phí; tổng trên chỉ cộng các giá trị đã biết, không phải hóa đơn. Token chỉ tổng hợp số lượng provider thực sự trả về.</p></div></div>

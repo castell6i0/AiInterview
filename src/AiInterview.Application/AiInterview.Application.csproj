@@ -1,0 +1,3 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup><ProjectReference Include="../AiInterview.Domain/AiInterview.Domain.csproj" /></ItemGroup>
+</Project>

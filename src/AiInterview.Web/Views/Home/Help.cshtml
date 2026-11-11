@@ -1,0 +1,56 @@
+@{
+    ViewData["Title"] = "Hướng dẫn sử dụng";
+    var signedIn = User.Identity?.IsAuthenticated == true;
+    var student = User.IsInRole(Roles.Student);
+}
+<article class="container py-4">
+    <div class="page-heading">
+        <div><span class="eyebrow">BẮT ĐẦU TỪ ĐÂY</span><h1>Buổi luyện đầu tiên của bạn</h1><p>Tài khoản, kết nối AI, câu trả lời và báo cáo đều được quản lý ngay trên website.</p></div>
+    </div>
+    <ol class="flow-steps" aria-label="Các bước bắt đầu">
+        <li><span>1</span> Tạo tài khoản</li><li><span>2</span> Kết nối AI</li><li><span>3</span> Luyện phỏng vấn</li><li><span>4</span> Xem góp ý</li>
+    </ol>
+    <div class="row g-4">
+        <section class="col-lg-6" aria-labelledby="accountHelp"><div class="card h-100"><div class="card-body p-4">
+            <span class="step-dot" aria-hidden="true">1</span><h2 class="h4 mt-3" id="accountHelp">Tạo tài khoản</h2>
+            <p>Điền họ tên, email và mật khẩu ngay trên website. Nếu hệ thống yêu cầu xác nhận email, hãy mở thư từ InterviewLab, bấm <strong>Xác nhận email</strong>, rồi đăng nhập. Nếu website chưa bật email, bạn có thể đăng nhập ngay sau khi tạo tài khoản; email khi đó chưa được xác minh.</p>
+            <p>Nếu đang chờ thư mà chưa thấy, kiểm tra thư rác, gửi lại email xác nhận hoặc liên hệ quản trị viên.</p>
+            <div class="support-actions mb-3"><a class="btn btn-soft btn-sm" href="/Account/CheckEmail">Gửi lại email xác nhận →</a></div>
+            @if (!signedIn) { <div class="d-flex flex-wrap gap-3"><a class="btn btn-primary" href="/Account/Register">Tạo tài khoản</a><a class="btn btn-outline-primary" href="/Account/Login">Đăng nhập</a></div> }
+            else { <p class="help-text mb-0">Bạn đã đăng nhập. Hãy chuyển sang bước kết nối AI.</p> }
+        </div></div></section>
+        <section class="col-lg-6" aria-labelledby="connectionHelp"><div class="card h-100"><div class="card-body p-4">
+            <span class="step-dot" aria-hidden="true">2</span><h2 class="h4 mt-3" id="connectionHelp">Chọn kết nối AI</h2>
+            <p>Mở <strong>Cài đặt AI</strong> để xem kết nối đang dùng. Nếu cần kết nối cá nhân, chọn Gemini, dán API key Google AI Studio rồi chọn model có hạn mức miễn phí. Bạn vẫn có thể tự nhập tên model.</p>
+            <p>Lấy key tại nhà cung cấp bạn muốn sử dụng. Mỗi nhà cung cấp dùng một key riêng.</p>
+            <p class="help-text">Danh sách chỉ gợi ý model Gemini có hạn mức miễn phí cho tài khoản đủ điều kiện; hãy dùng dự án Google AI Studio thuộc gói miễn phí. Dự án đã bật thanh toán vẫn có thể tính phí. Model tự nhập không được xác nhận miễn phí. OpenAI cũ vẫn được giữ trong phần nâng cao có nhãn phí, không tự chuyển kết nối.</p>
+            <div class="support-actions mb-3"><a class="btn btn-soft btn-sm" href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">Google AI Studio (mở tab mới) ↗</a></div>
+            <p class="help-text">Bấm <strong>Lưu &amp; kiểm tra model</strong> để lưu và thử tạo một nội dung mẫu ngắn bằng đúng key/model vừa lưu. Kiểm tra có thể dùng một ít hạn mức hoặc số dư API, không gửi CV hay câu trả lời. Thành công nghĩa là AI tạo được mẫu tại thời điểm kiểm tra; hạn mức có thể thay đổi khi luyện tập. Bấm <strong>Chỉ lưu</strong> nếu chưa muốn gọi API.</p>
+            <a class="btn btn-outline-primary" href="/AiSettings">Mở Cài đặt AI →</a>
+        </div></div></section>
+        <section class="col-lg-6" aria-labelledby="practiceHelp"><div class="card h-100"><div class="card-body p-4">
+            <span class="step-dot" aria-hidden="true">3</span><h2 class="h4 mt-3" id="practiceHelp">Chọn vị trí và trả lời câu hỏi</h2>
+            <p>Vào <strong>Luyện phỏng vấn</strong>, chọn vị trí ứng tuyển, cấp độ, ngôn ngữ và cách trả lời. Lần đầu, bạn có thể chọn 5 câu và nhập văn bản.</p>
+            <p>Đọc phần đồng ý gửi dữ liệu tới nhà cung cấp AI đang hiển thị. Vào phòng và bấm <strong>Bắt đầu phỏng vấn</strong> khi sẵn sàng. Đọc hoặc nghe câu hỏi, viết hoặc nói câu trả lời, rồi bấm <strong>Gửi câu trả lời</strong>.</p>
+            <p class="help-text">CV và tin tuyển dụng là tùy chọn cho buổi luyện kiến thức thông thường. Luyện dự án cần CV; luyện theo tin tuyển dụng cần JD. Bạn thêm tài liệu tại <strong>Hồ sơ · CV · JD</strong>.</p>
+            @if (student) { <div class="d-flex flex-wrap gap-3"><a class="btn btn-primary" href="/Interviews/Create">Tạo buổi luyện</a><a class="btn btn-outline-secondary" href="/Profile">Thêm CV hoặc JD</a></div> }
+            else if (!signedIn) { <p class="help-text mb-0">Đăng nhập bằng tài khoản sinh viên để bắt đầu.</p> }
+            else { <p class="help-text mb-0">Phần luyện phỏng vấn dành cho tài khoản sinh viên. Tài khoản hiện tại sử dụng chức năng theo vai trò được cấp.</p> }
+        </div></div></section>
+        <section class="col-lg-6" aria-labelledby="reportHelp"><div class="card h-100"><div class="card-body p-4">
+            <span class="step-dot" aria-hidden="true">4</span><h2 class="h4 mt-3" id="reportHelp">Đọc góp ý và luyện tiếp</h2>
+            <p>Hoàn tất các câu rồi bấm <strong>Tạo và xem báo cáo</strong>. Đọc điểm theo tiêu chí, dẫn chứng từ câu trả lời và gợi ý cải thiện. Chọn một điểm còn yếu để luyện trong buổi tiếp theo.</p>
+            <p>Trong <strong>Lịch sử &amp; tiến bộ</strong>, bạn có thể đọc lại báo cáo hoặc bấm <strong>Tiếp tục</strong> ở buổi chưa xong.</p>
+            <p class="help-text">Nếu AI báo lỗi, làm theo thông báo và thử lại trong buổi hiện tại. Câu trả lời đã gửi và lưu thành công vẫn được giữ. Với bản nháp, hãy chờ thông báo lưu xong trước khi rời trang.</p>
+            @if (student) { <a class="btn btn-outline-primary" href="/Dashboard/History">Mở lịch sử luyện tập →</a> }
+        </div></div></section>
+    </div>
+    <section class="card mt-4" aria-labelledby="faqHeading"><div class="card-body p-4">
+        <h2 class="h4 mb-4" id="faqHeading">Câu hỏi thường gặp</h2>
+        <details class="mb-3"><summary><strong>API key là gì? Người khác có thấy key của tôi không?</strong></summary><p class="mt-3">API key là mã cho phép website sử dụng dịch vụ AI từ tài khoản của bạn. Key cá nhân được mã hóa khi lưu trên máy chủ, chỉ áp dụng cho tài khoản của bạn và không hiển thị lại. Bạn có thể thay hoặc xóa key tại Cài đặt AI. Nội dung bạn đồng ý phân tích được gửi đến nhà cung cấp đã chọn.</p><div class="support-actions"><a class="btn btn-soft btn-sm" href="/Home/Privacy">Tìm hiểu cách xử lý dữ liệu →</a></div></details>
+        <details class="mb-3"><summary><strong>Key sai, hết hạn mức hoặc AI không trả lời thì làm gì?</strong></summary><p class="mt-3 mb-0">Mở Cài đặt AI, kiểm tra đúng nhà cung cấp và lưu lại key nếu cần. Xem quyền truy cập, hạn mức và thanh toán trên website nhà cung cấp. Nếu dùng kết nối chung, liên hệ người quản trị. Sau đó quay lại buổi đang luyện và thử lại. Nếu đổi nhà cung cấp, website sẽ yêu cầu bạn đồng ý gửi dữ liệu sang dịch vụ mới.</p></details>
+        <details class="mb-3"><summary><strong>Tôi đóng trang khi đang luyện thì có tiếp tục được không?</strong></summary><p class="mt-3 mb-0">Có. Đăng nhập lại cùng tài khoản, mở Lịch sử &amp; tiến bộ và chọn Tiếp tục ở buổi đó. Nội dung đã lưu sẽ được tải lại; phần chưa lưu thành công có thể cần nhập lại.</p></details>
+        <details><summary><strong>Microphone hoặc giọng đọc không hoạt động thì sao?</strong></summary><p class="mt-3 mb-0">Cho phép website dùng microphone trong trình duyệt khi bấm Bắt đầu nói. Nếu trình duyệt không hỗ trợ hoặc nhận sai lời nói, bạn vẫn có thể gõ và sửa câu trả lời trước khi gửi. Mở Giọng đọc và tốc độ để chọn giọng, hoặc tắt Tự đọc câu mới. Giọng đọc có sẵn phụ thuộc trình duyệt và thiết bị.</p></details>
+    </div></section>
+    @if (signedIn && !student) { <p class="mt-4"><a class="btn btn-outline-primary" href="/">Về trang làm việc của bạn →</a></p> }
+</article>

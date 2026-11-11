@@ -1,0 +1,152 @@
+@using System.Text.Json
+@using AiInterview.Web.Services
+@model AiSettingsViewModel
+@{
+    ViewData["Title"] = "Cài đặt AI";
+    var selectedIsOpenAi = Model.Provider == "OpenAI";
+    var selectedHasKey = selectedIsOpenAi ? Model.HasOpenAiKey : Model.HasGeminiKey;
+    var selectedKeyUnavailable = selectedIsOpenAi ? Model.OpenAiKeyUnavailable : Model.GeminiKeyUnavailable;
+}
+<div class="page-heading">
+    <div><span class="eyebrow">AI CỦA BẠN</span><h1>Kết nối AI</h1><p>Chọn dịch vụ, dán API key và bấm lưu. Mọi thao tác đều thực hiện ngay tại đây.</p></div>
+</div>
+<ol class="flow-steps" aria-label="Các bước kết nối AI"><li><span>1</span>Chọn dịch vụ</li><li><span>2</span>Dán key &amp; lưu</li><li><span>3</span>Kiểm tra &amp; tiếp tục</li></ol>
+
+@if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+{
+    <div class="alert alert-success" role="status">@Model.StatusMessage</div>
+}
+@if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+{
+    <div class="alert alert-danger" role="alert">@Model.ErrorMessage</div>
+}
+
+<section class="ai-current" aria-labelledby="currentAiHeading">
+    <div class="ai-current-copy">
+        <span class="eyebrow">ĐANG SỬ DỤNG</span>
+        <h2 id="currentAiHeading">@Model.EffectiveProvider <span class="ai-source-label">@(Model.UsePersonalSettings ? "Key cá nhân" : "Cấu hình hệ thống")</span></h2>
+        <p class="ai-current-model">Model: <strong>@Model.EffectiveModel</strong></p>
+        <p class="ai-current-note">@(Model.IsConfigured ? "Đã lưu cấu hình. Bấm kiểm tra để thử khả năng tạo nội dung trước khi luyện tập." : "Chưa có key dùng được. Nhập key của bạn bên dưới để bắt đầu.")</p>
+    </div>
+    <div class="ai-current-actions">
+        <form asp-controller="AiSettings" asp-action="TestConnection" method="post" data-preserve-on-limit data-rate-group="ai-settings" id="aiConnectionCheckForm" aria-describedby="connectionCheckHelp">
+            <input type="hidden" name="ReturnUrl" value="@Model.ReturnUrl" />
+            <button type="submit" class="btn btn-outline-primary" disabled="@(!Model.IsConfigured)">Kiểm tra kết nối đã lưu</button>
+        </form>
+        <span class="help-text" id="connectionCheckHelp">AI sẽ tạo một nội dung mẫu ngắn bằng cấu hình đã lưu. Lần kiểm tra có thể dùng một ít hạn mức; không gửi CV hay câu trả lời của bạn.</span>
+    </div>
+</section>
+@if (Model.IsConfigured)
+{
+    <div class="d-flex align-items-center flex-wrap gap-3 mb-4"><a href="@Model.ContinueUrl" class="btn btn-primary">@(Model.ReturnUrl is not null ? "Quay lại việc đang làm →" : User.IsInRole(Roles.Student) ? "Tiếp tục luyện phỏng vấn →" : "Về trang chính →")</a><span class="help-text m-0">Nếu kết nối hiện tại dùng được, bạn có thể tiếp tục ngay.</span></div>
+}
+else if (Model.ReturnUrl is not null)
+{
+    <p><a href="@Model.ReturnUrl" class="btn btn-soft btn-sm">← Quay lại trang trước</a></p>
+}
+
+<div class="ai-settings-layout" id="aiSettings"
+     data-gemini-model="@Model.GeminiModel" data-open-ai-model="@Model.OpenAiModel"
+     data-has-gemini-key="@Model.HasGeminiKey.ToString().ToLowerInvariant()" data-has-open-ai-key="@Model.HasOpenAiKey.ToString().ToLowerInvariant()"
+     data-gemini-key-unavailable="@Model.GeminiKeyUnavailable.ToString().ToLowerInvariant()" data-open-ai-key-unavailable="@Model.OpenAiKeyUnavailable.ToString().ToLowerInvariant()">
+    <div class="ai-settings-main">
+        <section class="card" aria-labelledby="personalAiHeading">
+            <div class="card-body">
+                <div class="ai-section-heading"><span class="step-dot" aria-hidden="true">1</span><h2 id="personalAiHeading">Thêm kết nối cá nhân</h2></div>
+                <p class="section-description">Bắt đầu với Gemini và chọn model có hạn mức miễn phí. Bạn cần API key từ tài khoản Google AI Studio của mình.</p>
+                <form asp-controller="AiSettings" asp-action="Save" method="post" data-preserve-on-limit data-rate-group="ai-settings" id="aiSettingsForm" autocomplete="off">
+                    <input type="hidden" name="ReturnUrl" value="@Model.ReturnUrl" />
+                    <div asp-validation-summary="All" role="alert"></div>
+                    <div class="mb-4">
+                        <label asp-for="Provider" class="form-label">Nhà cung cấp</label>
+                        <select asp-for="Provider" class="form-select" aria-describedby="providerHelp">
+                            <option value="Gemini">Google Gemini · Có hạn mức miễn phí</option>
+                            @if (selectedIsOpenAi)
+                            {
+                                <option value="OpenAI">OpenAI · Kết nối cũ có phí</option>
+                            }
+                        </select>
+                        <p class="help-text" id="providerHelp">Danh sách chọn nhanh chỉ gồm model Gemini có hạn mức miễn phí. Kết nối đã lưu không tự thay đổi.</p>
+                        @if (!selectedIsOpenAi && (Model.HasOpenAiKey || Model.OpenAiKeyUnavailable))
+                        {
+                            <details class="mt-2"><summary>Nâng cao · Kết nối cũ có phí</summary><p class="help-text">OpenAI đã lưu vẫn được giữ để quản lý, không nằm trong danh sách miễn phí.</p><a asp-action="Index" asp-route-provider="OpenAI" asp-route-returnUrl="@Model.ReturnUrl" class="btn btn-soft btn-sm">Quản lý OpenAI đã lưu</a></details>
+                        }
+                    </div>
+                    <div class="mb-4">
+                        <div class="ai-field-heading"><label for="ApiKey" class="form-label">API key <span id="keyProviderName">@Model.Provider</span></label><span class="ai-key-state" id="selectedKeyState">@(selectedKeyUnavailable ? "Cần nhập lại key" : selectedHasKey ? "Đã lưu key" : "Chưa có key cá nhân")</span></div>
+                        <div class="ai-key-input">
+                            <input type="password" id="ApiKey" name="ApiKey" value="" class="form-control" autocomplete="new-password" spellcheck="false" autocapitalize="off" maxlength="2048" placeholder="Dán API key của bạn tại đây" aria-describedby="keyHelp providerChangeNotice" />
+                            <button class="btn btn-outline-secondary" type="button" id="toggleApiKey" aria-controls="ApiKey" aria-pressed="false" hidden>Hiện key</button>
+                        </div>
+                        <p class="help-text" id="keyHelp">Đã lưu key thì có thể để trống ô này. Key của bạn được mã hóa và không hiển thị lại.</p>
+                        <p class="help-text ai-inline-notice" id="providerChangeNotice" role="status" aria-live="polite"></p>
+                    </div>
+                    <section class="ai-model-picker mb-4" aria-labelledby="modelPickerHeading">
+                        <div class="ai-field-heading"><h3 id="modelPickerHeading" class="h6 mb-0">Chọn model để luyện tập</h3><span class="ai-source-label" id="modelTierLabel">@(selectedIsOpenAi ? "Cần số dư API" : "Có lựa chọn miễn phí")</span></div>
+                        <p class="help-text" id="modelProviderNote">@(selectedIsOpenAi ? "Đây là kết nối OpenAI cũ có phí; không có model gợi ý miễn phí. Chọn Google Gemini và nhập key Gemini để xem các lựa chọn có hạn mức miễn phí." : "Danh sách chỉ có model với hạn mức miễn phí cho tài khoản đủ điều kiện. Dùng dự án Google AI Studio thuộc gói miễn phí; dự án đã bật thanh toán vẫn có thể tính phí.")</p>
+                        <div id="modelQuickPick" hidden>
+                            <label for="ModelPreset" class="form-label">Chọn model có hạn mức miễn phí</label>
+                            <select id="ModelPreset" class="form-select" aria-describedby="modelSelectionNote modelProviderNote"></select>
+                        </div>
+                        <label asp-for="Model" class="form-label mt-3">Tên model · có thể tự nhập</label>
+                        <input asp-for="Model" class="form-control" maxlength="100" autocomplete="off" spellcheck="false" autocapitalize="off" required aria-describedby="modelHelp modelSelectionNote" />
+                        <p class="help-text" id="modelHelp">Chọn ở trên sẽ điền tên vào ô này. Vẫn có thể tự nhập model; model ngoài danh sách không được xác nhận có hạn mức miễn phí.</p>
+                        <p class="ai-model-selection" id="modelSelectionNote" role="status" aria-live="polite">Bấm Lưu &amp; kiểm tra model để xác nhận bằng key của bạn.</p>
+                        <div class="ai-model-sources"><span class="help-text m-0">Danh sách tham khảo: @AiModelCatalog.CheckedOn</span><a id="modelPricingLink" href="@(selectedIsOpenAi ? "https://developers.openai.com/api/docs/pricing" : "https://ai.google.dev/gemini-api/docs/pricing")" class="btn btn-soft btn-sm" target="_blank" rel="noopener noreferrer">Xem phí &amp; hạn mức ↗</a></div>
+                    </section>
+                    <div class="ai-save-row"><button type="submit" name="CheckConnection" value="true" class="btn btn-primary" id="saveAndCheckModel">Lưu &amp; kiểm tra model →</button><button type="submit" class="btn btn-outline-secondary">Chỉ lưu</button></div>
+                    <p class="help-text mt-3 mb-0">Kiểm tra gửi một mẫu ngắn, không gửi CV hay câu trả lời. Lần gọi có thể dùng hạn mức hoặc số dư API của bạn. Thành công thì có thể quay lại luyện tập.</p>
+                </form>
+            </div>
+        </section>
+
+        <section class="card" aria-labelledby="savedKeysHeading">
+            <div class="card-body">
+                <h2 id="savedKeysHeading" class="h5">Quản lý key đã lưu</h2>
+                <p class="help-text mb-3">Xóa key sẽ ngừng sử dụng kết nối cá nhân tương ứng. Lịch sử luyện tập của bạn được giữ nguyên.</p>
+                <div class="ai-saved-key-row">
+                    <div><strong>Google Gemini</strong><span>@(Model.GeminiKeyUnavailable ? "Không đọc được key đã lưu · cần nhập lại" : Model.HasGeminiKey ? "Đã lưu key cá nhân" : "Chưa lưu key cá nhân")</span></div>
+                    @if (Model.HasGeminiKey || Model.GeminiKeyUnavailable)
+                    {
+                        <form asp-controller="AiSettings" asp-action="DeleteKey" method="post" data-preserve-on-limit data-rate-group="ai-settings"><input type="hidden" name="ReturnUrl" value="@Model.ReturnUrl" /><input type="hidden" name="Provider" value="Gemini" /><button type="submit" class="btn btn-sm ai-delete-key" aria-label="Xóa key cá nhân Gemini">Xóa key</button></form>
+                    }
+                </div>
+                @if (Model.HasOpenAiKey || Model.OpenAiKeyUnavailable || selectedIsOpenAi)
+                {
+                <div class="ai-saved-key-row">
+                    <div><strong>OpenAI</strong><span>@(Model.OpenAiKeyUnavailable ? "Không đọc được key đã lưu · cần nhập lại" : Model.HasOpenAiKey ? "Đã lưu key cá nhân" : "Chưa lưu key cá nhân")</span></div>
+                    @if (Model.HasOpenAiKey || Model.OpenAiKeyUnavailable)
+                    {
+                        <form asp-controller="AiSettings" asp-action="DeleteKey" method="post" data-preserve-on-limit data-rate-group="ai-settings"><input type="hidden" name="ReturnUrl" value="@Model.ReturnUrl" /><input type="hidden" name="Provider" value="OpenAI" /><button type="submit" class="btn btn-sm ai-delete-key" aria-label="Xóa key cá nhân OpenAI">Xóa key</button></form>
+                    }
+                </div>
+                }
+            </div>
+        </section>
+    </div>
+
+    <aside class="ai-settings-help" aria-label="Hướng dẫn kết nối AI">
+        <section class="soft-panel">
+            <div class="ai-section-heading"><span class="step-dot" aria-hidden="true">?</span><h2 class="h5">Lấy API key ở đâu?</h2></div>
+            <p>Đăng nhập vào nhà cung cấp bạn chọn, tạo key rồi dán vào ô bên cạnh.</p>
+            <a class="ai-provider-link" href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer"><span>Google AI Studio<strong>Lấy key Gemini</strong></span><span aria-hidden="true">↗</span></a>
+            @if (selectedIsOpenAi)
+            {
+                <details><summary>Kết nối OpenAI cũ · Có phí</summary><a class="ai-provider-link" href="https://platform.openai.com/settings/organization/api-keys" target="_blank" rel="noopener noreferrer"><span>OpenAI Platform<strong>Quản lý key OpenAI</strong></span><span aria-hidden="true">↗</span></a></details>
+            }
+            <p class="help-text mb-0">Đừng chia sẻ key cho người khác. Nội dung bạn đồng ý phân tích sẽ được gửi tới nhà cung cấp đang chọn.</p>
+        </section>
+        <section class="card" aria-labelledby="serverAiHeading">
+            <div class="card-body">
+                <h2 class="h5" id="serverAiHeading">Dùng cấu hình hệ thống</h2>
+                <p class="help-text">@(Model.ServerIsConfigured ? "Dùng kết nối do người quản trị thiết lập sẵn. Key cá nhân đã lưu vẫn được giữ để bạn chuyển lại sau." : "Người quản trị chưa thiết lập kết nối hệ thống. Hiện tại, hãy dùng API key cá nhân ở bên cạnh.")</p>
+                <form asp-controller="AiSettings" asp-action="UseServerDefaults" method="post" data-preserve-on-limit data-rate-group="ai-settings"><input type="hidden" name="ReturnUrl" value="@Model.ReturnUrl" /><button type="submit" class="btn btn-outline-secondary w-100" disabled="@(!Model.ServerIsConfigured || !Model.UsePersonalSettings)">@(Model.UsePersonalSettings ? "Chuyển sang cấu hình hệ thống" : "Đang dùng cấu hình hệ thống")</button></form>
+            </div>
+        </section>
+        <a class="ai-back-to-practice btn btn-soft btn-sm" href="/Home/Help#connectionHelp">Xem hướng dẫn kết nối từng bước →</a>
+    </aside>
+</div>
+@section Scripts {
+    <script id="aiModelCatalog" type="application/json">@Html.Raw(JsonSerializer.Serialize(AiModelCatalog.Models, new JsonSerializerOptions(JsonSerializerDefaults.Web)))</script>
+    <script src="~/js/ai-settings.js" asp-append-version="true"></script>
+}

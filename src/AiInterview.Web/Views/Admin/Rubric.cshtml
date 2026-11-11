@@ -1,0 +1,26 @@
+@model RubricEditVm
+@{ ViewData["Title"] = "Rubric và trọng số"; }
+<h1>Rubric và trọng số</h1>
+@await Html.PartialAsync("_Nav")
+@await Html.PartialAsync("_Alerts")
+<div class="alert alert-info">Mỗi lần lưu tạo một phiên bản mới và áp dụng cho buổi/bài tập tạo tiếp theo. Rubric của các buổi và bài tập đã có được giữ nguyên. Điểm tổng = tổng (điểm × trọng số) / tổng trọng số.</div>
+<form asp-action="Rubric" method="post">
+    <div asp-validation-summary="All" class="text-danger" role="alert"></div>
+    <div class="mb-3"><label asp-for="Name" class="form-label"></label><input asp-for="Name" class="form-control" /></div>
+    @for (var i = 0; i < Model.Criteria.Count; i++)
+    {
+        <div class="card mb-3"><div class="card-body"><input asp-for="Criteria[i].Code" type="hidden" /><h2 class="h5">Tiêu chí @(i + 1)</h2><div class="row g-3">
+            <div class="col-md-9"><label asp-for="Criteria[i].Name" class="form-label"></label><input asp-for="Criteria[i].Name" class="form-control" /></div>
+            <div class="col-md-3"><label asp-for="Criteria[i].Weight" class="form-label"></label><input asp-for="Criteria[i].Weight" class="form-control" type="number" min="0.01" max="100" step="0.01" /></div>
+            <div class="col-12"><label asp-for="Criteria[i].Description" class="form-label"></label><textarea asp-for="Criteria[i].Description" class="form-control" rows="3"></textarea><div class="form-text">Mô tả rõ mốc điểm 0–10, yêu cầu bằng chứng từ câu trả lời và chuẩn phù hợp thực tập sinh / mới tốt nghiệp.</div></div>
+        </div></div></div>
+    }
+    <button type="submit" class="btn btn-primary">Tạo và kích hoạt phiên bản mới</button>
+</form>
+<h2 class="h4 mt-5">Lịch sử phiên bản</h2>
+@foreach (var rubric in Model.History)
+{
+    <details class="card mb-2"><summary class="card-header">#@rubric.Id · @rubric.Name · @ClassroomUi.Date(rubric.CreatedAt) (UTC+7) @(rubric.IsActive ? "· Đang áp dụng" : "")</summary><div class="card-body"><div class="table-responsive"><table class="table table-sm"><thead><tr><th>Tiêu chí</th><th>Trọng số</th><th>Rubric</th></tr></thead><tbody>
+        @foreach (var criterion in rubric.Criteria) { <tr><td>@criterion.Name</td><td>@criterion.Weight.ToString("0.##")</td><td style="white-space:pre-wrap">@criterion.Description</td></tr> }
+    </tbody></table></div></div></details>
+}

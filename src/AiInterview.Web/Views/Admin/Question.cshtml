@@ -1,0 +1,17 @@
+@model QuestionEditVm
+@{ ViewData["Title"] = Model.Id == 0 ? "Thêm câu hỏi" : "Sửa câu hỏi"; }
+<a asp-action="Questions" class="btn btn-soft btn-sm">← Ngân hàng câu hỏi</a><h1 class="mt-3">@ViewData["Title"]</h1>
+<div class="card"><div class="card-body"><form asp-action="Question" method="post">
+    <input asp-for="Id" type="hidden" /><div asp-validation-summary="All" class="text-danger" role="alert"></div>
+    <div class="row g-3">
+        <div class="col-md-6"><label asp-for="PositionId" class="form-label"></label><select asp-for="PositionId" asp-items="@(new SelectList(Model.Positions, "Id", "Name"))" class="form-select"><option value="">Chọn vị trí</option></select></div>
+        <div class="col-md-3"><label asp-for="Level" class="form-label">Cấp độ</label><select asp-for="Level" asp-items="ClassroomUi.Options<InterviewLevel>()" class="form-select"></select></div>
+        <div class="col-md-3"><label asp-for="Language" class="form-label">Ngôn ngữ</label><select asp-for="Language" asp-items="ClassroomUi.Options<InterviewLanguage>()" class="form-select"></select></div>
+        <div class="col-md-6"><label asp-for="Kind" class="form-label">Loại phỏng vấn</label><select asp-for="Kind" asp-items="ClassroomUi.Options<InterviewKind>()" class="form-select"></select></div>
+        <div class="col-md-6"><label asp-for="CompanyType" class="form-label"></label><input asp-for="CompanyType" class="form-control" list="companyTypes" /><datalist id="companyTypes"><option value="Outsourcing"></option><option value="Product"></option><option value="Startup"></option><option value="Fintech / Ngân hàng"></option></datalist></div>
+        <div class="col-12"><label asp-for="Content" class="form-label"></label><textarea asp-for="Content" class="form-control" rows="6"></textarea></div>
+        <div class="col-12"><label asp-for="SkillTags" class="form-label"></label><input asp-for="SkillTags" class="form-control" placeholder="OOP, SQL, REST, Git, STAR" /><div class="form-text">Tối đa 15 chủ đề, mỗi chủ đề tối đa 80 ký tự. Chủ đề mới được thêm tự động.</div></div>
+        <div class="col-12"><div class="form-check"><input asp-for="IsActive" class="form-check-input" /><label asp-for="IsActive" class="form-check-label"></label></div></div>
+        <div class="col-12"><button class="btn btn-primary" type="submit">Lưu câu hỏi</button></div>
+    </div>
+</form></div></div>

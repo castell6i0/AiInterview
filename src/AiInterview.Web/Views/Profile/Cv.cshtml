@@ -1,0 +1,34 @@
+@model CvDetailModel
+@{ ViewData["Title"] = "Xem CV"; }
+<a asp-action="Index" class="mb-3 btn btn-soft btn-sm">← Hồ sơ & mục tiêu</a>
+<div class="d-flex flex-wrap justify-content-between gap-3 mb-4"><div><h1 class="h2">@Model.Cv.FileName</h1><p class="text-muted mb-0">Phiên bản #@Model.Cv.Id · @Ui.Time(Model.Cv.CreatedAt) (UTC+7)</p></div><a asp-controller="Interviews" asp-action="Create" asp-route-cvProfileId="@Model.Cv.Id" class="btn btn-primary align-self-start">Luyện với CV này</a></div>
+@await Html.PartialAsync("_Messages")
+@if (TempData["ProfileAiSettingsNeeded"] is true) { <p class="mb-4"><a asp-controller="AiSettings" asp-action="Index" asp-route-returnUrl="@Url.Action("Cv", "Profile", new { id = Model.Cv.Id })" class="btn btn-outline-primary">Sửa kết nối AI rồi quay lại CV này →</a></p> }
+<div class="row g-4">
+    <section class="col-lg-5"><div class="card"><div class="card-body p-4">
+        <h2 class="h4">Kỹ năng, dự án & kinh nghiệm</h2>
+        @if (Model.Analysis is not null) {
+            <p>@Model.Analysis.Summary</p>
+            <h3 class="h6 mt-3">Kỹ năng được nêu</h3>
+            @if (Model.Analysis.Skills.Length == 0) { <p class="text-muted">Chưa tìm thấy kỹ năng cụ thể.</p> }
+            <div class="d-flex flex-wrap gap-2">@foreach (var skill in Model.Analysis.Skills) { <span class="badge bg-primary">@skill</span> }</div>
+            <h3 class="h6 mt-4">Dự án</h3><ul>@foreach (var project in Model.Analysis.Projects) { <li class="mb-2">@project</li> }</ul>
+            <h3 class="h6 mt-4">Kinh nghiệm</h3><ul>@foreach (var experience in Model.Analysis.Experience) { <li class="mb-2">@experience</li> }</ul>
+        } else { <p class="text-muted">Nội dung đã lưu. Phân tích để tổng hợp các kỹ năng, dự án và kinh nghiệm được nêu trong CV.</p> }
+        @if (!Model.AiConfigured) { <div class="alert alert-warning"><p>@ActiveAi.Provider chưa được kết nối. Nội dung CV đã được lưu.</p><div class="support-actions"><a asp-controller="AiSettings" asp-action="Index" asp-route-returnUrl="@Url.Action("Cv", "Profile", new { id = Model.Cv.Id })" class="btn btn-soft btn-sm">Mở Cài đặt AI để nhập key →</a></div></div> }
+        <form asp-action="AnalyzeCv" asp-route-id="@Model.Cv.Id" method="post" class="mt-4">
+            <input type="hidden" name="ConsentedProvider" value="@ActiveAi.Provider" />
+            <div class="form-check mb-3"><input type="checkbox" name="Consent" value="true" id="cvConsent" required class="form-check-input" /><label for="cvConsent" class="form-check-label">Tôi đồng ý gửi nội dung CV này tới @ActiveAi.Provider để phân tích.</label></div>
+            <button class="btn btn-primary" type="submit" disabled="@(!Model.AiConfigured)">@(Model.Analysis is null ? "Phân tích CV" : "Phân tích lại")</button>
+            <p class="form-text mt-2">Nếu AI gặp lỗi, nội dung và kết quả đã lưu vẫn được giữ lại để thử lại.</p>
+        </form>
+    </div></div></section>
+    <section class="col-lg-7"><div class="card"><div class="card-body p-4">
+        <h2 class="h4">Văn bản đã trích xuất</h2><p class="text-muted">Kiểm tra trước khi gửi. Nếu thứ tự văn bản bị sai, hãy xuất lại CV và tải phiên bản mới.</p>
+        <div class="border rounded p-3" style="white-space:pre-wrap;overflow-wrap:anywhere;max-height:650px;overflow:auto" tabindex="0" aria-label="Nội dung CV đã trích xuất">@Model.Cv.ExtractedText</div>
+    </div></div></section>
+</div>
+<div class="mt-4">
+@if (Model.CanDelete) { <form asp-action="DeleteCv" asp-route-id="@Model.Cv.Id" method="post"><button class="btn btn-outline-danger btn-sm" type="submit">Xóa CV chưa sử dụng</button></form> }
+else { <p class="text-muted small">Phiên bản đã được dùng trong buổi luyện hoặc so sánh JD và được giữ để bảo toàn lịch sử.</p> }
+</div>
