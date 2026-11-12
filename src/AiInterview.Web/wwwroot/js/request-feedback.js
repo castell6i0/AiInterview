@@ -50,7 +50,7 @@
             if (state.busy || group.until > Date.now()) { refresh(); return; }
             const data = new FormData(form);
             if (event.submitter?.name) data.append(event.submitter.name, event.submitter.value);
-            state.busy = true; group.until = 0; form.setAttribute('aria-busy', 'true'); refresh();
+            state.busy = true; group.until = 0; form.setAttribute('aria-busy', 'true'); refresh(); pending(true, event.submitter);
             message.hidden = false; message.textContent = 'Đang xử lý, vui lòng chờ…';
             const controller = new AbortController();
             const timeout = setTimeout(() => controller.abort(), 90000);
@@ -64,6 +64,7 @@
                 if (!target.startsWith('/') || target.startsWith('//') || target.includes('\\')) throw new Error('Chưa nhận được kết quả hợp lệ. Hãy kiểm tra lại trang trước khi gửi lại.');
                 window.location.assign(target);
             } catch (error) {
+                pending(false, event.submitter);
                 if (error.code === 'rate_limited') group.until = Date.now() + error.retryAfterSeconds * 1000;
                 message.hidden = false;
                 message.textContent = error.name === 'AbortError' ? 'Yêu cầu mất nhiều thời gian. Nội dung vẫn được giữ; hãy kiểm tra lại trạng thái trước khi gửi lại.'
@@ -74,6 +75,30 @@
         });
         window.addEventListener('pageshow', event => {
             if (event.persisted) { state.busy = false; form.removeAttribute('aria-busy'); refresh(); }
+        });
+    }
+    // Waiting feedback for ordinary navigation: 2px top bar on internal links and full-page form posts.
+    const bar = document.body ? document.getElementById('navProgress') : null;
+    let linkTimer = 0;
+    function pending(on, button) {
+        bar?.classList.toggle('is-active', on);
+        button?.classList?.toggle('is-loading', on); // test doubles have no classList
+    }
+    if (bar) {
+        document.addEventListener('click', event => {
+            const link = event.target.closest?.('a[href]');
+            if (!link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+            if ((link.target && link.target !== '_self') || link.hasAttribute('download') || link.origin !== location.origin) return;
+            if (link.pathname === location.pathname && link.search === location.search && link.hash) return;
+            pending(true);
+            // A file download (e.g. CSV export) never unloads the page; drop the bar after a while.
+            clearTimeout(linkTimer); linkTimer = setTimeout(() => pending(false), 8000);
+        });
+        // Form-level handlers (data-confirm, AJAX forms above) run first and cancel when they take over.
+        document.addEventListener('submit', event => { if (!event.defaultPrevented) pending(true, event.submitter); });
+        window.addEventListener('pageshow', () => {
+            pending(false);
+            document.querySelectorAll('.btn.is-loading').forEach(button => button.classList.remove('is-loading'));
         });
     }
     window.InterviewRequests = { waitMessage, retrySeconds, responseError, enhanceForm };

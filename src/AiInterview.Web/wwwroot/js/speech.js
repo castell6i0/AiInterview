@@ -1,4 +1,6 @@
 'use strict';
+// Visual cue only: the interview room's wave shows "speaking" while an utterance plays (no-op elsewhere).
+const roomStage=(state,onlyFrom)=>{const stage=globalThis.document?.getElementById?.('roomStage');if(stage?.setAttribute&&(!onlyFrom||stage.getAttribute('data-state')===onlyFrom))stage.setAttribute('data-state',state);};
 // Browser adapter contract; a future adapter can call a server STT service without changing the room.
 class ISpeechToText {
     get supported(){return false;}
@@ -83,7 +85,7 @@ class BrowserTextToSpeech {
         this.refreshVoices();if(this.voices.length)return Promise.resolve();
         return new Promise(resolve=>{let timer;const finish=()=>{clearTimeout(timer);this.waiters.delete(finish);resolve();};this.waiters.add(finish);timer=setTimeout(finish,1800);});
     }
-    stop(){this.generation++;this.utterance=null;if(this.supported)window.speechSynthesis.cancel();for(const finish of [...this.waiters])finish();}
+    stop(){this.generation++;this.utterance=null;roomStage('idle','speaking');if(this.supported)window.speechSynthesis.cancel();for(const finish of [...this.waiters])finish();}
     normalize(text){
         const vi=this.baseLanguage==='vi';
         return String(text||'').normalize('NFC')
@@ -115,7 +117,8 @@ class BrowserTextToSpeech {
         if(!voice){this.controls?.notice?.(`Máy chưa có giọng ${this.baseLanguage==='vi'?'tiếng Việt':'tiếng Anh'} phù hợp. Bạn có thể tiếp tục đọc câu hỏi trên màn hình hoặc thử Microsoft Edge.`);return false;}
         const chunks=this.chunks(normalized),rate=this.rate;
         const next=()=>{
-            if(generation!==this.generation||!chunks.length){this.utterance=null;return;}
+            if(generation!==this.generation||!chunks.length){this.utterance=null;if(generation===this.generation)roomStage('idle','speaking');return;}
+            roomStage('speaking');
             const utterance=new window.SpeechSynthesisUtterance(chunks.shift());this.utterance=utterance;utterance.lang=voice.lang;utterance.voice=voice;utterance.rate=rate;
             utterance.onend=()=>{if(generation===this.generation)next();};
             utterance.onerror=event=>{if(generation!==this.generation)return;this.stop();if(!['interrupted','canceled'].includes(event.error))this.controls?.notice?.('Chưa phát được giọng đọc này. Hãy chọn giọng khác hoặc bấm Đọc câu hỏi để thử lại.');};

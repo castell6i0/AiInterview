@@ -2,14 +2,14 @@
 @{ ViewData["Title"] = "Tạo buổi luyện"; }
 <div class="page-heading">
     <div><span class="eyebrow">LUYỆN PHỎNG VẤN</span><h1>Chuẩn bị buổi luyện của bạn</h1><p>Chọn vị trí và cách trả lời. Bạn có thể bắt đầu ngay với 5 câu hỏi.</p></div>
-    <a href="/Dashboard/History" class="btn btn-outline-secondary">Xem các buổi đã luyện</a>
+    <a href="/Dashboard/History" class="btn btn-secondary">Xem các buổi đã luyện</a>
 </div>
 <ol class="flow-steps" aria-label="Các bước luyện phỏng vấn">
     <li class="current" aria-current="step"><span>1</span> Chọn buổi luyện</li>
     <li><span>2</span> Trả lời câu hỏi</li>
     <li><span>3</span> Nhận góp ý & luyện tiếp</li>
 </ol>
-@if (!Model.AiConfigured) { <div class="alert alert-warning" role="alert"><p><strong>Cần kết nối @ActiveAi.Provider để bắt đầu.</strong> Hãy kết nối AI trước, rồi quay lại chọn buổi luyện.</p><div class="support-actions"><a asp-controller="AiSettings" asp-action="Index" asp-route-returnUrl="@Url.Action("Create", "Interviews", new { assignmentId = Model.AssignmentId, cvProfileId = Model.CvProfileId, jobDescriptionId = Model.JobDescriptionId, kind = Model.Kind })" class="btn btn-soft btn-sm">Mở Cài đặt AI để nhập key →</a></div></div> }
+@if (!Model.AiConfigured) { <div class="alert alert-warning" role="alert"><p><strong>Cần kết nối @ActiveAi.Provider để bắt đầu.</strong> Hãy kết nối AI trước, rồi quay lại chọn buổi luyện.</p><div class="support-actions"><a asp-controller="AiSettings" asp-action="Index" asp-route-returnUrl="@Url.Action("Create", "Interviews", new { assignmentId = Model.AssignmentId, cvProfileId = Model.CvProfileId, jobDescriptionId = Model.JobDescriptionId, kind = Model.Kind })" class="btn btn-secondary btn-sm">Mở Cài đặt AI để nhập key →</a></div></div> }
 @if (Model.AssignmentId.HasValue) { <div class="alert alert-info"><strong>Bài tập: @Model.AssignmentTitle.</strong> Giữ đúng vị trí, cấp độ, ngôn ngữ, loại và số câu giảng viên yêu cầu.</div> }
 <form asp-action="Create" method="post" id="createInterviewForm">
     <input type="hidden" name="ConsentedProvider" value="@ActiveAi.Provider" />
@@ -46,7 +46,7 @@
                         <div class="col-12"><label asp-for="FocusSkills" class="form-label">Chủ đề muốn tập trung</label><input asp-for="FocusSkills" class="form-control" maxlength="500" placeholder="Ví dụ: kiểm thử API, SQL, giao tiếp nhóm…" /></div>
                     </div>
                     <p id="personalizationHelp" class="help-text mt-3">Luyện dự án cần chọn CV; luyện theo tin tuyển dụng cần chọn JD.</p>
-                    <a href="/Profile" class="btn btn-soft btn-sm">Quản lý CV và tin tuyển dụng →</a>
+                    <a href="/Profile" class="btn btn-secondary btn-sm">Quản lý CV và tin tuyển dụng →</a>
                 </div>
             </details>
         </div>

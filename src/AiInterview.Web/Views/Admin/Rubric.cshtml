@@ -20,7 +20,7 @@
 <h2 class="h4 mt-5">Lịch sử phiên bản</h2>
 @foreach (var rubric in Model.History)
 {
-    <details class="card mb-2"><summary class="card-header">#@rubric.Id · @rubric.Name · @ClassroomUi.Date(rubric.CreatedAt) (UTC+7) @(rubric.IsActive ? "· Đang áp dụng" : "")</summary><div class="card-body"><div class="table-responsive"><table class="table table-sm"><thead><tr><th>Tiêu chí</th><th>Trọng số</th><th>Rubric</th></tr></thead><tbody>
-        @foreach (var criterion in rubric.Criteria) { <tr><td>@criterion.Name</td><td>@criterion.Weight.ToString("0.##")</td><td style="white-space:pre-wrap">@criterion.Description</td></tr> }
+    <details class="card mb-2"><summary class="card-header">#@rubric.Id · @rubric.Name · @ClassroomUi.Date(rubric.CreatedAt) (UTC+7) @if (rubric.IsActive) { <span class="pill pill-ok ms-1">Đang áp dụng</span> }</summary><div class="card-body"><div class="table-responsive"><table class="table table-sm"><thead><tr><th>Tiêu chí</th><th class="num">Trọng số</th><th>Rubric</th></tr></thead><tbody>
+        @foreach (var criterion in rubric.Criteria) { <tr><td>@criterion.Name</td><td class="num">@criterion.Weight.ToString("0.##")</td><td class="preserve">@criterion.Description</td></tr> }
     </tbody></table></div></div></details>
 }

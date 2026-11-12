@@ -1,14 +1,9 @@
 @model ConfirmationEmailModel
 @{ ViewData["Title"] = "Xác nhận email"; }
 <div class="auth-shell">
-    <aside class="auth-art">
-        <span class="eyebrow">BƯỚC 2 / XÁC NHẬN EMAIL</span>
-        <h2>Mở hộp thư.<br />Hoàn tất đăng ký.</h2>
-        <p>Trong thư từ InterviewLab, nhấn <strong>Xác nhận email</strong> để kích hoạt tài khoản.</p>
-        <ol class="ps-3 mt-3"><li class="mb-2">Kiểm tra hộp thư đến và thư rác.</li><li class="mb-2">Mở liên kết xác nhận trong vòng 24 giờ.</li><li>Quay lại đăng nhập để bắt đầu luyện.</li></ol>
-    </aside>
-    <section class="auth-form">
+    <section class="auth-card">
         <h1>Kiểm tra email của bạn</h1>
+        <ol class="auth-steps"><li>Kiểm tra hộp thư đến và thư rác.</li><li>Mở liên kết xác nhận trong vòng 24 giờ.</li><li>Quay lại đăng nhập để bắt đầu luyện.</li></ol>
         @if (!string.IsNullOrEmpty(Model.Message))
         {
             <div class="alert @(Model.DeliveryFailed ? "alert-warning" : "alert-info")" role="status">@Model.Message</div>
@@ -19,7 +14,7 @@
             <form asp-action="ResendConfirmation" method="post">
                 <div asp-validation-summary="ModelOnly" role="alert"></div>
                 <div class="mb-4"><label asp-for="Email" class="form-label">Email đã đăng ký</label><input asp-for="Email" type="email" class="form-control" autocomplete="email" required /><span asp-validation-for="Email"></span></div>
-                <button class="btn btn-primary w-100" type="submit">Gửi lại email xác nhận →</button>
+                <button class="btn btn-primary w-100" type="submit">Gửi lại email xác nhận <span class="btn-arrow" aria-hidden="true">→</span></button>
             </form>
             <p class="form-text mt-3">Chờ ít nhất một phút giữa các lần gửi. Gửi lại thư không tạo thêm tài khoản.</p>
         }
@@ -28,8 +23,8 @@
             <div class="alert alert-warning" role="status">Website hiện chưa bật gửi email. Nếu vừa đăng ký trong chế độ này, bạn có thể đăng nhập ngay; địa chỉ email chưa được xác minh. Nếu tài khoản cũ đang chờ xác nhận, vui lòng liên hệ quản trị viên.</div>
         }
         <div class="auth-support">
-            <div class="support-action-row"><span class="small">Đã xác nhận email?</span><a class="btn btn-soft btn-sm" asp-action="Login">Đăng nhập →</a></div>
-            <div class="support-action-row"><span class="small">Nhập sai email khi tạo tài khoản?</span><a class="btn btn-soft btn-sm" asp-action="Register">Đăng ký bằng email đúng →</a></div>
+            <div class="support-action-row"><span class="small">Đã xác nhận email?</span><a class="btn btn-secondary btn-sm" asp-action="Login">Đăng nhập <span class="btn-arrow" aria-hidden="true">→</span></a></div>
+            <div class="support-action-row"><span class="small">Nhập sai email khi tạo tài khoản?</span><a class="btn btn-secondary btn-sm" asp-action="Register">Đăng ký bằng email đúng <span class="btn-arrow" aria-hidden="true">→</span></a></div>
         </div>
     </section>
 </div>

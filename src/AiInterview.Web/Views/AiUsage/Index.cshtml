@@ -2,9 +2,13 @@
 @{ ViewData["Title"] = "Sử dụng AI theo ngày"; }
 <h1>Sử dụng AI theo ngày</h1>
 <p class="text-muted">Theo dõi lượt gọi, token và chi phí ước tính của từng tài khoản.</p>
-<a asp-controller="Admin" asp-action="Index" class="btn btn-soft mb-3">← Quay lại quản trị</a>
+<a asp-controller="Admin" asp-action="Index" class="btn btn-secondary mb-3">← Quay lại quản trị</a>
+<dl class="kpi-grid">
+    <div class="kpi"><dt>AI hệ thống</dt><dd><span class="kpi-value kpi-text">@(Model.SystemKeyEnabled ? "Đang bật" : "Đang tắt")</span></dd></div>
+    <div class="kpi"><dt>Hạn mức ngày</dt><dd><span class="kpi-value">@Model.DailyQuota</span><span class="kpi-unit">lượt/tài khoản</span></dd></div>
+    <div class="kpi"><dt>Hạn mức tháng</dt><dd>@if (Model.MonthlyQuota > 0) { <span class="kpi-value">@Model.MonthlyQuota</span><span class="kpi-unit">lượt/tài khoản</span> } else { <span class="kpi-value kpi-text">Không đặt</span> }</dd></div>
+</dl>
 <div class="card mb-3"><div class="card-body">
-    <p><strong>AI hệ thống:</strong> @(Model.SystemKeyEnabled ? "Đang bật" : "Đang tắt") · @Model.DailyQuota lượt/ngày/tài khoản · @(Model.MonthlyQuota > 0 ? $"{Model.MonthlyQuota} lượt/tháng/tài khoản" : "Không đặt hạn mức tháng")</p>
     <form method="get" class="d-flex flex-wrap align-items-end gap-2">
         <div><label for="usage-day" class="form-label">Ngày tính quota (UTC)</label><input id="usage-day" name="day" type="date" value="@Model.Day.ToString("yyyy-MM-dd")" class="form-control" required /></div>
         <button class="btn btn-primary" type="submit">Xem thống kê</button>
@@ -13,18 +17,18 @@
 </div></div>
 <div class="card"><div class="card-body">
     <div class="table-responsive"><table class="table align-middle">
-        <thead><tr><th>Mã tài khoản</th><th>Dịch vụ</th><th>Loại key</th><th>Lượt</th><th>Token vào</th><th>Token ra</th><th>Chi phí đã biết (USD)</th><th>Chưa rõ chi phí</th></tr></thead>
+        <thead><tr><th>Mã tài khoản</th><th>Dịch vụ</th><th>Loại key</th><th class="num">Lượt</th><th class="num">Token vào</th><th class="num">Token ra</th><th class="num">Chi phí đã biết (USD)</th><th class="num">Chưa rõ chi phí</th></tr></thead>
         <tbody>
         @foreach (var row in Model.Rows)
         {
-            <tr><td class="text-break">@row.UserId</td><td>@row.Provider</td><td>@(row.KeySource == "System" ? "Hệ thống" : row.KeySource == "Personal" ? "Cá nhân" : "Dữ liệu cũ")</td><td>@row.Requests</td><td>@row.InputTokens.ToString("N0")</td><td>@row.OutputTokens.ToString("N0")</td><td>@row.KnownCostUsd.ToString("0.000000")</td><td>@row.UnknownCostCount</td></tr>
+            <tr><td class="text-break">@row.UserId</td><td>@row.Provider</td><td>@(row.KeySource == "System" ? "Hệ thống" : row.KeySource == "Personal" ? "Cá nhân" : "Dữ liệu cũ")</td><td class="num">@row.Requests</td><td class="num">@row.InputTokens.ToString("N0")</td><td class="num">@row.OutputTokens.ToString("N0")</td><td class="num">@row.KnownCostUsd.ToString("0.000000")</td><td class="num">@row.UnknownCostCount</td></tr>
         }
         @if (Model.Rows.Count == 0) { <tr><td colspan="8">Chưa có lượt gọi trong ngày này.</td></tr> }
         </tbody>
     </table></div>
     <p class="small text-muted">Chi phí chỉ cộng các giá trị đã biết, không phải hóa đơn. Token thiếu hoặc nhà cung cấp chưa trả usage không được tự ước lượng. Các bản ghi trước khi nâng cấp được ghi là “Dữ liệu cũ”.</p>
     <div class="d-flex gap-2">
-        @if (Model.Page > 1) { <a asp-route-day="@Model.Day.ToString("yyyy-MM-dd")" asp-route-page="@(Model.Page - 1)" class="btn btn-soft">← Trang trước</a> }
-        @if (Model.HasMore) { <a asp-route-day="@Model.Day.ToString("yyyy-MM-dd")" asp-route-page="@(Model.Page + 1)" class="btn btn-soft">Trang tiếp →</a> }
+        @if (Model.Page > 1) { <a asp-route-day="@Model.Day.ToString("yyyy-MM-dd")" asp-route-page="@(Model.Page - 1)" class="btn btn-secondary">← Trang trước</a> }
+        @if (Model.HasMore) { <a asp-route-day="@Model.Day.ToString("yyyy-MM-dd")" asp-route-page="@(Model.Page + 1)" class="btn btn-secondary">Trang tiếp →</a> }
     </div>
 </div></div>

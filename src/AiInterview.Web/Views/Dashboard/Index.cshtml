@@ -1,5 +1,5 @@
 @model DashboardModel
-@{ ViewData["Title"] = "Góc luyện tập"; var resume = Model.Recent.FirstOrDefault(s => s.Status != SessionStatus.Completed); }
+@{ ViewData["Title"] = "Góc luyện tập"; var resume = Model.Recent.FirstOrDefault(s => s.Status != SessionStatus.Completed); var average = Ui.Score(Model.AverageScore); var hasDelivery = Model.Progress.Any(x => x.WordCount.HasValue); }
 <div class="page-heading"><div><span class="eyebrow">TỔNG QUAN</span><h1>Góc luyện tập của bạn</h1><p>Mỗi buổi một bước tiến. Chọn việc bạn muốn làm tiếp theo.</p></div></div>
 <section class="dashboard-hero mb-4" aria-labelledby="nextPracticeHeading">
     <div class="dashboard-hero-copy"><span class="eyebrow">BƯỚC TIẾP THEO</span>
@@ -14,97 +14,128 @@
     <div class="dashboard-hero-action">
         @if (!ActiveAi.IsConfigured) {
             <a asp-controller="AiSettings" asp-action="Index" asp-route-returnUrl="/Interviews/Create" class="btn btn-primary">Kết nối AI →</a>
-            @if (resume is not null) { <a asp-controller="Interviews" asp-action="Room" asp-route-id="@resume.Id" class="btn btn-outline-primary">Mở buổi đang dở</a> }
-            else { <a asp-controller="Profile" asp-action="Index" class="btn btn-outline-primary">Chuẩn bị hồ sơ trước</a> }
+            @if (resume is not null) { <a asp-controller="Interviews" asp-action="Room" asp-route-id="@resume.Id" class="btn btn-secondary">Mở buổi đang dở</a> }
+            else { <a asp-controller="Profile" asp-action="Index" class="btn btn-secondary">Chuẩn bị hồ sơ trước</a> }
         }
-        else if (resume is not null) { <a asp-controller="Interviews" asp-action="Room" asp-route-id="@resume.Id" class="btn btn-primary">Tiếp tục buổi luyện →</a><a asp-controller="Interviews" asp-action="Create" class="btn btn-outline-primary">Tạo buổi mới</a> }
-        else { <a asp-controller="Interviews" asp-action="Create" class="btn btn-primary">Tạo buổi luyện →</a><a asp-controller="Profile" asp-action="Index" class="btn btn-outline-primary">Chuẩn bị CV & JD</a> }
+        else if (resume is not null) { <a asp-controller="Interviews" asp-action="Room" asp-route-id="@resume.Id" class="btn btn-primary">Tiếp tục buổi luyện →</a><a asp-controller="Interviews" asp-action="Create" class="btn btn-secondary">Tạo buổi mới</a> }
+        else { <a asp-controller="Interviews" asp-action="Create" class="btn btn-primary">Tạo buổi luyện →</a><a asp-controller="Profile" asp-action="Index" class="btn btn-secondary">Chuẩn bị CV & JD</a> }
     </div>
 </section>
 @if (!Model.HasAnySessions) {
-    <section class="mb-4" aria-labelledby="firstPracticeHeading">
-        <h2 id="firstPracticeHeading" class="h4 mb-3">Buổi đầu tiên: bắt đầu với 3 bước</h2>
-        <ol class="row g-3 list-unstyled mb-0">
-            <li class="col-md-4"><div class="card h-100"><div class="card-body"><span class="eyebrow">BƯỚC 1</span><h3 class="h5">@(ActiveAi.IsConfigured ? "AI đã được thiết lập" : "Kết nối AI")</h3><p class="mb-0">@(ActiveAi.IsConfigured ? $"Bạn đang chọn {ActiveAi.Provider}. Có thể đổi dịch vụ hoặc API key trong Cài đặt AI." : "Vào Cài đặt AI, chọn dịch vụ và làm theo hướng dẫn lấy, lưu API key.")</p></div></div></li>
-            <li class="col-md-4"><div class="card h-100"><div class="card-body"><span class="eyebrow">BƯỚC 2</span><h3 class="h5">Tạo buổi luyện</h3><p class="mb-0">Chọn vị trí ứng tuyển, cấp độ và ngôn ngữ. Bắt đầu với 5 câu hỏi để làm quen.</p></div></div></li>
-            <li class="col-md-4"><div class="card h-100"><div class="card-body"><span class="eyebrow">BƯỚC 3</span><h3 class="h5">Trả lời và xem góp ý</h3><p class="mb-0">Gõ hoặc nói câu trả lời. Cuối buổi, xem báo cáo để biết điểm mạnh và phần cần ôn thêm.</p></div></div></li>
+    <section class="card mb-4" aria-labelledby="firstPracticeHeading"><div class="card-body p-4">
+        <h2 id="firstPracticeHeading" class="h4 mb-0">Buổi đầu tiên: bắt đầu với 3 bước</h2>
+        <ol class="feature-list">
+            <li><span class="step-dot">1</span><h3>@(ActiveAi.IsConfigured ? "AI đã được thiết lập" : "Kết nối AI")</h3><p>@(ActiveAi.IsConfigured ? $"Bạn đang chọn {ActiveAi.Provider}. Có thể đổi dịch vụ hoặc API key trong Cài đặt AI." : "Vào Cài đặt AI, chọn dịch vụ và làm theo hướng dẫn lấy, lưu API key.")</p></li>
+            <li><span class="step-dot">2</span><h3>Tạo buổi luyện</h3><p>Chọn vị trí ứng tuyển, cấp độ và ngôn ngữ. Bắt đầu với 5 câu hỏi để làm quen.</p></li>
+            <li><span class="step-dot">3</span><h3>Trả lời và xem góp ý</h3><p>Gõ hoặc nói câu trả lời. Cuối buổi, xem báo cáo để biết điểm mạnh và phần cần ôn thêm.</p></li>
         </ol>
-    </section>
+    </div></section>
 }
-<nav class="section-jumps mb-4" aria-label="Đi đến nội dung tổng quan"><a href="#recent">Buổi gần đây</a><a href="#progress">Xem tiến bộ</a><a href="#practice">Luyện điểm yếu</a></nav>
+<nav class="section-jumps mb-4" aria-label="Đi đến nội dung tổng quan"><a href="#recent">Buổi gần đây</a><a href="#practice">Luyện điểm yếu</a><a href="#progress">Xem tiến bộ</a></nav>
 @if (TempData["DashboardError"] is string error) { <div class="alert alert-warning" role="alert">@error</div> }
-<section id="recent" class="mb-4" aria-labelledby="recentHeading"><div class="d-flex flex-wrap justify-content-between gap-3 mb-3"><h2 id="recentHeading" class="h4">Buổi gần đây</h2><a asp-action="History" class="btn btn-soft btn-sm">Toàn bộ lịch sử & so sánh →</a></div>
+
+<section id="recent" class="mb-5" aria-labelledby="recentHeading">
+    <div class="section-head"><h2 id="recentHeading" class="h4 mb-0">Buổi gần đây</h2><a asp-action="History" class="btn btn-secondary btn-sm">Toàn bộ lịch sử & so sánh →</a></div>
     @if (Model.Recent.Count == 0) { <p class="text-muted">@(Model.HasAnySessions ? "Chưa có buổi trong bộ lọc này. Đổi bộ lọc hoặc mở toàn bộ lịch sử để xem các buổi khác." : "Buổi luyện đầu tiên của bạn sẽ xuất hiện tại đây.")</p> }
-    else { <div class="row g-3">@foreach (var session in Model.Recent) { <div class="col-md-6 col-xl-4"><div class="card h-100"><div class="card-body"><span class="badge bg-secondary mb-2">@Ui.Label(session.Status)</span><h3 class="h5">@session.Position.Name</h3><p class="small text-muted">@session.Level · @Ui.Label(session.Language) · @Ui.Time(session.CreatedAt)</p>@if (session.Evaluation is not null) { <p class="fs-4 fw-semibold">@session.Evaluation.OverallScore.ToString("0.0") <span class="fs-6 fw-normal">/10 @(session.Evaluation.IsProvisional ? "· Tạm thời" : "")</span></p> }<a asp-controller="Interviews" asp-action="@(session.Status == SessionStatus.Completed ? "Report" : "Room")" asp-route-id="@session.Id" class="btn btn-sm btn-outline-primary">@(session.Status == SessionStatus.Completed ? "Xem báo cáo" : "Tiếp tục buổi")</a></div></div></div> }</div> }
+    else { var index = 0;
+        <ul class="session-list">@foreach (var session in Model.Recent) { var band = Ui.Score(session.Evaluation?.OverallScore); var done = session.Status == SessionStatus.Completed; var tone = done ? "pill-ok" : session.Status == SessionStatus.ReadyForEvaluation ? "pill-warn" : "pill-off";
+            <li class="reveal" style="--i:@(index++)">
+                <div class="session-main"><div class="session-title"><strong>@session.Position.Name</strong><span class="pill @tone">@Ui.Label(session.Status)</span></div><span class="session-meta">@session.Level · @Ui.Label(session.Language) · @Ui.Time(session.CreatedAt)</span></div>
+                <div class="session-score">@if (session.Evaluation is not null) { <span class="score-line score-@band.Band"><span class="score-value">@session.Evaluation.OverallScore.ToString("0.0")</span><span class="kpi-unit">/10</span><span class="score-label">@band.Label@(session.Evaluation.IsProvisional ? " · Tạm thời" : "")</span></span> } else { <span class="text-muted small">Chưa có điểm</span> }</div>
+                <a asp-controller="Interviews" asp-action="@(done ? "Report" : "Room")" asp-route-id="@session.Id" class="btn btn-sm btn-secondary">@(done ? "Xem báo cáo" : "Tiếp tục buổi")</a>
+            </li> }</ul>
+    }
 </section>
 
-<h2 class="h4" id="progress">Theo dõi tiến bộ</h2><p class="text-muted">Lọc cùng vị trí, ngôn ngữ và cấp độ để so sánh các buổi luyện.</p>
-<form asp-action="Index" method="get" class="card mb-4"><div class="card-body"><div class="row g-3 align-items-end">
-    <div class="col-md-4"><label asp-for="PositionId" class="form-label">Vị trí</label><select asp-for="PositionId" class="form-select"><option value="">Tất cả vị trí</option>@foreach (var position in Model.Positions) { <option value="@position.Id">@position.Name</option> }</select></div>
-    <div class="col-md-3"><label asp-for="Language" class="form-label">Ngôn ngữ</label><select asp-for="Language" class="form-select"><option value="">Cả hai ngôn ngữ</option>@foreach (var value in Enum.GetValues<InterviewLanguage>()) { <option value="@value">@Ui.Label(value)</option> }</select></div>
-    <div class="col-md-3"><label asp-for="Level" class="form-label">Cấp độ</label><select asp-for="Level" class="form-select"><option value="">Cả hai cấp độ</option>@foreach (var value in Enum.GetValues<InterviewLevel>()) { <option value="@value">@value</option> }</select></div>
-    <div class="col-md-2"><button type="submit" class="btn btn-outline-primary w-100">Xem tiến bộ</button></div>
-</div></div></form>
-<div class="row g-3 mb-4">
-    <div class="col-6 col-lg-3"><div class="card h-100"><div class="card-body"><p class="text-muted mb-1">Tổng buổi luyện</p><strong class="display-6">@Model.TotalSessions</strong></div></div></div>
-    <div class="col-6 col-lg-3"><div class="card h-100"><div class="card-body"><p class="text-muted mb-1">Đã có báo cáo</p><strong class="display-6">@Model.CompletedSessions</strong></div></div></div>
-    <div class="col-6 col-lg-3"><div class="card h-100"><div class="card-body"><p class="text-muted mb-1">Buổi đầy đủ trong biểu đồ</p><strong class="display-6">@Model.FullEvaluatedSessions</strong></div></div></div>
-    <div class="col-6 col-lg-3"><div class="card h-100"><div class="card-body"><p class="text-muted mb-1">Điểm trung bình</p><strong class="display-6">@(Model.AverageScore?.ToString("0.0") ?? "—")</strong><span class="text-muted"> / 10</span></div></div></div>
-</div>
-<section class="card mb-4" aria-labelledby="progressHeading"><div class="card-body p-4">
-    <h2 id="progressHeading" class="h4">Tiến bộ qua từng buổi</h2>
-    <p class="text-muted small">So sánh điểm của tối đa 100 buổi đầy đủ gần nhất. Mỗi đường là một bối cảnh luyện; buổi kết thúc sớm vẫn được giữ trong lịch sử.</p>
-    @if (Model.Progress.Count == 0) { <p class="mb-0">Chưa có báo cáo đầy đủ để vẽ biểu đồ.</p> }
-    else {
-        <div style="height:300px"><canvas id="scoreChart" aria-label="Biểu đồ điểm nội dung theo thời gian" role="img"></canvas></div>
-        <details class="mt-3"><summary>Xem số liệu điểm và cách nói</summary><div class="table-responsive mt-2"><table class="table table-sm"><thead><tr><th>Ngày (UTC+7)</th><th>Bối cảnh</th><th>Điểm /10</th><th>Từ/phút</th><th>Nghĩ (giây)</th><th>Từ đệm/câu</th></tr></thead><tbody>@foreach (var point in Model.Progress) { <tr><td><a asp-controller="Interviews" asp-action="Report" asp-route-id="@point.Id" class="btn btn-soft btn-sm">@point.Date</a></td><td>@point.Position</td><td>@point.Score.ToString("0.00")</td><td>@(point.WordsPerMinute?.ToString("0.0") ?? "—")</td><td>@(point.ThinkingSeconds?.ToString("0.0") ?? "—")</td><td>@(point.FillerCount?.ToString("0.0") ?? "—")</td></tr> }</tbody></table></div></details>
-    }
-</div></section>
-@if (Model.Progress.Any(x => x.WordCount.HasValue)) {
-    <section class="card mb-4" aria-labelledby="deliveryHeading"><div class="card-body p-4"><div class="d-flex flex-wrap justify-content-between gap-3 mb-2"><h2 id="deliveryHeading" class="h4">Cách nói & độ dài câu trả lời</h2><div><label for="deliveryMetric" class="visually-hidden">Chỉ số cách nói</label><select id="deliveryMetric" class="form-select form-select-sm"><option value="wordsPerMinute">Tốc độ — từ/phút</option><option value="thinkingSeconds">Thời gian suy nghĩ — giây</option><option value="fillerCount">Từ đệm — trung bình/câu</option><option value="longPauseCount">Dừng dài — trung bình/câu</option><option value="wordCount">Độ dài — từ/câu</option></select></div></div><p class="text-muted small">Ước tính trung bình từ transcript và thời gian nhận dạng thật. Buổi văn bản chỉ có độ dài câu trả lời. Không quy đổi thành điểm nội dung; số không đo được để trống.</p><div style="height:270px"><canvas id="deliveryChart" role="img" aria-label="Biểu đồ xu hướng chỉ số cách nói"></canvas></div></div></section>
-}
-<section class="card mb-4" aria-labelledby="skillHeading"><div class="card-body p-4">
-    <h2 id="skillHeading" class="h4">Bản đồ kỹ năng</h2><p class="text-muted small">Điểm trung bình của các lượt trả lời được gắn chủ đề, bao gồm câu hỏi tiếp. Số lượt là lượng bằng chứng, không phải mức thành thạo đã được chứng nhận. Lọc cùng vị trí, cấp độ và ngôn ngữ để đọc đúng bối cảnh.</p>
-    @if (Model.Skills.Count == 0) { <p class="mb-0">Hoàn thành một buổi để thấy kỹ năng đã được đánh giá.</p> }
-    else { <div class="row g-3">@foreach (var skill in Model.Skills) { var color = skill.Score < 5 ? "border-danger" : skill.Score < 7 ? "border-warning" : "border-success"; <div class="col-6 col-md-4 col-xl-3"><div class="border border-2 @color rounded p-3 h-100"><h3 class="h6">@skill.Skill</h3><strong class="fs-4">@skill.Score.ToString("0.0")<span class="fs-6 fw-normal"> /10</span></strong><p class="small text-muted mb-0">@skill.AnswerCount lượt có đánh giá · @(skill.Score < 5 ? "Ưu tiên luyện" : skill.Score < 7 ? "Cần củng cố" : "Đang làm tốt")</p></div></div> }</div> }
-</div></section>
-<section class="card mb-4" id="practice" aria-labelledby="practiceHeading"><div class="card-body p-4">
-    <h2 id="practiceHeading" class="h4">Một bước luyện tiếp theo</h2><p>Chọn bối cảnh muốn cải thiện. Hệ thống dùng ba chủ đề có điểm thấp nhất trong tối đa 20 buổi đầy đủ gần nhất của bối cảnh đó để tạo buổi 5 câu.</p>
-    @if (Model.Skills.Count > 0) {
-        <h3 class="h6">Kế hoạch ôn theo điểm yếu trong bộ lọc hiện tại</h3>
-        <ol class="mb-4">@foreach (var skill in Model.Skills.Take(3)) { <li class="mb-2"><strong>@skill.Skill (@skill.Score.ToString("0.0")/10):</strong> @(skill.Score < 5 ? "Dành 20 phút ôn khái niệm cốt lõi, tự viết hai ví dụ đúng và một lỗi thường gặp." : "Dành 20 phút bổ sung trường hợp biên và đánh đổi cho một ví dụ trong dự án của bạn.") Sau đó trả lời lại một câu về chủ đề này trong 2 phút và đối chiếu phản hồi trước.</li> }</ol>
-    }
-    @if (!ActiveAi.IsConfigured) {
-        <div class="alert alert-info mb-0"><p>Kết nối AI để tạo buổi luyện theo điểm yếu. Bạn vẫn có thể xem các báo cáo và câu hỏi gợi ý bên dưới.</p><a asp-controller="AiSettings" asp-action="Index" asp-route-returnUrl="/Dashboard#practice" class="btn btn-outline-primary">Kết nối AI</a></div>
-    } else {
-    <form asp-action="PracticeWeak" method="post"><input type="hidden" name="Practice.ConsentedProvider" value="@ActiveAi.Provider" /><div class="row g-3">
-        <div class="col-md-5"><label asp-for="Practice.PositionId" class="form-label">Vị trí luyện</label><select asp-for="Practice.PositionId" class="form-select" required>@foreach (var position in Model.Positions) { <option value="@position.Id">@position.Name</option> }</select></div>
-        <div class="col-md-3"><label asp-for="Practice.Level" class="form-label">Cấp độ</label><select asp-for="Practice.Level" class="form-select">@foreach (var level in Enum.GetValues<InterviewLevel>()) { <option value="@level">@level</option> }</select></div>
-        <div class="col-md-4"><label asp-for="Practice.Language" class="form-label">Ngôn ngữ</label><select asp-for="Practice.Language" class="form-select">@foreach (var language in Enum.GetValues<InterviewLanguage>()) { <option value="@language">@Ui.Label(language)</option> }</select></div>
-    </div><div class="form-check my-3"><input asp-for="Practice.Consent" class="form-check-input" required /><label asp-for="Practice.Consent" class="form-check-label">Tôi đồng ý gửi câu trả lời trong buổi luyện mới tới @ActiveAi.Provider để sinh câu hỏi và chấm điểm.</label></div><button type="submit" class="btn btn-primary">Luyện điểm yếu — 5 câu</button></form>
-    }
+<section class="card mb-5" id="practice" aria-labelledby="practiceHeading"><div class="card-body p-4">
+    <h2 id="practiceHeading" class="h4">Luyện thêm theo điểm yếu</h2><p class="text-muted">Hệ thống dùng ba chủ đề có điểm thấp nhất trong tối đa 20 buổi đầy đủ gần nhất của bối cảnh bạn chọn để tạo buổi 5 câu.</p>
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <h3 class="h6">Kế hoạch ôn theo bộ lọc hiện tại</h3>
+            @if (Model.Skills.Count > 0) {
+                <ol class="practice-plan">@foreach (var skill in Model.Skills.Take(3)) { var band = Ui.Score(skill.Score); <li><div class="d-flex flex-wrap align-items-baseline gap-2"><strong>@skill.Skill</strong><span class="score-value score-@band.Band">@skill.Score.ToString("0.0")/10</span><span class="small text-muted">@band.Label</span></div><p class="small mb-0">@(skill.Score < 5 ? "Dành 20 phút ôn khái niệm cốt lõi, tự viết hai ví dụ đúng và một lỗi thường gặp." : "Dành 20 phút bổ sung trường hợp biên và đánh đổi cho một ví dụ trong dự án của bạn.") Sau đó trả lời lại một câu về chủ đề này trong 2 phút và đối chiếu phản hồi trước.</p></li> }</ol>
+            } else { <p class="text-muted small mb-0">Chưa có chủ đề được chấm. Hoàn thành một buổi để có kế hoạch theo điểm yếu.</p> }
+        </div>
+        <div class="col-lg-5 practice-form">
+            <h3 class="h6">Tạo buổi 5 câu</h3>
+            @if (!ActiveAi.IsConfigured) {
+                <div class="alert alert-info mb-0"><p>Kết nối AI để tạo buổi luyện theo điểm yếu. Bạn vẫn có thể xem các báo cáo và câu hỏi gợi ý bên dưới.</p><a asp-controller="AiSettings" asp-action="Index" asp-route-returnUrl="/Dashboard#practice" class="btn btn-primary">Kết nối AI</a></div>
+            } else {
+            <form asp-action="PracticeWeak" method="post"><input type="hidden" name="Practice.ConsentedProvider" value="@ActiveAi.Provider" />
+                <div class="mb-2"><label asp-for="Practice.PositionId" class="form-label">Vị trí luyện</label><select asp-for="Practice.PositionId" class="form-select" required>@foreach (var position in Model.Positions) { <option value="@position.Id">@position.Name</option> }</select></div>
+                <div class="row g-2"><div class="col-6"><label asp-for="Practice.Level" class="form-label">Cấp độ</label><select asp-for="Practice.Level" class="form-select">@foreach (var level in Enum.GetValues<InterviewLevel>()) { <option value="@level">@level</option> }</select></div>
+                <div class="col-6"><label asp-for="Practice.Language" class="form-label">Ngôn ngữ</label><select asp-for="Practice.Language" class="form-select">@foreach (var language in Enum.GetValues<InterviewLanguage>()) { <option value="@language">@Ui.Label(language)</option> }</select></div></div>
+                <div class="form-check my-3"><input asp-for="Practice.Consent" class="form-check-input" required /><label asp-for="Practice.Consent" class="form-check-label small">Tôi đồng ý gửi câu trả lời trong buổi luyện mới tới @ActiveAi.Provider để sinh câu hỏi và chấm điểm.</label></div>
+                <button type="submit" class="btn btn-primary w-100">Luyện điểm yếu — 5 câu</button>
+            </form>
+            }
+        </div>
+    </div>
     @if (Model.Recommendations.Count > 0) {
-        <h3 class="h5 mt-4">Câu hỏi trong ngân hàng nên ôn</h3><p class="text-muted small">Gợi ý theo lựa chọn ban đầu bên trên; áp dụng bộ lọc đầu trang để cập nhật danh sách.</p>
-        <div class="row g-3">@foreach (var question in Model.Recommendations) { <div class="col-md-6"><div class="border rounded p-3 h-100"><p class="small text-muted">#@question.Id · @question.Position · @question.Level · @Ui.Label(question.Language)</p><p>@question.Content</p><div class="d-flex flex-wrap gap-1 mb-2">@foreach (var tag in question.Skills) { <span class="badge bg-secondary">@tag</span> }</div><small class="text-muted">@Ui.Label(question.Kind) · @question.CompanyType</small></div></div> }</div>
+        <details class="mt-4"><summary class="fw-semibold">Câu hỏi trong ngân hàng nên ôn (@Model.Recommendations.Count)</summary><p class="text-muted small mt-2">Gợi ý theo lựa chọn ban đầu bên trên; áp dụng bộ lọc tiến bộ bên dưới để cập nhật danh sách.</p>
+            <div class="row g-3">@foreach (var question in Model.Recommendations) { <div class="col-md-6"><div class="skill-cell h-100"><p class="small text-muted mb-1">#@question.Id · @question.Position · @question.Level · @Ui.Label(question.Language) · @Ui.Label(question.Kind)</p><p class="mb-2">@question.Content</p><div class="d-flex flex-wrap gap-1">@foreach (var tag in question.Skills) { <span class="tag">@tag</span> }</div></div></div> }</div>
+        </details>
     }
 </div></section>
+
+<section id="progress" aria-labelledby="progressTitle">
+<div class="section-head"><div><h2 class="h4 mb-1" id="progressTitle">Theo dõi tiến bộ</h2><p class="text-muted small mb-0">Lọc cùng vị trí, ngôn ngữ và cấp độ để so sánh các buổi luyện.</p></div></div>
+<form asp-action="Index" method="get" class="filter-bar mb-3"><div class="row g-2 align-items-end">
+    <div class="col-md-3"><label asp-for="PositionId" class="form-label">Vị trí</label><select asp-for="PositionId" class="form-select form-select-sm"><option value="">Tất cả vị trí</option>@foreach (var position in Model.Positions) { <option value="@position.Id">@position.Name</option> }</select></div>
+    <div class="col-6 col-md-3"><label asp-for="Language" class="form-label">Ngôn ngữ</label><select asp-for="Language" class="form-select form-select-sm"><option value="">Cả hai ngôn ngữ</option>@foreach (var value in Enum.GetValues<InterviewLanguage>()) { <option value="@value">@Ui.Label(value)</option> }</select></div>
+    <div class="col-6 col-md-3"><label asp-for="Level" class="form-label">Cấp độ</label><select asp-for="Level" class="form-select form-select-sm"><option value="">Cả hai cấp độ</option>@foreach (var value in Enum.GetValues<InterviewLevel>()) { <option value="@value">@value</option> }</select></div>
+    <div class="col-md-3"><button type="submit" class="btn btn-primary btn-sm w-100">Xem tiến bộ</button></div>
+</div></form>
+<dl class="kpi-grid">
+    <div class="kpi reveal" style="--i:0"><dt>Tổng buổi luyện</dt><dd><span class="kpi-value">@Model.TotalSessions</span><span class="kpi-unit">buổi</span></dd></div>
+    <div class="kpi reveal" style="--i:1"><dt>Đã có báo cáo</dt><dd><span class="kpi-value">@Model.CompletedSessions</span><span class="kpi-unit">buổi</span></dd></div>
+    <div class="kpi reveal" style="--i:2"><dt>Buổi đầy đủ</dt><dd><span class="kpi-value">@Model.FullEvaluatedSessions</span><span class="kpi-unit">buổi</span></dd><dd class="kpi-hint">Trả lời đủ câu chính và đã chấm; dùng cho biểu đồ.</dd></div>
+    <div class="kpi reveal" style="--i:3"><dt>Điểm trung bình</dt><dd class="score-@average.Band"><span class="kpi-value">@(Model.AverageScore?.ToString("0.0") ?? "—")</span><span class="kpi-unit">/10</span>@if (Model.AverageScore.HasValue) { <span class="score-label">@average.Label</span> }</dd><dd class="kpi-hint">Trung bình các buổi đầy đủ trong bộ lọc.</dd></div>
+</dl>
+<div class="row g-4 mb-4">
+    <div class="@(hasDelivery ? "col-xl-6" : "col-12")"><section class="card h-100" aria-labelledby="progressHeading"><div class="card-body p-4">
+        <h3 id="progressHeading" class="h5">Điểm qua từng buổi</h3>
+        <p class="text-muted small">Tối đa 100 buổi đầy đủ gần nhất. Mỗi đường là một bối cảnh luyện; buổi kết thúc sớm vẫn ở trong lịch sử.</p>
+        @if (Model.Progress.Count == 0) {
+            <div class="chart-empty"><p class="mb-3">Chưa có buổi đầy đủ để vẽ biểu đồ. Cần ít nhất một buổi trả lời đủ mọi câu chính và đã tạo báo cáo.</p><a asp-controller="Interviews" asp-action="Create" class="btn btn-primary">Tạo buổi luyện →</a></div>
+        }
+        else {
+            <div class="chart-box" style="height:260px"><canvas id="scoreChart" aria-label="Biểu đồ điểm nội dung theo ngày, thang 0 đến 10" role="img"></canvas></div>
+            <details class="mt-3"><summary>Xem bảng số liệu</summary><div class="table-responsive mt-2"><table class="table table-sm"><thead><tr><th>Ngày (UTC+7)</th><th>Bối cảnh</th><th class="num">Điểm /10</th><th>Mức</th></tr></thead><tbody>@foreach (var point in Model.Progress) { var band = Ui.Score(point.Score); <tr><td><a asp-controller="Interviews" asp-action="Report" asp-route-id="@point.Id">@point.Date</a></td><td>@point.Position</td><td class="num">@point.Score.ToString("0.00")</td><td class="score-@band.Band">@band.Label</td></tr> }</tbody></table></div></details>
+        }
+    </div></section></div>
+    @if (hasDelivery) {
+    <div class="col-xl-6"><section class="card h-100" aria-labelledby="deliveryHeading"><div class="card-body p-4"><div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-2"><h3 id="deliveryHeading" class="h5 mb-0">Cách nói & độ dài câu trả lời</h3><div><label for="deliveryMetric" class="visually-hidden">Chỉ số cách nói</label><select id="deliveryMetric" class="form-select form-select-sm"><option value="wordsPerMinute">Tốc độ — từ/phút</option><option value="thinkingSeconds">Thời gian suy nghĩ — giây</option><option value="fillerCount">Từ đệm — trung bình/câu</option><option value="longPauseCount">Dừng dài — trung bình/câu</option><option value="wordCount">Độ dài — từ/câu</option></select></div></div><p class="text-muted small">Ước tính từ transcript và thời gian nhận dạng thật. Buổi văn bản chỉ có độ dài câu trả lời; không quy đổi thành điểm nội dung.</p><div class="chart-box" style="height:260px"><canvas id="deliveryChart" role="img" aria-label="Biểu đồ xu hướng chỉ số cách nói theo ngày"></canvas></div>
+        <details class="mt-3"><summary>Xem bảng số liệu</summary><div class="table-responsive mt-2"><table class="table table-sm"><thead><tr><th>Ngày (UTC+7)</th><th>Bối cảnh</th><th class="num">Từ/phút</th><th class="num">Nghĩ (giây)</th><th class="num">Từ đệm/câu</th><th class="num">Dừng dài/câu</th><th class="num">Từ/câu</th></tr></thead><tbody>@foreach (var point in Model.Progress) { <tr><td>@point.Date</td><td>@point.Position</td><td class="num">@(point.WordsPerMinute?.ToString("0.0") ?? "—")</td><td class="num">@(point.ThinkingSeconds?.ToString("0.0") ?? "—")</td><td class="num">@(point.FillerCount?.ToString("0.0") ?? "—")</td><td class="num">@(point.LongPauseCount?.ToString("0.0") ?? "—")</td><td class="num">@(point.WordCount?.ToString("0") ?? "—")</td></tr> }</tbody></table></div></details>
+    </div></section></div>
+    }
+</div>
+<section class="card mb-4" aria-labelledby="skillHeading"><div class="card-body p-4">
+    <div class="section-head"><h3 id="skillHeading" class="h5 mb-0">Bản đồ kỹ năng</h3>@if (Model.Skills.Count > 0) { <span class="small text-muted">@Model.Skills.Count chủ đề</span> }</div>
+    <p class="text-muted small">Điểm trung bình các lượt trả lời được gắn chủ đề, gồm câu hỏi tiếp. Số lượt là lượng bằng chứng, không phải mức thành thạo đã chứng nhận.</p>
+    @if (Model.Skills.Count == 0) { <div class="chart-empty"><p class="mb-3">Chưa có kỹ năng nào được chấm. Hoàn thành và tạo báo cáo cho một buổi để thấy điểm theo chủ đề.</p><a asp-controller="Interviews" asp-action="Create" class="btn btn-secondary">Tạo buổi luyện</a></div> }
+    else { <ul class="skill-grid">@foreach (var skill in Model.Skills) { var band = Ui.Score(skill.Score); <li class="skill-chip"><span class="skill-name" title="@skill.Skill">@skill.Skill</span><span class="score-value score-@band.Band">@skill.Score.ToString("0.0")</span><span class="skill-meta"><span class="score-@band.Band">@band.Label</span> · @skill.AnswerCount lượt</span></li> }</ul> }
+</div></section>
+</section>
 @section Scripts {
     <script id="progressData" type="application/json">@Html.Raw(AiPrompts.Json(Model.Progress))</script>
     <script>
     (() => {
-        if (typeof Chart === 'undefined') return;
+        if (typeof Chart === 'undefined' || !window.ChartTheme) return;
         const points = JSON.parse(document.getElementById('progressData').textContent);
         const contexts = [...new Set(points.map(p => p.position))];
-        const colors = ['#2452d6', '#159b80', '#d66b1f', '#9343b8', '#cb3b5b', '#52722b', '#3e879d'];
-        const datasets = metric => contexts.map((context, index) => ({ label: context, data: points.map(p => p.position === context ? p[metric] : null), borderColor: colors[index % colors.length], backgroundColor: colors[index % colors.length], tension: .2, spanGaps: true, pointRadius: 4 }));
+        const datasets = metric => contexts.map((context, index) => ({ label: context, data: points.map(p => p.position === context ? p[metric] : null), tension: .2, spanGaps: true, ...ChartTheme.series(index) }));
+        const xAxis = { title: { display: true, text: 'Ngày (UTC+7)' } };
+        const legend = { display: contexts.length > 1, position: 'bottom' };
         const score = document.getElementById('scoreChart');
-        if (score) new Chart(score, { type: 'line', data: { labels: points.map(p => p.date), datasets: datasets('score') }, options: { maintainAspectRatio: false, scales: { y: { min: 0, max: 10, title: { display: true, text: 'Điểm nội dung /10' } } }, plugins: { legend: { position: 'bottom' } } } });
+        if (score) new Chart(score, { type: 'line', data: { labels: points.map(p => p.date), datasets: datasets('score') }, options: { maintainAspectRatio: false, scales: { x: xAxis, y: { min: 0, max: 10, ticks: { stepSize: 2 }, title: { display: true, text: 'Điểm nội dung (/10)' } } }, plugins: { legend } } });
         const delivery = document.getElementById('deliveryChart');
         if (delivery) {
             const select = document.getElementById('deliveryMetric');
             select.value = points.some(p => p.wordsPerMinute !== null) ? 'wordsPerMinute' : 'wordCount';
-            const chart = new Chart(delivery, { type: 'line', data: { labels: points.map(p => p.date), datasets: datasets(select.value) }, options: { maintainAspectRatio: false, scales: { y: { beginAtZero: true } }, plugins: { legend: { position: 'bottom' } } } });
-            select.addEventListener('change', event => { chart.data.datasets = datasets(event.target.value); chart.update(); });
+            const yTitle = () => select.options[select.selectedIndex].text;
+            const chart = new Chart(delivery, { type: 'line', data: { labels: points.map(p => p.date), datasets: datasets(select.value) }, options: { maintainAspectRatio: false, scales: { x: xAxis, y: { beginAtZero: true, title: { display: true, text: yTitle() } } }, plugins: { legend } } });
+            select.addEventListener('change', event => { chart.data.datasets = datasets(event.target.value); chart.options.scales.y.title.text = yTitle(); chart.update(); });
         }
     })();
     </script>

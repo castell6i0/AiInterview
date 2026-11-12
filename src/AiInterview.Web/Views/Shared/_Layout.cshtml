@@ -8,87 +8,122 @@
         || controller == "Interviews" && action is "Report" or "Replay" or "Compare";
     string Current(bool active) => active ? "page" : null!;
     string Active(bool active) => active ? "active" : "";
+    // Background effect per area: rotating Hello World sphere when signed in, falling 0/1 on account pages, drifting tokens elsewhere.
+    var background = ViewData["Bg"] as string ?? (signedIn ? "sphere" : controller == "Account" ? "matrix" : "ascii");
 }
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" data-bs-theme="dark">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
     <meta name="description" content="Luyện phỏng vấn IT và theo dõi tiến bộ của bạn." />
     <title>@ViewData["Title"] · InterviewLab</title>
     <link rel="icon" type="image/svg+xml" href="~/favicon.svg" />
     <link rel="stylesheet" href="~/lib/bootstrap/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <script>try{var c=document.documentElement.classList;if(localStorage.getItem("sidebar")==="collapsed")c.add("sidebar-collapsed");if(localStorage.getItem("effects")==="off")c.add("motion-off")}catch(e){}</script>
 </head>
-<body class="@(signedIn ? "workspace" : "public-page")">
+<body class="@(signedIn ? "workspace" : "public-page")" data-bg="@background">
 <a class="skip-link" href="#main">Đến nội dung</a>
+<div class="nav-progress" id="navProgress" aria-hidden="true"></div>
+<canvas id="asciiBg" aria-hidden="true"></canvas>
+<svg class="icon-sprite" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+    <symbol id="i-overview" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1" /><rect x="14" y="3" width="7" height="5" rx="1" /><rect x="14" y="12" width="7" height="9" rx="1" /><rect x="3" y="16" width="7" height="5" rx="1" /></symbol>
+    <symbol id="i-practice" viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3" /><path d="M19 10v1a7 7 0 0 1-14 0v-1M12 18v4M8 22h8" /></symbol>
+    <symbol id="i-history" viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8M14 7h7v7" /></symbol>
+    <symbol id="i-profile" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M8 13h8M8 17h5" /></symbol>
+    <symbol id="i-classes" viewBox="0 0 24 24"><path d="M22 10 12 5 2 10l10 5 10-5zM6 12v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5" /></symbol>
+    <symbol id="i-teach" viewBox="0 0 24 24"><path d="M2 3h20M4 3v11a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V3M12 15v4M8 21l4-2 4 2" /></symbol>
+    <symbol id="i-admin" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="4" /><path d="M2 21a7 7 0 0 1 14 0M16 3.1a4 4 0 0 1 0 7.8M22 21a7 7 0 0 0-4-6.3" /></symbol>
+    <symbol id="i-positions" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" /><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2M2 13h20" /></symbol>
+    <symbol id="i-questions" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01" /></symbol>
+    <symbol id="i-rubric" viewBox="0 0 24 24"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6" /></symbol>
+    <symbol id="i-ai" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2" /><rect x="9" y="9" width="6" height="6" /><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3" /></symbol>
+    <symbol id="i-help" viewBox="0 0 24 24"><path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2zM22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z" /></symbol>
+    <symbol id="i-data" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></symbol>
+    <symbol id="i-logout" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" /></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16" /></symbol>
+    <symbol id="i-terminal" viewBox="0 0 24 24"><path d="M4 17l6-5-6-5M12 19h8" /></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5" /></symbol>
+    <symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" /></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></symbol>
+    <symbol id="i-external" viewBox="0 0 24 24"><path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /></symbol>
+    <symbol id="i-retry" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5" /></symbol>
+</svg>
 @if (signedIn)
 {
     <aside class="sidebar" id="appNav">
-        <a class="brand" href="/" aria-label="InterviewLab — trang chủ"><span class="brand-mark" aria-hidden="true">il</span>InterviewLab<span class="brand-dot" aria-hidden="true">.</span></a>
+        <button type="button" class="brand brand-toggle" id="sidebarToggle" aria-controls="appNav" aria-expanded="true" aria-label="InterviewLab — thu gọn hoặc mở menu" title="Thu gọn / mở menu"><span class="brand-mark" aria-hidden="true">il</span><span class="brand-name" aria-hidden="true">InterviewLab<span class="brand-dot">.</span></span></button>
         <div class="nav-caption">Không gian của bạn</div>
         <nav aria-label="Điều hướng chính">
             @if (User.IsInRole(Roles.Student))
             {
-                <a class="nav-item @Active(controller == "Dashboard" && !historyActive)" aria-current="@Current(controller == "Dashboard" && !historyActive)" href="/Dashboard"><span class="nav-icon" aria-hidden="true">◫</span>Tổng quan</a>
-                <a class="nav-item @Active(controller == "Interviews" && !historyActive)" aria-current="@Current(controller == "Interviews" && !historyActive)" href="/Interviews/Create"><span class="nav-icon" aria-hidden="true">◎</span>Luyện phỏng vấn</a>
-                <a class="nav-item @Active(historyActive)" aria-current="@Current(historyActive)" href="/Dashboard/History"><span class="nav-icon" aria-hidden="true">↗</span>Lịch sử &amp; tiến bộ</a>
-                <a class="nav-item @Active(controller == "Profile")" aria-current="@Current(controller == "Profile")" href="/Profile"><span class="nav-icon" aria-hidden="true">▤</span>Hồ sơ · CV · JD</a>
-                <a class="nav-item @Active(controller == "Classes")" aria-current="@Current(controller == "Classes")" href="/Classes"><span class="nav-icon" aria-hidden="true">◇</span>Lớp của tôi</a>
+                <a class="nav-item @Active(controller == "Dashboard" && !historyActive)" aria-current="@Current(controller == "Dashboard" && !historyActive)" href="/Dashboard" title="Tổng quan"><svg class="nav-icon" aria-hidden="true" focusable="false"><use href="#i-overview" /></svg><span class="nav-label">Tổng quan</span></a>
+                <a class="nav-item @Active(controller == "Interviews" && !historyActive)" aria-current="@Current(controller == "Interviews" && !historyActive)" href="/Interviews/Create" title="Luyện phỏng vấn"><svg class="nav-icon" aria-hidden="true" focusable="false"><use href="#i-practice" /></svg><span class="nav-label">Luyện phỏng vấn</span></a>
+                <a class="nav-item @Active(historyActive)" aria-current="@Current(historyActive)" href="/Dashboard/History" title="Lịch sử &amp; tiến bộ"><svg class="nav-icon" aria-hidden="true" focusable="false"><use href="#i-history" /></svg><span class="nav-label">Lịch sử &amp; tiến bộ</span></a>
+                <a class="nav-item @Active(controller == "Profile")" aria-current="@Current(controller == "Profile")" href="/Profile" title="Hồ sơ · CV · JD"><svg class="nav-icon" aria-hidden="true" focusable="false"><use href="#i-profile" /></svg><span class="nav-label">Hồ sơ · CV · JD</span></a>
+                <a class="nav-item @Active(controller == "Classes")" aria-current="@Current(controller == "Classes")" href="/Classes" title="Lớp của tôi"><svg class="nav-icon" aria-hidden="true" focusable="false"><use href="#i-classes" /></svg><span class="nav-label">Lớp của tôi</span></a>
             }
             @if (User.IsInRole(Roles.Lecturer))
             {
-                <a class="nav-item @Active(controller == "Lecturer")" aria-current="@Current(controller == "Lecturer")" href="/Lecturer"><span class="nav-icon" aria-hidden="true">◫</span>Lớp giảng dạy</a>
+                <a class="nav-item @Active(controller == "Lecturer")" aria-current="@Current(controller == "Lecturer")" href="/Lecturer" title="Lớp giảng dạy"><svg class="nav-icon" aria-hidden="true" focusable="false"><use href="#i-teach" /></svg><span class="nav-label">Lớp giảng dạy</span></a>
             }
             @if (User.IsInRole(Roles.Admin))
             {
                 var usersActive = controller == "Admin" && action is "Users" or "CreateUser" or "EditUser" or "DeleteUser" or "UserAccess";
                 var positionsActive = controller == "Admin" && action is "Positions" or "Position" or "DeletePosition";
                 var questionsActive = controller == "Admin" && action is "Questions" or "Question" or "DeleteQuestion";
-                <a class="nav-item @Active(controller == "Admin" && action == "Index")" aria-current="@Current(controller == "Admin" && action == "Index")" href="/Admin"><span class="nav-icon" aria-hidden="true">◫</span>Tổng quan quản trị</a>
-                <a class="nav-item @Active(usersActive)" aria-current="@Current(usersActive)" href="/Admin/Users"><span class="nav-icon" aria-hidden="true">◇</span>Người dùng</a>
-                <a class="nav-item @Active(positionsActive)" aria-current="@Current(positionsActive)" href="/Admin/Positions"><span class="nav-icon" aria-hidden="true">▤</span>Vị trí ứng tuyển</a>
-                <a class="nav-item @Active(questionsActive)" aria-current="@Current(questionsActive)" href="/Admin/Questions"><span class="nav-icon" aria-hidden="true">?</span>Ngân hàng câu hỏi</a>
-                <a class="nav-item @Active(controller == "Admin" && action == "Rubric")" aria-current="@Current(controller == "Admin" && action == "Rubric")" href="/Admin/Rubric"><span class="nav-icon" aria-hidden="true">≋</span>Tiêu chí &amp; trọng số</a>
+                <a class="nav-item @Active(controller == "Admin" && action == "Index")" aria-current="@Current(controller == "Admin" && action == "Index")" href="/Admin" title="Tổng quan quản trị"><svg class="nav-icon" aria-hidden="true" focusable="false"><use href="#i-admin" /></svg><span class="nav-label">Tổng quan quản trị</span></a>
+                <a class="nav-item @Active(usersActive)" aria-current="@Current(usersActive)" href="/Admin/Users" title="Người dùng"><svg class="nav-icon" aria-hidden="true" focusable="false"><use href="#i-users" /></svg><span class="nav-label">Người dùng</span></a>
+                <a class="nav-item @Active(positionsActive)" aria-current="@Current(positionsActive)" href="/Admin/Positions" title="Vị trí ứng tuyển"><svg class="nav-icon" aria-hidden="true" focusable="false"><use href="#i-positions" /></svg><span class="nav-label">Vị trí ứng tuyển</span></a>
+                <a class="nav-item @Active(questionsActive)" aria-current="@Current(questionsActive)" href="/Admin/Questions" title="Ngân hàng câu hỏi"><svg class="nav-icon" aria-hidden="true" focusable="false"><use href="#i-questions" /></svg><span class="nav-label">Ngân hàng câu hỏi</span></a>
+                <a class="nav-item @Active(controller == "Admin" && action == "Rubric")" aria-current="@Current(controller == "Admin" && action == "Rubric")" href="/Admin/Rubric" title="Tiêu chí &amp; trọng số"><svg class="nav-icon" aria-hidden="true" focusable="false"><use href="#i-rubric" /></svg><span class="nav-label">Tiêu chí &amp; trọng số</span></a>
             }
             <div class="nav-caption mt-4">Cài đặt &amp; hỗ trợ</div>
-            <a class="nav-item @Active(controller == "AiSettings")" aria-current="@Current(controller == "AiSettings")" href="/AiSettings"><span class="nav-icon" aria-hidden="true">⚙</span>Cài đặt AI</a>
-            <a class="nav-item @Active(controller == "Home" && action == "Help")" aria-current="@Current(controller == "Home" && action == "Help")" href="/Home/Help"><span class="nav-icon" aria-hidden="true">?</span>Hướng dẫn sử dụng</a>
-            <a class="nav-item @Active(controller == "Home" && action == "Privacy")" aria-current="@Current(controller == "Home" && action == "Privacy")" href="/Home/Privacy"><span class="nav-icon" aria-hidden="true">♧</span>Dữ liệu của bạn</a>
+            <a class="nav-item @Active(controller == "AiSettings")" aria-current="@Current(controller == "AiSettings")" href="/AiSettings" title="Cài đặt AI"><svg class="nav-icon" aria-hidden="true" focusable="false"><use href="#i-ai" /></svg><span class="nav-label">Cài đặt AI</span></a>
+            <a class="nav-item @Active(controller == "Home" && action == "Help")" aria-current="@Current(controller == "Home" && action == "Help")" href="/Home/Help" title="Hướng dẫn sử dụng"><svg class="nav-icon" aria-hidden="true" focusable="false"><use href="#i-help" /></svg><span class="nav-label">Hướng dẫn sử dụng</span></a>
+            <a class="nav-item @Active(controller == "Home" && action == "Privacy")" aria-current="@Current(controller == "Home" && action == "Privacy")" href="/Home/Privacy" title="Dữ liệu của bạn"><svg class="nav-icon" aria-hidden="true" focusable="false"><use href="#i-data" /></svg><span class="nav-label">Dữ liệu của bạn</span></a>
         </nav>
         <div class="sidebar-account">
-            <div class="sidebar-user">
+            <div class="sidebar-user" title="@userName">
                 <span class="avatar" aria-hidden="true">@userInitial</span>
                 <div><strong>@(User.IsInRole(Roles.Admin) ? "Quản trị viên" : User.IsInRole(Roles.Lecturer) ? "Giảng viên" : "Sinh viên")</strong><div class="user-email" title="@userName">@userName</div></div>
             </div>
-            <form asp-controller="Account" asp-action="Logout" method="post"><button class="logout-button" type="submit">Đăng xuất ↗</button></form>
+            <form asp-controller="Account" asp-action="Logout" method="post"><button class="btn btn-secondary btn-sm logout-button" type="submit" aria-label="Đăng xuất" title="Đăng xuất"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-logout" /></svg><span class="nav-label">Đăng xuất</span></button></form>
         </div>
     </aside>
     <div class="workspace-content">
         <header class="app-header">
-            <button class="btn btn-sm btn-outline-secondary mobile-menu" type="button" aria-label="Mở hoặc đóng menu điều hướng" aria-expanded="false" aria-controls="appNav" id="menuToggle">☰</button>
+            <button class="btn btn-sm btn-secondary mobile-menu" type="button" aria-label="Mở hoặc đóng menu điều hướng" aria-expanded="false" aria-controls="appNav" id="menuToggle"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-menu" /></svg></button>
             <div class="header-path"><span class="header-context">Không gian học tập /</span><strong>@ViewData["Title"]</strong></div>
+            <button class="btn btn-secondary btn-sm bg-toggle" type="button" id="bgToggle" aria-pressed="true" title="Bật/tắt nền chuyển động và hiệu ứng" hidden><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-terminal" /></svg><span>Hiệu ứng</span></button>
         </header>
         <main id="main" class="page-content">
             @if (TempData["Message"] is string message) { <div class="alert alert-info" role="status">@message</div> }
             @RenderBody()
         </main>
-        <footer class="app-footer"><span>InterviewLab · Luyện phỏng vấn IT</span><a class="btn btn-soft btn-sm" href="/Home/Privacy">Quyền riêng tư</a></footer>
+        <footer class="app-footer"><span>InterviewLab · Luyện phỏng vấn IT</span><a class="btn btn-secondary btn-sm" href="/Home/Privacy">Quyền riêng tư</a></footer>
     </div>
 }
 else
 {
+    <div class="public-bar" id="publicBar">
     <header class="public-header container">
         <a class="brand" href="/"><span class="brand-mark" aria-hidden="true">il</span>InterviewLab<span class="brand-dot" aria-hidden="true">.</span></a>
-        <nav class="d-flex flex-wrap align-items-center gap-2" aria-label="Hướng dẫn và tài khoản"><a class="btn btn-soft btn-sm" href="/Home/Help" aria-current="@Current(controller == "Home" && action == "Help")">Hướng dẫn</a><a class="btn btn-soft btn-sm" href="/Account/Login" aria-current="@Current(controller == "Account" && action == "Login")">Đăng nhập</a><a class="btn btn-primary btn-sm" href="/Account/Register">Bắt đầu luyện tập →</a></nav>
+        <nav class="d-flex flex-wrap align-items-center gap-2" aria-label="Hướng dẫn và tài khoản"><button class="btn btn-secondary btn-sm bg-toggle" type="button" id="bgToggle" aria-pressed="true" title="Bật/tắt nền chuyển động và hiệu ứng" hidden><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-terminal" /></svg><span>Hiệu ứng</span></button><a class="btn btn-secondary btn-sm" href="/Home/Help" aria-current="@Current(controller == "Home" && action == "Help")">Hướng dẫn</a><a class="btn btn-secondary btn-sm" href="/Account/Login" aria-current="@Current(controller == "Account" && action == "Login")">Đăng nhập</a><a class="btn btn-primary btn-sm" href="/Account/Register">Bắt đầu luyện tập →</a></nav>
     </header>
+    </div>
     <main id="main">@RenderBody()</main>
-    <footer class="container public-footer"><span>InterviewLab · Luyện phỏng vấn IT</span><a class="btn btn-soft btn-sm" href="/Home/Privacy">Dữ liệu &amp; quyền riêng tư</a></footer>
+    <footer class="container public-footer"><span>InterviewLab · Luyện phỏng vấn IT</span><a class="btn btn-secondary btn-sm" href="/Home/Privacy">Dữ liệu &amp; quyền riêng tư</a></footer>
 }
 <script src="~/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script src="~/lib/chart/chart.umd.min.js"></script>
+<script src="~/js/chart-theme.js" asp-append-version="true"></script>
 <script src="~/js/site.js" asp-append-version="true"></script>
 <script src="~/js/request-feedback.js" asp-append-version="true"></script>
+<script src="~/js/background.js" asp-append-version="true"></script>
 @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

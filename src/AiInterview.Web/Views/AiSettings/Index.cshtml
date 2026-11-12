@@ -31,7 +31,7 @@
     <div class="ai-current-actions">
         <form asp-controller="AiSettings" asp-action="TestConnection" method="post" data-preserve-on-limit data-rate-group="ai-settings" id="aiConnectionCheckForm" aria-describedby="connectionCheckHelp">
             <input type="hidden" name="ReturnUrl" value="@Model.ReturnUrl" />
-            <button type="submit" class="btn btn-outline-primary" disabled="@(!Model.IsConfigured)">Kiểm tra kết nối đã lưu</button>
+            <button type="submit" class="btn btn-ai" disabled="@(!Model.IsConfigured)">Kiểm tra kết nối đã lưu</button>
         </form>
         <span class="help-text" id="connectionCheckHelp">AI sẽ tạo một nội dung mẫu ngắn bằng cấu hình đã lưu. Lần kiểm tra có thể dùng một ít hạn mức; không gửi CV hay câu trả lời của bạn.</span>
     </div>
@@ -42,7 +42,7 @@
 }
 else if (Model.ReturnUrl is not null)
 {
-    <p><a href="@Model.ReturnUrl" class="btn btn-soft btn-sm">← Quay lại trang trước</a></p>
+    <p><a href="@Model.ReturnUrl" class="btn btn-secondary btn-sm">← Quay lại trang trước</a></p>
 }
 
 <div class="ai-settings-layout" id="aiSettings"
@@ -69,14 +69,14 @@ else if (Model.ReturnUrl is not null)
                         <p class="help-text" id="providerHelp">Danh sách chọn nhanh chỉ gồm model Gemini có hạn mức miễn phí. Kết nối đã lưu không tự thay đổi.</p>
                         @if (!selectedIsOpenAi && (Model.HasOpenAiKey || Model.OpenAiKeyUnavailable))
                         {
-                            <details class="mt-2"><summary>Nâng cao · Kết nối cũ có phí</summary><p class="help-text">OpenAI đã lưu vẫn được giữ để quản lý, không nằm trong danh sách miễn phí.</p><a asp-action="Index" asp-route-provider="OpenAI" asp-route-returnUrl="@Model.ReturnUrl" class="btn btn-soft btn-sm">Quản lý OpenAI đã lưu</a></details>
+                            <details class="mt-2"><summary>Nâng cao · Kết nối cũ có phí</summary><p class="help-text">OpenAI đã lưu vẫn được giữ để quản lý, không nằm trong danh sách miễn phí.</p><a asp-action="Index" asp-route-provider="OpenAI" asp-route-returnUrl="@Model.ReturnUrl" class="btn btn-secondary btn-sm">Quản lý OpenAI đã lưu</a></details>
                         }
                     </div>
                     <div class="mb-4">
                         <div class="ai-field-heading"><label for="ApiKey" class="form-label">API key <span id="keyProviderName">@Model.Provider</span></label><span class="ai-key-state" id="selectedKeyState">@(selectedKeyUnavailable ? "Cần nhập lại key" : selectedHasKey ? "Đã lưu key" : "Chưa có key cá nhân")</span></div>
                         <div class="ai-key-input">
                             <input type="password" id="ApiKey" name="ApiKey" value="" class="form-control" autocomplete="new-password" spellcheck="false" autocapitalize="off" maxlength="2048" placeholder="Dán API key của bạn tại đây" aria-describedby="keyHelp providerChangeNotice" />
-                            <button class="btn btn-outline-secondary" type="button" id="toggleApiKey" aria-controls="ApiKey" aria-pressed="false" hidden>Hiện key</button>
+                            <button class="btn btn-secondary" type="button" id="toggleApiKey" aria-controls="ApiKey" aria-pressed="false" hidden>Hiện key</button>
                         </div>
                         <p class="help-text" id="keyHelp">Đã lưu key thì có thể để trống ô này. Key của bạn được mã hóa và không hiển thị lại.</p>
                         <p class="help-text ai-inline-notice" id="providerChangeNotice" role="status" aria-live="polite"></p>
@@ -92,9 +92,9 @@ else if (Model.ReturnUrl is not null)
                         <input asp-for="Model" class="form-control" maxlength="100" autocomplete="off" spellcheck="false" autocapitalize="off" required aria-describedby="modelHelp modelSelectionNote" />
                         <p class="help-text" id="modelHelp">Chọn ở trên sẽ điền tên vào ô này. Vẫn có thể tự nhập model; model ngoài danh sách không được xác nhận có hạn mức miễn phí.</p>
                         <p class="ai-model-selection" id="modelSelectionNote" role="status" aria-live="polite">Bấm Lưu &amp; kiểm tra model để xác nhận bằng key của bạn.</p>
-                        <div class="ai-model-sources"><span class="help-text m-0">Danh sách tham khảo: @AiModelCatalog.CheckedOn</span><a id="modelPricingLink" href="@(selectedIsOpenAi ? "https://developers.openai.com/api/docs/pricing" : "https://ai.google.dev/gemini-api/docs/pricing")" class="btn btn-soft btn-sm" target="_blank" rel="noopener noreferrer">Xem phí &amp; hạn mức ↗</a></div>
+                        <div class="ai-model-sources"><span class="help-text m-0">Danh sách tham khảo: @AiModelCatalog.CheckedOn</span><a id="modelPricingLink" href="@(selectedIsOpenAi ? "https://developers.openai.com/api/docs/pricing" : "https://ai.google.dev/gemini-api/docs/pricing")" class="btn btn-secondary btn-sm" target="_blank" rel="noopener noreferrer">Xem phí &amp; hạn mức <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-external" /></svg></a></div>
                     </section>
-                    <div class="ai-save-row"><button type="submit" name="CheckConnection" value="true" class="btn btn-primary" id="saveAndCheckModel">Lưu &amp; kiểm tra model →</button><button type="submit" class="btn btn-outline-secondary">Chỉ lưu</button></div>
+                    <div class="ai-save-row"><button type="submit" name="CheckConnection" value="true" class="btn btn-primary" id="saveAndCheckModel">Lưu &amp; kiểm tra model →</button><button type="submit" class="btn btn-secondary">Chỉ lưu</button></div>
                     <p class="help-text mt-3 mb-0">Kiểm tra gửi một mẫu ngắn, không gửi CV hay câu trả lời. Lần gọi có thể dùng hạn mức hoặc số dư API của bạn. Thành công thì có thể quay lại luyện tập.</p>
                 </form>
             </div>
@@ -108,7 +108,7 @@ else if (Model.ReturnUrl is not null)
                     <div><strong>Google Gemini</strong><span>@(Model.GeminiKeyUnavailable ? "Không đọc được key đã lưu · cần nhập lại" : Model.HasGeminiKey ? "Đã lưu key cá nhân" : "Chưa lưu key cá nhân")</span></div>
                     @if (Model.HasGeminiKey || Model.GeminiKeyUnavailable)
                     {
-                        <form asp-controller="AiSettings" asp-action="DeleteKey" method="post" data-preserve-on-limit data-rate-group="ai-settings"><input type="hidden" name="ReturnUrl" value="@Model.ReturnUrl" /><input type="hidden" name="Provider" value="Gemini" /><button type="submit" class="btn btn-sm ai-delete-key" aria-label="Xóa key cá nhân Gemini">Xóa key</button></form>
+                        <form asp-controller="AiSettings" asp-action="DeleteKey" method="post" data-preserve-on-limit data-rate-group="ai-settings"><input type="hidden" name="ReturnUrl" value="@Model.ReturnUrl" /><input type="hidden" name="Provider" value="Gemini" /><button type="submit" class="btn btn-sm btn-danger" aria-label="Xóa key cá nhân Gemini">Xóa key</button></form>
                     }
                 </div>
                 @if (Model.HasOpenAiKey || Model.OpenAiKeyUnavailable || selectedIsOpenAi)
@@ -117,7 +117,7 @@ else if (Model.ReturnUrl is not null)
                     <div><strong>OpenAI</strong><span>@(Model.OpenAiKeyUnavailable ? "Không đọc được key đã lưu · cần nhập lại" : Model.HasOpenAiKey ? "Đã lưu key cá nhân" : "Chưa lưu key cá nhân")</span></div>
                     @if (Model.HasOpenAiKey || Model.OpenAiKeyUnavailable)
                     {
-                        <form asp-controller="AiSettings" asp-action="DeleteKey" method="post" data-preserve-on-limit data-rate-group="ai-settings"><input type="hidden" name="ReturnUrl" value="@Model.ReturnUrl" /><input type="hidden" name="Provider" value="OpenAI" /><button type="submit" class="btn btn-sm ai-delete-key" aria-label="Xóa key cá nhân OpenAI">Xóa key</button></form>
+                        <form asp-controller="AiSettings" asp-action="DeleteKey" method="post" data-preserve-on-limit data-rate-group="ai-settings"><input type="hidden" name="ReturnUrl" value="@Model.ReturnUrl" /><input type="hidden" name="Provider" value="OpenAI" /><button type="submit" class="btn btn-sm btn-danger" aria-label="Xóa key cá nhân OpenAI">Xóa key</button></form>
                     }
                 </div>
                 }
@@ -129,10 +129,10 @@ else if (Model.ReturnUrl is not null)
         <section class="soft-panel">
             <div class="ai-section-heading"><span class="step-dot" aria-hidden="true">?</span><h2 class="h5">Lấy API key ở đâu?</h2></div>
             <p>Đăng nhập vào nhà cung cấp bạn chọn, tạo key rồi dán vào ô bên cạnh.</p>
-            <a class="ai-provider-link" href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer"><span>Google AI Studio<strong>Lấy key Gemini</strong></span><span aria-hidden="true">↗</span></a>
+            <a class="ai-provider-link" href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer"><span>Google AI Studio<strong>Lấy key Gemini</strong></span><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-external" /></svg></a>
             @if (selectedIsOpenAi)
             {
-                <details><summary>Kết nối OpenAI cũ · Có phí</summary><a class="ai-provider-link" href="https://platform.openai.com/settings/organization/api-keys" target="_blank" rel="noopener noreferrer"><span>OpenAI Platform<strong>Quản lý key OpenAI</strong></span><span aria-hidden="true">↗</span></a></details>
+                <details><summary>Kết nối OpenAI cũ · Có phí</summary><a class="ai-provider-link" href="https://platform.openai.com/settings/organization/api-keys" target="_blank" rel="noopener noreferrer"><span>OpenAI Platform<strong>Quản lý key OpenAI</strong></span><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-external" /></svg></a></details>
             }
             <p class="help-text mb-0">Đừng chia sẻ key cho người khác. Nội dung bạn đồng ý phân tích sẽ được gửi tới nhà cung cấp đang chọn.</p>
         </section>
@@ -140,10 +140,10 @@ else if (Model.ReturnUrl is not null)
             <div class="card-body">
                 <h2 class="h5" id="serverAiHeading">Dùng cấu hình hệ thống</h2>
                 <p class="help-text">@(Model.ServerIsConfigured ? "Dùng kết nối do người quản trị thiết lập sẵn. Key cá nhân đã lưu vẫn được giữ để bạn chuyển lại sau." : "Người quản trị chưa thiết lập kết nối hệ thống. Hiện tại, hãy dùng API key cá nhân ở bên cạnh.")</p>
-                <form asp-controller="AiSettings" asp-action="UseServerDefaults" method="post" data-preserve-on-limit data-rate-group="ai-settings"><input type="hidden" name="ReturnUrl" value="@Model.ReturnUrl" /><button type="submit" class="btn btn-outline-secondary w-100" disabled="@(!Model.ServerIsConfigured || !Model.UsePersonalSettings)">@(Model.UsePersonalSettings ? "Chuyển sang cấu hình hệ thống" : "Đang dùng cấu hình hệ thống")</button></form>
+                <form asp-controller="AiSettings" asp-action="UseServerDefaults" method="post" data-preserve-on-limit data-rate-group="ai-settings"><input type="hidden" name="ReturnUrl" value="@Model.ReturnUrl" /><button type="submit" class="btn btn-secondary w-100" disabled="@(!Model.ServerIsConfigured || !Model.UsePersonalSettings)">@(Model.UsePersonalSettings ? "Chuyển sang cấu hình hệ thống" : "Đang dùng cấu hình hệ thống")</button></form>
             </div>
         </section>
-        <a class="ai-back-to-practice btn btn-soft btn-sm" href="/Home/Help#connectionHelp">Xem hướng dẫn kết nối từng bước →</a>
+        <a class="ai-back-to-practice btn btn-secondary btn-sm" href="/Home/Help#connectionHelp">Xem hướng dẫn kết nối từng bước →</a>
     </aside>
 </div>
 @section Scripts {

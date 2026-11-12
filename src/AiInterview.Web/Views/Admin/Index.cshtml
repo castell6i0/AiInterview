@@ -3,15 +3,18 @@
 <h1>Quản trị hệ thống</h1><p class="text-muted">Quản lý quyền truy cập, nội dung luyện tập và tiêu chí đánh giá.</p>
 @await Html.PartialAsync("_Nav")
 @await Html.PartialAsync("_Alerts")
-<a asp-controller="AiUsage" asp-action="Index" class="btn btn-soft mb-3">Xem sử dụng AI theo tài khoản và ngày →</a>
-<div class="row g-3 mb-4">
-    <div class="col-md-4"><div class="card h-100"><div class="card-body"><p class="text-muted mb-1">Người dùng</p><strong class="fs-2">@Model.UserCount</strong><div class="mt-2"><a asp-action="Users" class="btn btn-soft btn-sm">Quản lý tài khoản →</a></div></div></div></div>
-    <div class="col-md-4"><div class="card h-100"><div class="card-body"><p class="text-muted mb-1">Buổi phỏng vấn</p><strong class="fs-2">@Model.SessionCount</strong><p class="small text-muted mb-0">Tổng số buổi ở mọi trạng thái</p></div></div></div>
-    <div class="col-md-4"><div class="card h-100"><div class="card-body"><p class="text-muted mb-1">Câu hỏi ngân hàng</p><strong class="fs-2">@Model.QuestionCount</strong><div class="mt-2"><a asp-action="Questions" class="btn btn-soft btn-sm">Bổ sung câu hỏi →</a></div></div></div></div>
-</div>
-<div class="card"><div class="card-body"><h2 class="h4">Sử dụng AI</h2><div class="row g-3">
-    <div class="col-sm-6 col-lg-3"><div class="text-muted">Lượt gọi, gồm retry</div><strong class="fs-4">@Model.AiRequestCount.ToString("N0")</strong></div>
-    <div class="col-sm-6 col-lg-3"><div class="text-muted">Token đầu vào đã ghi nhận</div><strong class="fs-4">@Model.ReportedInputTokens.ToString("N0")</strong></div>
-    <div class="col-sm-6 col-lg-3"><div class="text-muted">Token đầu ra đã ghi nhận</div><strong class="fs-4">@Model.ReportedOutputTokens.ToString("N0")</strong></div>
-    <div class="col-sm-6 col-lg-3"><div class="text-muted">Chi phí có dữ liệu (ước tính)</div><strong class="fs-4">@Model.KnownEstimatedCostUsd.ToString("0.0000") USD</strong></div>
-</div><p class="small text-muted mt-3 mb-0">Có @Model.UnknownCostCount lượt chưa xác định chi phí; tổng trên chỉ cộng các giá trị đã biết, không phải hóa đơn. Token chỉ tổng hợp số lượng provider thực sự trả về.</p></div></div>
+<a asp-controller="AiUsage" asp-action="Index" class="btn btn-secondary mb-3">Xem sử dụng AI theo tài khoản và ngày →</a>
+<dl class="kpi-grid mb-2">
+    <div class="kpi reveal" style="--i:0"><dt>Người dùng</dt><dd><span class="kpi-value">@Model.UserCount</span><span class="kpi-unit">tài khoản</span></dd></div>
+    <div class="kpi reveal" style="--i:1"><dt>Buổi phỏng vấn</dt><dd><span class="kpi-value">@Model.SessionCount</span><span class="kpi-unit">buổi</span></dd><dd class="kpi-hint">Mọi trạng thái, kể cả buổi chưa xong.</dd></div>
+    <div class="kpi reveal" style="--i:2"><dt>Câu hỏi ngân hàng</dt><dd><span class="kpi-value">@Model.QuestionCount</span><span class="kpi-unit">câu</span></dd></div>
+</dl>
+<div class="support-actions mb-4"><a asp-action="Users" class="btn btn-secondary btn-sm">Quản lý tài khoản →</a><a asp-action="Questions" class="btn btn-secondary btn-sm">Bổ sung câu hỏi →</a></div>
+<h2 class="h4">Sử dụng AI</h2>
+<dl class="kpi-grid mb-2">
+    <div class="kpi reveal" style="--i:3"><dt>Lượt gọi</dt><dd><span class="kpi-value">@Model.AiRequestCount.ToString("N0")</span><span class="kpi-unit">lượt</span></dd><dd class="kpi-hint">Gồm cả lượt thử lại.</dd></div>
+    <div class="kpi reveal" style="--i:4"><dt>Token vào</dt><dd><span class="kpi-value">@Model.ReportedInputTokens.ToString("N0")</span><span class="kpi-unit">token</span></dd><dd class="kpi-hint">Chỉ số provider trả về.</dd></div>
+    <div class="kpi reveal" style="--i:5"><dt>Token ra</dt><dd><span class="kpi-value">@Model.ReportedOutputTokens.ToString("N0")</span><span class="kpi-unit">token</span></dd><dd class="kpi-hint">Chỉ số provider trả về.</dd></div>
+    <div class="kpi reveal" style="--i:6"><dt>Chi phí đã biết</dt><dd><span class="kpi-value">@Model.KnownEstimatedCostUsd.ToString("0.0000")</span><span class="kpi-unit">USD</span></dd><dd class="kpi-hint">Ước tính, không phải hóa đơn.</dd></div>
+</dl>
+<div><p class="small text-muted mb-0">Có @Model.UnknownCostCount lượt chưa xác định chi phí; tổng trên chỉ cộng các giá trị đã biết, không phải hóa đơn. Token chỉ tổng hợp số lượng provider thực sự trả về.</p></div>

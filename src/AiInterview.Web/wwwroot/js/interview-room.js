@@ -59,24 +59,26 @@ function saveDraft(){
 
 function telemetry(){const elapsed=Date.now()-displayedAt;if(elapsed<0||elapsed>3600000)return null;return{usedRecognition,firstSpeechMs:firstInput,elapsedMs:elapsed,windows:usedRecognition?windows:[]};}
 const speech=new window.InterviewSpeech.BrowserSpeechToText(config.language,{
-start:()=>{$('micButton').classList.add('recording');$('micButton').textContent='■ Dừng nói';lockAnswer();if(!busy)status('AI đang nghe…');},
+start:()=>{$('roomStage').setAttribute?.('data-state','listening');$('micButton').classList.add('recording');$('micButton').textContent='Dừng nói';lockAnswer();if(!busy)status('AI đang nghe…');},
 speechStart:()=>{firstInput??=Date.now()-displayedAt;if(speechStart===null)speechStart=Date.now()-displayedAt;},
 speechEnd:()=>{if(speechStart!==null){windows.push({startMs:speechStart,endMs:Date.now()-displayedAt});speechStart=null;}},
 result:(final,interim)=>{if(!current||current.id!==speechTurnId||(busy&&!submitting))return;if(final){usedRecognition=true;firstInput??=Date.now()-displayedAt;setAnswer([baseSpeech,final].filter(Boolean).join(' '));if(submitting){dirty=true;stash();}else edited();}$('interimTranscript').textContent=interim;},
-end:()=>{if(speechStart!==null){windows.push({startMs:speechStart,endMs:Date.now()-displayedAt});speechStart=null;}$('micButton').classList.remove('recording');$('micButton').textContent='● Bắt đầu nói';$('interimTranscript').textContent='';lockAnswer();if(!busy)status('Đang chờ câu trả lời của bạn');},error:message=>notice(message)});
+end:()=>{if(speechStart!==null){windows.push({startMs:speechStart,endMs:Date.now()-displayedAt});speechStart=null;}$('roomStage').setAttribute?.('data-state','idle');$('micButton').classList.remove('recording');$('micButton').textContent='Bắt đầu nói';$('interimTranscript').textContent='';lockAnswer();if(!busy)status('Đang chờ câu trả lời của bạn');},error:message=>notice(message)});
 if(config.voice&&!speech.supported){$('micButton').hidden=true;notice('Trình duyệt này chưa hỗ trợ nhận dạng giọng nói. Buổi luyện tự động dùng ô nhập văn bản.');}
 if(!tts.supported){$('readButton').hidden=true;$('autoRead').checked=false;$('autoRead').disabled=true;}
 $('micButton').addEventListener('click',()=>{if(busy||submitting||!current)return;if(speech.listening)stopListening();else{tts.stop();baseSpeech=readAnswer().trim();speechTurnId=current.id;speech.start();lockAnswer();}});
 $('readButton').addEventListener('click',async()=>{if(busy||submitting)return;$('readButton').disabled=true;try{await stopListening();tts.stop();tts.speak($('questionText').textContent);}finally{$('readButton').disabled=busy;}});
 $('autoRead').addEventListener('change',()=>{if(!$('autoRead').checked)tts.stop();});
 $('answerInput').addEventListener('input',edited);
+// Dark editor theme read from the CSS tokens; falls back to vs-dark where styles are unavailable.
+function editorTheme(monaco){const css=window.getComputedStyle?.(document.documentElement),token=name=>css.getPropertyValue(name).trim();if(!css||!monaco.editor.defineTheme)return 'vs-dark';monaco.editor.defineTheme('interviewlab',{base:'vs-dark',inherit:true,rules:[],colors:{'editor.background':token('--bg'),'editor.foreground':token('--text'),'editor.lineHighlightBackground':token('--surface-2'),'editorLineNumber.foreground':token('--muted'),'editorCursor.foreground':token('--accent'),'editorWidget.background':token('--surface-1')}});return 'interviewlab';}
 function loadMonaco(){if(editorLoading)return editorLoading;editorLoading=new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='/lib/monaco/vs/loader.js';script.onload=()=>{window.require.config({paths:{vs:'/lib/monaco/vs'}});window.require(['vs/editor/editor.main'],()=>resolve(window.monaco),reject);};script.onerror=reject;document.head.appendChild(script);});return editorLoading;}
 async function prepareEditor(){
     const turn=current;if(!turn?.isCoding){$('codePanel').hidden=true;$('answerInput').hidden=false;return;}
     $('answerInput').hidden=false;
     try{const monaco=await loadMonaco();if(current?.id!==turn.id)return;
         const language=['csharp','javascript','python'].includes(turn.codeLanguage)?turn.codeLanguage:'plaintext';
-        if(!editor){editor=monaco.editor.create($('monacoEditor'),{value:$('answerInput').value,language,readOnly:busy||speech.listening,automaticLayout:true,minimap:{enabled:false},fontSize:14,wordWrap:'on',scrollBeyondLastLine:false,tabSize:4});editor.onDidChangeModelContent(()=>{if(!suppressEditor&&editorTurnId===current?.id){$('answerInput').value=editor.getValue();edited();}});}
+        if(!editor){editor=monaco.editor.create($('monacoEditor'),{value:$('answerInput').value,language,theme:editorTheme(monaco),readOnly:busy||speech.listening,automaticLayout:true,minimap:{enabled:false},fontSize:14,wordWrap:'on',scrollBeyondLastLine:false,tabSize:4});editor.onDidChangeModelContent(()=>{if(!suppressEditor&&editorTurnId===current?.id){$('answerInput').value=editor.getValue();edited();}});}
         else{monaco.editor.setModelLanguage(editor.getModel(),language);suppressEditor=true;try{editor.setValue($('answerInput').value);}finally{suppressEditor=false;}}
         editorTurnId=turn.id;lockAnswer();$('codePanel').hidden=false;$('answerInput').hidden=true;editor.layout();updateCount();
     }catch{if(current?.id!==turn.id)return;editorLoading=null;editorTurnId=null;notice('Chưa tải được trình soạn thảo code. Bạn vẫn có thể viết code trong ô văn bản.');$('codePanel').hidden=true;$('answerInput').hidden=false;}

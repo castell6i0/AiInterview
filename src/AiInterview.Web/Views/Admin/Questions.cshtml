@@ -11,14 +11,14 @@
 @foreach (var question in Model.Questions)
 {
     <div class="card mb-3"><div class="card-body"><div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
-        <div class="flex-grow-1"><p class="text-muted small mb-2">@question.Position.Name · @ClassroomUi.Label(question.Level) · @ClassroomUi.Label(question.Language) · @ClassroomUi.Label(question.Kind) · @question.CompanyType</p><p style="white-space:pre-wrap">@question.Content</p>
-            <div class="d-flex flex-wrap gap-1">@foreach (var tag in question.Tags) { <span class="badge bg-light text-dark border">@tag.Skill.Name</span> } <span class="badge @(question.IsActive ? "bg-success" : "bg-secondary")">@(question.IsActive ? "Đang dùng" : "Đã tắt")</span></div>
-        </div><div class="d-flex gap-2"><a asp-action="Question" asp-route-id="@question.Id" class="btn btn-outline-primary btn-sm">Sửa</a><form asp-action="DeleteQuestion" method="post"><input name="id" type="hidden" value="@question.Id" /><button class="btn btn-outline-danger btn-sm" type="submit">Xóa</button></form></div>
+        <div class="flex-grow-1"><p class="text-muted small mb-2">@question.Position.Name · @ClassroomUi.Label(question.Level) · @ClassroomUi.Label(question.Language) · @ClassroomUi.Label(question.Kind) · @question.CompanyType</p><p class="preserve">@question.Content</p>
+            <div class="d-flex flex-wrap gap-1">@foreach (var tag in question.Tags) { <span class="tag">@tag.Skill.Name</span> } <span class="pill @(question.IsActive ? "pill-ok" : "pill-off")">@(question.IsActive ? "Đang dùng" : "Đã tắt")</span></div>
+        </div><div class="d-flex gap-2"><a asp-action="Question" asp-route-id="@question.Id" class="btn btn-secondary btn-sm">Sửa</a><form asp-action="DeleteQuestion" method="post"><input name="id" type="hidden" value="@question.Id" /><button class="btn btn-danger btn-sm" type="submit">Xóa</button></form></div>
     </div></div></div>
 }
 @if (Model.Questions.Count == 0) { <p>Không tìm thấy câu hỏi phù hợp.</p> }
 <nav class="d-flex align-items-center justify-content-between mt-4" aria-label="Phân trang câu hỏi">
-    @if (Model.Page > 1) { <a asp-action="Questions" asp-route-search="@Model.Search" asp-route-positionId="@Model.PositionId" asp-route-page="@(Model.Page - 1)" class="btn btn-outline-secondary">← Trang trước</a> } else { <span></span> }
+    @if (Model.Page > 1) { <a asp-action="Questions" asp-route-search="@Model.Search" asp-route-positionId="@Model.PositionId" asp-route-page="@(Model.Page - 1)" class="btn btn-secondary">← Trang trước</a> } else { <span></span> }
     <span>Trang @Model.Page / @Model.TotalPages</span>
-    @if (Model.Page < Model.TotalPages) { <a asp-action="Questions" asp-route-search="@Model.Search" asp-route-positionId="@Model.PositionId" asp-route-page="@(Model.Page + 1)" class="btn btn-outline-secondary">Trang sau →</a> } else { <span></span> }
+    @if (Model.Page < Model.TotalPages) { <a asp-action="Questions" asp-route-search="@Model.Search" asp-route-positionId="@Model.PositionId" asp-route-page="@(Model.Page + 1)" class="btn btn-secondary">Trang sau →</a> } else { <span></span> }
 </nav>

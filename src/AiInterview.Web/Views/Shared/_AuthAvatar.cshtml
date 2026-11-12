@@ -1,0 +1,18 @@
+@* Decorative avatar on account pages: types on a laptop, looks up, glances left and right, then types again (CSS in site.css). *@
+<svg class="auth-avatar" viewBox="0 0 120 120" aria-hidden="true" focusable="false">
+    <defs><clipPath id="authAvatarClip"><circle cx="60" cy="60" r="55" /></clipPath></defs>
+    <circle class="av-bg" cx="60" cy="60" r="55" />
+    <g clip-path="url(#authAvatarClip)">
+        <path class="av-line" d="M22 118 C24 84 96 84 98 118" />
+        <g class="av-head">
+            <circle class="av-line" cx="60" cy="45" r="16" />
+            <g class="av-eyes"><circle cx="54" cy="45" r="1.9" /><circle cx="66" cy="45" r="1.9" /></g>
+        </g>
+        <rect class="av-laptop" x="33" y="78" width="54" height="32" rx="3" />
+        <circle class="av-logo" cx="60" cy="93" r="2.6" />
+        <line class="av-line" x1="20" y1="111" x2="100" y2="111" />
+        <ellipse class="av-hand av-hand-left" cx="36" cy="107" rx="6" ry="4" />
+        <ellipse class="av-hand av-hand-right" cx="84" cy="107" rx="6" ry="4" />
+    </g>
+    <circle class="av-ring" cx="60" cy="60" r="55" />
+</svg>

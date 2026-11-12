@@ -24,7 +24,7 @@
             <label for="cvFile" class="form-label">Tệp PDF hoặc DOCX</label>
             <input id="cvFile" name="cvFile" type="file" class="form-control mb-2" accept=".pdf,.docx" required aria-describedby="uploadHelp" />
             <p id="uploadHelp" class="form-text">Tối đa 5 MB. PDF phải có văn bản chọn được; chưa hỗ trợ PDF scan. Không lưu tệp gốc hoặc audio.</p>
-            <button class="btn btn-outline-primary" type="submit">Tải CV và trích xuất chữ</button>
+            <button class="btn btn-primary" type="submit">Tải CV và trích xuất chữ</button>
         </form>
         <hr class="my-4" /><h3 class="h5">Giữ lịch sử rõ ràng</h3>
         <p class="text-muted mb-0">CV và JD đã dùng trong buổi luyện được giữ nguyên phiên bản. Khi nội dung thay đổi, hãy thêm bản mới để các báo cáo cũ vẫn có đúng bối cảnh.</p>
@@ -35,12 +35,12 @@
     @if (Model.Cvs.Count == 0) { <p class="text-muted">Chưa có CV. Tải bản đầu tiên ở phía trên.</p> }
     else {
         <div class="table-responsive"><table class="table align-middle"><thead><tr><th>Tệp / phiên bản</th><th>Ngày thêm (UTC+7)</th><th>Phân tích AI</th><th><span class="visually-hidden">Thao tác</span></th></tr></thead><tbody>
-        @foreach (var cv in Model.Cvs) { <tr><td>@cv.FileName <small class="text-muted">#@cv.Id</small></td><td>@Ui.Time(cv.CreatedAt)</td><td><span class="badge @(cv.AnalysisJson is null ? "bg-secondary" : "bg-success")">@(cv.AnalysisJson is null ? "Chưa phân tích" : "Đã phân tích")</span></td><td><a asp-action="Cv" asp-route-id="@cv.Id" class="btn btn-sm btn-outline-primary">Xem CV</a></td></tr> }
+        @foreach (var cv in Model.Cvs) { <tr><td>@cv.FileName <small class="text-muted">#@cv.Id</small></td><td>@Ui.Time(cv.CreatedAt)</td><td><span class="pill @(cv.AnalysisJson is null ? "pill-off" : "pill-ok")">@(cv.AnalysisJson is null ? "Chưa phân tích" : "Đã phân tích")</span></td><td><a asp-action="Cv" asp-route-id="@cv.Id" class="btn btn-sm btn-secondary">Xem CV</a></td></tr> }
         </tbody></table></div>
     }
 </section>
 <section class="mt-4" aria-labelledby="jdHeading">
-    <div class="d-flex flex-wrap justify-content-between gap-3 mb-3"><h2 id="jdHeading" class="h4 mb-0">Tin tuyển dụng mục tiêu</h2><a asp-action="CreateJd" class="btn btn-sm btn-outline-primary">Dán JD mới</a></div>
+    <div class="d-flex flex-wrap justify-content-between gap-3 mb-3"><h2 id="jdHeading" class="h4 mb-0">Tin tuyển dụng mục tiêu</h2><a asp-action="CreateJd" class="btn btn-sm btn-secondary">Dán JD mới</a></div>
     @if (Model.Jds.Count == 0) { <p class="text-muted">Thêm mô tả công việc thật để so sánh yêu cầu với CV.</p> }
-    else { <div class="row g-3">@foreach (var jd in Model.Jds) { <div class="col-md-6 col-xl-4"><div class="card h-100"><div class="card-body"><h3 class="h5">@jd.Title</h3><p class="text-muted">@jd.Company · @Ui.Time(jd.CreatedAt)</p><a asp-action="Jd" asp-route-id="@jd.Id" class="btn btn-sm btn-outline-primary">Xem JD & khoảng trống</a></div></div></div> }</div> }
+    else { <div class="row g-3">@foreach (var jd in Model.Jds) { <div class="col-md-6 col-xl-4"><div class="card h-100"><div class="card-body"><h3 class="h5">@jd.Title</h3><p class="text-muted">@jd.Company · @Ui.Time(jd.CreatedAt)</p><a asp-action="Jd" asp-route-id="@jd.Id" class="btn btn-sm btn-secondary">Xem JD & khoảng trống</a></div></div></div> }</div> }
 </section>

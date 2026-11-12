@@ -1,31 +1,26 @@
 @model LoginModel
 @{ ViewData["Title"] = "Đăng nhập"; }
 <div class="auth-shell">
-    <aside class="auth-art">
-        <span class="eyebrow">CHÀO MỪNG BẠN TRỞ LẠI</span>
-        <h2>Lần luyện tiếp theo.<br />Một bước tiến mới.</h2>
-        <p>Mỗi câu trả lời là một cơ hội để hiểu rõ hơn những gì bạn biết và những gì cần luyện.</p>
-        <span class="small-pill align-self-start mt-4">INTERVIEWLAB / KHÔNG GIAN CỦA BẠN</span>
-    </aside>
-    <section class="auth-form">
+    <section class="auth-card">
         <h1>Đăng nhập</h1>
-        <p class="mb-4">Tiếp tục buổi luyện và xem tiến bộ của bạn.</p>
+        <p class="auth-lead">Tiếp tục buổi luyện và xem tiến bộ của bạn.</p>
+        <partial name="_AuthAvatar" />
         @if (TempData["Message"] is string message && !string.IsNullOrWhiteSpace(message))
         {
             <div class="alert alert-info" role="status">@message</div>
         }
-        <form asp-action="Login" method="post">
+        <form asp-action="Login" method="post" class="login-form">
             <div asp-validation-summary="ModelOnly" role="alert"></div>
             <input asp-for="ReturnUrl" type="hidden" />
-            <div class="mb-3"><label asp-for="Email" class="form-label">Email</label><input asp-for="Email" type="email" class="form-control" autocomplete="username" required /><span asp-validation-for="Email"></span></div>
-            <div class="mb-3"><label asp-for="Password" class="form-label">Mật khẩu</label><input asp-for="Password" class="form-control" autocomplete="current-password" required /><span asp-validation-for="Password"></span></div>
+            <div class="auth-field"><label asp-for="Email" class="form-label">Email</label><input asp-for="Email" type="email" class="form-control" autocomplete="username" required /><span asp-validation-for="Email"></span></div>
+            <div class="auth-field"><label asp-for="Password" class="form-label">Mật khẩu</label><input asp-for="Password" class="form-control" autocomplete="current-password" required /><span asp-validation-for="Password"></span></div>
             <label class="form-check mb-4"><input asp-for="RememberMe" class="form-check-input" /><span class="form-check-label">Ghi nhớ đăng nhập trên máy này</span></label>
-            <button class="btn btn-primary w-100" type="submit">Đăng nhập →</button>
+            <button class="btn btn-primary w-100" type="submit">Đăng nhập <span class="btn-arrow" aria-hidden="true">→</span></button>
         </form>
         <p class="form-text mt-3">Nếu website đã bật tính năng email, bạn sẽ nhận thông báo đăng nhập.</p>
         <nav class="auth-support" aria-label="Hỗ trợ đăng nhập">
-            <a class="btn btn-soft btn-sm" asp-action="CheckEmail">Nhận lại email xác nhận →</a>
+            <a class="btn btn-secondary btn-sm" asp-action="CheckEmail">Nhận lại email xác nhận <span class="btn-arrow" aria-hidden="true">→</span></a>
         </nav>
-        <div class="auth-switch"><span>Chưa có tài khoản?</span><a class="btn btn-soft btn-sm" asp-action="Register">Tạo tài khoản →</a></div>
+        <div class="auth-switch"><span>Chưa có tài khoản?</span><a class="btn btn-secondary btn-sm" asp-action="Register">Tạo tài khoản <span class="btn-arrow" aria-hidden="true">→</span></a></div>
     </section>
 </div>

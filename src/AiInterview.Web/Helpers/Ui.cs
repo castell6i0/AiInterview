@@ -14,4 +14,13 @@ public static class Ui
     };
     public static string Time(DateTimeOffset? value) => value?.ToOffset(TimeSpan.FromHours(7)).ToString("dd/MM/yyyy HH:mm") ?? "—";
     public static string[] Strings(string? value) => AiInterview.Application.Services.AiPrompts.Read<string[]>(value) ?? [];
+    // One score band for every score on screen (0–10; pass readiness 0–100 as value / 10). CSS: .score-{Band}.
+    public static (string Band, string Label) Score(decimal? score) => score switch
+    {
+        null => ("none", "Chưa có điểm"),
+        < 5m => ("low", "Cần cải thiện"),
+        < 7m => ("mid", "Khá"),
+        < 8.5m => ("good", "Tốt"),
+        _ => ("top", "Xuất sắc")
+    };
 }

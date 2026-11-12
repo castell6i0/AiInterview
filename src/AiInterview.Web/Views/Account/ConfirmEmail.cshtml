@@ -1,24 +1,19 @@
 @model ConfirmEmailResultModel
 @{ ViewData["Title"] = Model.Succeeded ? "Email đã được xác nhận" : "Chưa xác nhận được email"; }
 <div class="auth-shell">
-    <aside class="auth-art">
-        <span class="eyebrow">INTERVIEWLAB / TÀI KHOẢN CỦA BẠN</span>
-        <h2>@(Model.Succeeded ? "Sẵn sàng cho buổi luyện đầu tiên." : "Chỉ còn một bước xác nhận.")</h2>
-        <p>@(Model.Succeeded ? "Chọn vị trí ứng tuyển, trả lời theo cách của bạn và nhận phản hồi để tiến bộ." : "Bạn có thể yêu cầu một email mới để hoàn tất đăng ký.")</p>
-    </aside>
-    <section class="auth-form">
+    <section class="auth-card">
         @if (Model.Succeeded)
         {
             <h1>Email đã được xác nhận</h1>
             <p class="mb-4">Tài khoản của bạn đã sẵn sàng. Đăng nhập bằng email và mật khẩu đã đăng ký để bắt đầu.</p>
-            <a class="btn btn-primary w-100" asp-action="Login">Đăng nhập để bắt đầu →</a>
+            <a class="btn btn-primary w-100" asp-action="Login">Đăng nhập để bắt đầu <span class="btn-arrow" aria-hidden="true">→</span></a>
         }
         else
         {
             <h1>Liên kết chưa hợp lệ hoặc đã hết hạn</h1>
             <p class="mb-4">Yêu cầu một email xác nhận mới, rồi mở liên kết trong vòng 24 giờ.</p>
-            <a class="btn btn-primary w-100" asp-action="CheckEmail">Nhận lại email xác nhận →</a>
-            <div class="auth-switch"><span>Đã xác nhận trước đó?</span><a class="btn btn-soft btn-sm" asp-action="Login">Đăng nhập →</a></div>
+            <a class="btn btn-primary w-100" asp-action="CheckEmail">Nhận lại email xác nhận <span class="btn-arrow" aria-hidden="true">→</span></a>
+            <div class="auth-switch"><span>Đã xác nhận trước đó?</span><a class="btn btn-secondary btn-sm" asp-action="Login">Đăng nhập <span class="btn-arrow" aria-hidden="true">→</span></a></div>
         }
     </section>
 </div>

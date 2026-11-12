@@ -5,8 +5,8 @@
 <div class="row g-3">@foreach (var classroom in Model)
 {
     <div class="col-md-6 col-xl-4"><div class="card h-100"><div class="card-body">
-        <span class="badge @(classroom.IsActive ? "bg-success" : "bg-secondary") mb-2">@(classroom.IsActive ? "Đang mở" : "Đã đóng")</span>
-        <h2 class="h4">@classroom.Name</h2><p>@classroom.Members.Count sinh viên · Mã lớp <strong>@classroom.JoinCode</strong></p>
-        <a asp-action="Details" asp-route-id="@classroom.Id" class="btn btn-outline-primary">Mở dashboard lớp</a>
+        <span class="pill @(classroom.IsActive ? "pill-ok" : "pill-off") mb-2">@(classroom.IsActive ? "Đang mở" : "Đã đóng")</span>
+        <h2 class="h4">@classroom.Name</h2><p><span class="score-value">@classroom.Members.Count</span> sinh viên · Mã lớp <strong class="join-code">@classroom.JoinCode</strong></p>
+        <a asp-action="Details" asp-route-id="@classroom.Id" class="btn btn-secondary">Mở dashboard lớp</a>
     </div></div></div>
 }</div>

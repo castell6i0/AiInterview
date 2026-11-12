@@ -1,3 +1,84 @@
 @{ViewData["Title"]="Tự tin bước vào buổi phỏng vấn";}
-<section class="hero container"><div><span class="small-pill">DÀNH CHO SINH VIÊN IT VIỆT NAM</span><h1>Buổi phỏng vấn<br/>đầu tiên.<br/><em>Tự tin hơn.</em></h1><p>Luyện cùng một nhà tuyển dụng AI, nhận phản hồi cụ thể và biết mình cần cải thiện điều gì. Bắt đầu từ chính CV và công việc bạn muốn ứng tuyển.</p><div class="d-flex gap-3 flex-wrap mt-4"><a href="/Account/Register" class="btn btn-primary">Bắt đầu buổi luyện đầu tiên ↗</a><a href="/Account/Login" class="btn btn-outline-primary">Tôi đã có tài khoản</a></div><div class="d-flex gap-3 mt-4 small text-muted"><span>✓ Tiếng Việt & tiếng Anh</span><span>✓ Văn bản & giọng nói</span></div></div><div class="hero-orbit" aria-hidden="true"><div class="orbit-ring"></div><div class="orbit-ring"></div><div class="interview-preview"><div class="d-flex gap-3 align-items-center"><span class="ai-avatar">AI</span><div><div class="preview-label">KHÔNG GIAN LUYỆN TẬP</div><strong>Người phỏng vấn của bạn</strong></div></div><h3>Hiểu kiến thức.<br/>Kể câu chuyện của bạn.<br/>Trình bày rõ ràng.</h3><div class="wave">@for(var i=0;i<25;i++){<i></i>}</div><div class="small text-muted">Lắng nghe · Phản hồi · Cùng tiến bộ</div><hr/><span class="tag">Intern / Fresher</span><span class="tag">CV của bạn</span><span class="tag">JD thực tế</span></div></div></section>
-<section class="container pb-5"><div class="support-action-row mb-4"><span>Mới dùng InterviewLab?</span><a class="btn btn-soft btn-sm" href="/Home/Help">Xem hướng dẫn từng bước →</a></div><div class="row g-4"><div class="col-md-4"><div class="card h-100"><div class="card-body"><span class="step-dot">1</span><h2 class="h5 mt-3">Một buổi luyện vừa với bạn</h2><p class="mb-0">Chọn vị trí, ngôn ngữ và phong cách người phỏng vấn. Luyện kiến thức, hành vi hoặc trình bày dự án.</p></div></div></div><div class="col-md-4"><div class="card h-100"><div class="card-body"><span class="step-dot">2</span><h2 class="h5 mt-3">Biết vì sao mình được điểm đó</h2><p class="mb-0">Phản hồi theo năm tiêu chí, dẫn chứng từ câu trả lời và gợi ý cách diễn đạt tốt hơn.</p></div></div></div><div class="col-md-4"><div class="card h-100"><div class="card-body"><span class="step-dot">3</span><h2 class="h5 mt-3">Thấy tiến bộ qua từng lần</h2><p class="mb-0">Theo dõi điểm, nhận diện chủ đề cần luyện và tham gia bài tập cùng giảng viên.</p></div></div></div></div></section>
+<section class="landing-hero" aria-labelledby="landingTitle">
+    <div class="container landing-hero-inner" id="heroInner">
+        <span class="small-pill">DÀNH CHO SINH VIÊN IT VIỆT NAM</span>
+        <h1 id="landingTitle" class="wordmark">InterviewLab<span class="wordmark-dot" aria-hidden="true">.</span></h1>
+        <p class="landing-slogan"><span class="landing-prompt" aria-hidden="true">&gt;</span>Buổi phỏng vấn đầu tiên.<br /><em>Tự tin hơn.</em><span class="t-cursor" aria-hidden="true"></span></p>
+        <div class="landing-actions"><a href="/Account/Register" class="btn btn-primary">Bắt đầu buổi luyện đầu tiên <span class="btn-arrow" aria-hidden="true">→</span></a><a href="/Account/Login" class="btn btn-secondary">Tôi đã có tài khoản</a></div>
+        <a class="landing-scroll" href="#how"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-chevron-down" /></svg>Cuộn xuống để xem một buổi luyện diễn ra thế nào</a>
+    </div>
+</section>
+
+<section class="story" id="how" aria-labelledby="storyTitle">
+    <div class="container">
+        <header class="story-intro">
+            <span class="eyebrow">MỘT BUỔI LUYỆN · BỐN BƯỚC</span>
+            <h2 id="storyTitle">Một buổi luyện diễn ra thế nào</h2>
+            <p class="landing-lead">Luyện cùng một nhà tuyển dụng AI, nhận phản hồi cụ thể và biết mình cần cải thiện điều gì. Bắt đầu từ chính CV và công việc bạn muốn ứng tuyển.</p>
+            <div class="hero-meta"><span><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-check" /></svg>Tiếng Việt &amp; tiếng Anh</span><span><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-check" /></svg>Văn bản &amp; giọng nói</span></div>
+        </header>
+        <div class="story-grid">
+            <div class="story-steps">
+                <article class="story-step"><div class="story-card"><span class="story-index">01 / 04</span><h3>Một buổi luyện vừa với bạn</h3><p>Chọn vị trí, ngôn ngữ và phong cách người phỏng vấn. Luyện kiến thức, hành vi hoặc trình bày dự án.</p></div></article>
+                <article class="story-step"><div class="story-card"><span class="story-index">02 / 04</span><h3>Trả lời như một buổi phỏng vấn thật</h3><p>Gõ hoặc nói câu trả lời bằng tiếng Việt hoặc tiếng Anh. Người phỏng vấn có thể hỏi thêm để làm rõ ý; bản nháp được tự động lưu.</p></div></article>
+                <article class="story-step"><div class="story-card"><span class="story-index">03 / 04</span><h3>Biết vì sao mình được điểm đó</h3><p>Phản hồi theo năm tiêu chí, dẫn chứng từ câu trả lời và gợi ý cách diễn đạt tốt hơn.</p></div></article>
+                <article class="story-step"><div class="story-card"><span class="story-index">04 / 04</span><h3>Thấy tiến bộ qua từng lần</h3><p>Theo dõi điểm, nhận diện chủ đề cần luyện và tham gia bài tập cùng giảng viên.</p></div></article>
+            </div>
+            <div class="story-stage" aria-hidden="true">
+                <div class="terminal story-window">
+                    <div class="terminal-bar"><span class="terminal-dots"><i></i><i></i><i></i></span><span>buoi-luyen — backend-intern</span><span class="terminal-note">Ví dụ minh họa</span></div>
+                    <div class="story-progress"><i></i><i></i><i></i><i></i></div>
+                    <div class="story-scenes">
+                        <div class="scene">
+                            <dl class="scene-config">
+                                <div style="--i:0"><dt>vị trí</dt><dd>Backend Intern</dd></div>
+                                <div style="--i:1"><dt>ngôn ngữ</dt><dd>Tiếng Việt</dd></div>
+                                <div style="--i:2"><dt>nội dung</dt><dd>Kỹ thuật</dd></div>
+                                <div style="--i:3"><dt>người phỏng vấn</dt><dd>Tech lead nghiêm</dd></div>
+                                <div style="--i:4"><dt>số câu chính</dt><dd>5</dd></div>
+                                <div style="--i:5"><dt>cách trả lời</dt><dd>Giọng nói</dd></div>
+                            </dl>
+                            <p class="scene-foot" style="--i:6"><span class="t-prompt">&gt;</span>Vào phòng phỏng vấn</p>
+                        </div>
+                        <div class="scene">
+                            <p class="t-line t-meta scene-in" style="--i:0">Câu 1/5 · Kỹ thuật · REST API</p>
+                            <p class="t-line t-ai scene-in" style="--i:1"><span class="t-who">AI</span>API trả về 200 OK kèm {"error": "not found"} khi không tìm thấy sản phẩm. Có vấn đề gì, bạn sửa thế nào?</p>
+                            <div class="scene-wave scene-in" style="--i:2">@for (var i = 0; i < 28; i++) { <i style="--i:@i"></i> }</div>
+                            <p class="t-line t-user scene-in" style="--i:3"><span class="t-who">Bạn</span>Nên trả 404 Not Found. Client và cache dựa vào status code để xử lý; body chỉ mô tả lỗi.</p>
+                            <p class="t-line t-meta scene-in" style="--i:4">Tự động lưu bản nháp</p>
+                        </div>
+                        <div class="scene">
+                            <ul class="scene-scores">
+                                <li class="score-good" style="--i:0;--v:.8"><span>Độ đúng</span><b><i></i></b><em>8,0 · Tốt</em></li>
+                                <li class="score-mid" style="--i:1;--v:.65"><span>Độ sâu</span><b><i></i></b><em>6,5 · Khá</em></li>
+                                <li class="score-good" style="--i:2;--v:.75"><span>Cấu trúc</span><b><i></i></b><em>7,5 · Tốt</em></li>
+                                <li class="score-top" style="--i:3;--v:.85"><span>Liên quan</span><b><i></i></b><em>8,5 · Xuất sắc</em></li>
+                                <li class="score-good" style="--i:4;--v:.7"><span>Ngôn ngữ</span><b><i></i></b><em>7,0 · Tốt</em></li>
+                            </ul>
+                            <blockquote class="quote scene-in" style="--i:5">“Client và cache dựa vào status code để xử lý”</blockquote>
+                        </div>
+                        <div class="scene">
+                            <svg class="scene-chart" viewBox="0 0 300 150" role="presentation">
+                                <line class="axis" x1="20" y1="130" x2="290" y2="130" /><line class="grid" x1="20" y1="70" x2="290" y2="70" /><line class="grid" x1="20" y1="10" x2="290" y2="10" />
+                                <polyline class="trend" points="30,67.6 95,56.8 160,48.4 225,41.2 285,26.8" pathLength="100" />
+                                <circle cx="30" cy="67.6" r="3.5" style="--i:0" /><circle cx="95" cy="56.8" r="3.5" style="--i:1" /><circle cx="160" cy="48.4" r="3.5" style="--i:2" /><circle cx="225" cy="41.2" r="3.5" style="--i:3" /><circle cx="285" cy="26.8" r="3.5" style="--i:4" />
+                                <text x="30" y="146">buổi 1</text><text x="285" y="146" text-anchor="end">buổi 5</text><text x="30" y="55" class="val" text-anchor="middle">5,2</text><text x="276" y="22" class="val" text-anchor="end">8,6</text>
+                            </svg>
+                            <ul class="scene-skills scene-in" style="--i:5"><li class="score-mid">SQL 6,3 · Khá</li><li class="score-good">REST API 7,4 · Tốt</li><li class="score-top">Bảo mật 8,6 · Xuất sắc</li></ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="container landing-cta" aria-labelledby="ctaTitle">
+    <div class="landing-cta-inner">
+        <h2 id="ctaTitle">Sẵn sàng cho buổi đầu tiên?</h2>
+        <p>Tạo tài khoản, kết nối AI rồi bắt đầu với 5 câu hỏi để làm quen.</p>
+        <div class="landing-actions"><a href="/Account/Register" class="btn btn-primary">Bắt đầu buổi luyện đầu tiên <span class="btn-arrow" aria-hidden="true">→</span></a><a href="/Account/Login" class="btn btn-secondary">Tôi đã có tài khoản</a></div>
+        <p class="small mt-4 mb-0">Mới dùng InterviewLab? <a href="/Home/Help">Xem hướng dẫn từng bước</a> — từ tạo tài khoản, kết nối AI đến đọc báo cáo.</p>
+    </div>
+</section>
+@section Scripts { <script src="~/js/story.js" asp-append-version="true"></script> }

@@ -1,37 +1,31 @@
 @model RegisterModel
 @{ ViewData["Title"] = "Tạo tài khoản"; var emailConfigured = ViewData["EmailConfigured"] is true; }
 <div class="auth-shell">
-    <aside class="auth-art">
-        <span class="eyebrow">BẮT ĐẦU TỪ HÔM NAY</span>
-        <h2>Chuẩn bị tốt hơn.<br />Kể câu chuyện<br />của bạn rõ hơn.</h2>
-        <p>Tạo tài khoản sinh viên để lưu buổi luyện, nhận phản hồi và theo dõi tiến bộ.</p>
-        <ol class="ps-3 mt-3"><li class="mb-2">Điền thông tin của bạn.</li><li class="mb-2">Xác nhận email nếu website yêu cầu.</li><li>Đăng nhập và bắt đầu luyện phỏng vấn.</li></ol>
-        <p class="small mt-3 mb-2">Bạn có thể dùng kết nối AI có sẵn hoặc thêm key cá nhân ngay trên web.</p>
-        <a class="btn btn-soft btn-sm align-self-start" asp-controller="Home" asp-action="Help">Xem hướng dẫn sử dụng →</a>
-        <p class="small mt-4">Tài khoản giảng viên được quản trị viên cấp quyền.</p>
-    </aside>
-    <section class="auth-form">
+    <section class="auth-card">
         <h1>Tạo tài khoản</h1>
-        <p class="mb-4">Nhập thông tin của bạn để tạo tài khoản trên website.</p>
+        <p class="auth-lead">Tài khoản sinh viên để lưu buổi luyện, nhận phản hồi và theo dõi tiến bộ.</p>
+        <partial name="_AuthAvatar" />
         @if (!emailConfigured)
         {
             <div class="alert alert-info" role="status">Website chưa bật gửi email xác nhận. Bạn vẫn có thể đăng ký và đăng nhập ngay; email của bạn sẽ chưa được xác minh.</div>
         }
         <form asp-action="Register" method="post">
             <div asp-validation-summary="ModelOnly" role="alert"></div>
-            <div class="mb-3"><label asp-for="FullName" class="form-label">Họ và tên</label><input asp-for="FullName" class="form-control" autocomplete="name" required /><span asp-validation-for="FullName"></span></div>
-            <div class="mb-3"><label asp-for="Email" class="form-label">Email</label><input asp-for="Email" type="email" class="form-control" autocomplete="username" aria-describedby="emailHelp" required /><div class="form-text" id="emailHelp">@(emailConfigured ? "Bạn cần mở email này để hoàn tất đăng ký." : "Dùng email của bạn để đăng nhập. Hiện tại website chưa xác minh email.")</div><span asp-validation-for="Email"></span></div>
-            <div class="mb-3"><label asp-for="Password" class="form-label">Mật khẩu</label><input asp-for="Password" class="form-control" autocomplete="new-password" minlength="10" aria-describedby="passwordHelp" required /><div class="form-text" id="passwordHelp">Ít nhất 10 ký tự, có chữ hoa, chữ thường, số và ký tự đặc biệt.</div><span asp-validation-for="Password"></span></div>
-            <div class="mb-4"><label asp-for="ConfirmPassword" class="form-label">Nhập lại mật khẩu</label><input asp-for="ConfirmPassword" class="form-control" autocomplete="new-password" required /><span asp-validation-for="ConfirmPassword"></span></div>
-            <button class="btn btn-primary w-100" type="submit">@(emailConfigured ? "Tạo tài khoản & gửi email xác nhận →" : "Tạo tài khoản →")</button>
+            <div class="auth-field"><label asp-for="FullName" class="form-label">Họ và tên</label><input asp-for="FullName" class="form-control" autocomplete="name" required /><span asp-validation-for="FullName"></span></div>
+            <div class="auth-field"><label asp-for="Email" class="form-label">Email</label><input asp-for="Email" type="email" class="form-control" autocomplete="username" aria-describedby="emailHelp" required /><div class="form-text" id="emailHelp">@(emailConfigured ? "Bạn cần mở email này để hoàn tất đăng ký." : "Dùng email của bạn để đăng nhập. Hiện tại website chưa xác minh email.")</div><span asp-validation-for="Email"></span></div>
+            <div class="auth-field"><label asp-for="Password" class="form-label">Mật khẩu</label><input asp-for="Password" class="form-control" autocomplete="new-password" minlength="10" aria-describedby="passwordHelp" required /><div class="form-text" id="passwordHelp">Ít nhất 10 ký tự, có chữ hoa, chữ thường, số và ký tự đặc biệt.</div><span asp-validation-for="Password"></span></div>
+            <div class="auth-field mb-4"><label asp-for="ConfirmPassword" class="form-label">Nhập lại mật khẩu</label><input asp-for="ConfirmPassword" class="form-control" autocomplete="new-password" required /><span asp-validation-for="ConfirmPassword"></span></div>
+            <button class="btn btn-primary w-100" type="submit">@(emailConfigured ? "Tạo tài khoản & gửi email xác nhận" : "Tạo tài khoản") <span class="btn-arrow" aria-hidden="true">→</span></button>
         </form>
+        <p class="form-text mt-3">Tài khoản giảng viên được quản trị viên cấp quyền.</p>
         <nav class="auth-support" aria-label="Hỗ trợ đăng ký">
             @if (emailConfigured)
             {
-                <a class="btn btn-soft btn-sm" asp-action="CheckEmail">Chưa nhận được email? Nhận lại thư →</a>
+                <a class="btn btn-secondary btn-sm" asp-action="CheckEmail">Chưa nhận được email? Nhận lại thư <span class="btn-arrow" aria-hidden="true">→</span></a>
             }
-            <a class="btn btn-soft btn-sm" asp-controller="Home" asp-action="Privacy">Dữ liệu &amp; quyền riêng tư</a>
+            <a class="btn btn-secondary btn-sm" asp-controller="Home" asp-action="Help">Xem hướng dẫn sử dụng <span class="btn-arrow" aria-hidden="true">→</span></a>
+            <a class="btn btn-secondary btn-sm" asp-controller="Home" asp-action="Privacy">Dữ liệu &amp; quyền riêng tư</a>
         </nav>
-        <div class="auth-switch"><span>Đã có tài khoản?</span><a class="btn btn-soft btn-sm" asp-action="Login">Đăng nhập →</a></div>
+        <div class="auth-switch"><span>Đã có tài khoản?</span><a class="btn btn-secondary btn-sm" asp-action="Login">Đăng nhập <span class="btn-arrow" aria-hidden="true">→</span></a></div>
     </section>
 </div>
