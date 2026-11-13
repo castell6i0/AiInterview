@@ -230,6 +230,13 @@ public class ClassMember
     public string StudentId { get; set; } = "";
     public DateTimeOffset JoinedAt { get; set; } = DateTimeOffset.UtcNow;
 }
+/// <summary>A student the lecturer removed from a class; blocks rejoining with the join code.</summary>
+public class ClassBan
+{
+    public int ClassId { get; set; }
+    public string StudentId { get; set; } = "";
+    public DateTimeOffset BannedAt { get; set; } = DateTimeOffset.UtcNow;
+}
 public class Assignment
 {
     public int Id { get; set; }

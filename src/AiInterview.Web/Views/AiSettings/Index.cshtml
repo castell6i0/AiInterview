@@ -121,7 +121,7 @@
                 <div><strong>Google Gemini</strong><span>@(Model.GeminiKeyUnavailable ? "Không đọc được key đã lưu · cần nhập lại" : Model.HasGeminiKey ? "Đã lưu key cá nhân" : "Chưa lưu key cá nhân")</span></div>
                 @if (Model.HasGeminiKey || Model.GeminiKeyUnavailable)
                 {
-                    <form asp-controller="AiSettings" asp-action="DeleteKey" method="post" data-preserve-on-limit data-rate-group="ai-settings"><input type="hidden" name="ReturnUrl" value="@Model.ReturnUrl" /><input type="hidden" name="Provider" value="Gemini" /><button type="submit" class="btn btn-sm btn-danger" aria-label="Xóa key cá nhân Gemini">Xóa key</button></form>
+                    <form asp-controller="AiSettings" asp-action="DeleteKey" method="post" data-preserve-on-limit data-rate-group="ai-settings"><input type="hidden" name="ReturnUrl" value="@Model.ReturnUrl" /><input type="hidden" name="Provider" value="Gemini" /><button type="submit" class="btn btn-sm btn-danger" aria-label="Xóa key cá nhân Gemini"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-trash" /></svg>Xóa key</button></form>
                 }
             </div>
             @if (Model.HasOpenAiKey || Model.OpenAiKeyUnavailable || selectedIsOpenAi)
@@ -130,7 +130,7 @@
                 <div><strong>OpenAI</strong><span>@(Model.OpenAiKeyUnavailable ? "Không đọc được key đã lưu · cần nhập lại" : Model.HasOpenAiKey ? "Đã lưu key cá nhân" : "Chưa lưu key cá nhân")</span></div>
                 @if (Model.HasOpenAiKey || Model.OpenAiKeyUnavailable)
                 {
-                    <form asp-controller="AiSettings" asp-action="DeleteKey" method="post" data-preserve-on-limit data-rate-group="ai-settings"><input type="hidden" name="ReturnUrl" value="@Model.ReturnUrl" /><input type="hidden" name="Provider" value="OpenAI" /><button type="submit" class="btn btn-sm btn-danger" aria-label="Xóa key cá nhân OpenAI">Xóa key</button></form>
+                    <form asp-controller="AiSettings" asp-action="DeleteKey" method="post" data-preserve-on-limit data-rate-group="ai-settings"><input type="hidden" name="ReturnUrl" value="@Model.ReturnUrl" /><input type="hidden" name="Provider" value="OpenAI" /><button type="submit" class="btn btn-sm btn-danger" aria-label="Xóa key cá nhân OpenAI"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-trash" /></svg>Xóa key</button></form>
                 }
             </div>
             }

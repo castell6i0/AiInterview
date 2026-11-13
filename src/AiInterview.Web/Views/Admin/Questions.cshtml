@@ -1,18 +1,18 @@
 @model AdminQuestionsVm
 @{ ViewData["Title"] = "Ngân hàng câu hỏi"; }
-<div class="page-heading"><div><h1>Ngân hàng câu hỏi</h1></div><a asp-action="Question" class="btn btn-primary">Thêm câu hỏi</a></div>
+<div class="page-heading"><div><h1>Ngân hàng câu hỏi</h1></div></div>
 @await Html.PartialAsync("_Alerts")
-<form asp-action="Questions" method="get" class="filter-bar row g-2 mx-0 mb-4">
-    <div class="col-md-6"><label for="search" class="visually-hidden">Nội dung, kỹ năng hoặc loại công ty</label><input id="search" name="search" value="@Model.Search" class="form-control" placeholder="Nội dung, kỹ năng hoặc loại công ty" maxlength="200" /></div>
-    <div class="col-md-4"><label asp-for="PositionId" class="visually-hidden">Vị trí</label><select asp-for="PositionId" asp-items="@(new SelectList(Model.Positions, "Id", "Name"))" class="form-select"><option value="">Tất cả vị trí</option></select></div>
-    <div class="col-md-2"><button class="btn btn-secondary w-100" type="submit">Lọc câu hỏi</button></div>
+<form asp-action="Questions" method="get" class="filter-bar toolbar mb-4">
+    <label for="search" class="visually-hidden">Nội dung, kỹ năng hoặc loại công ty</label><input id="search" name="search" value="@Model.Search" class="form-control toolbar-grow" placeholder="Nội dung, kỹ năng hoặc loại công ty" maxlength="200" />
+    <label asp-for="PositionId" class="visually-hidden">Vị trí</label><select asp-for="PositionId" asp-items="@(new SelectList(Model.Positions, "Id", "Name"))" class="form-select toolbar-select"><option value="">Tất cả vị trí</option></select>
+    <button class="btn btn-secondary" type="submit">Lọc câu hỏi</button><a asp-action="Question" class="btn btn-primary">Thêm câu hỏi</a>
 </form>
 @foreach (var question in Model.Questions)
 {
     <div class="card mb-3"><div class="card-body"><div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
         <div class="flex-grow-1"><p class="text-muted small mb-2">@question.Position.Name · @ClassroomUi.Label(question.Level) · @ClassroomUi.Label(question.Language) · @ClassroomUi.Label(question.Kind) · @question.CompanyType</p><p class="preserve">@question.Content</p>
             <div class="d-flex flex-wrap gap-1">@foreach (var tag in question.Tags) { <span class="tag">@tag.Skill.Name</span> } <span class="pill @(question.IsActive ? "pill-ok" : "pill-off")">@(question.IsActive ? "Đang dùng" : "Đã tắt")</span></div>
-        </div><div class="d-flex gap-2"><a asp-action="Question" asp-route-id="@question.Id" class="btn btn-secondary btn-sm">Sửa</a><form asp-action="DeleteQuestion" method="post"><input name="id" type="hidden" value="@question.Id" /><button class="btn btn-danger btn-sm" type="submit">Xóa</button></form></div>
+        </div><div class="row-actions"><a asp-action="Question" asp-route-id="@question.Id" class="btn btn-secondary btn-sm" aria-label="Sửa câu hỏi #@question.Id"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-edit" /></svg>Sửa</a><form asp-action="DeleteQuestion" method="post"><input name="id" type="hidden" value="@question.Id" /><button class="btn btn-danger btn-sm" type="submit" aria-label="Xóa câu hỏi #@question.Id"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-trash" /></svg>Xóa</button></form></div>
     </div></div></div>
 }
 @if (Model.Questions.Count == 0) { <p>Không tìm thấy câu hỏi phù hợp.</p> }

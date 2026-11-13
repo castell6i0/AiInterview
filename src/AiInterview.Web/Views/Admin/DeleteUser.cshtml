@@ -1,6 +1,6 @@
 @model DeleteUserVm
 @{ ViewData["Title"] = "Xóa người dùng"; }
-<a asp-action="Users" class="page-back">← Quản lý người dùng</a>
+<a asp-action="Users" class="btn btn-secondary btn-back"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-back" /></svg>Quản lý người dùng</a>
 <h1>Xóa người dùng</h1>
 @await Html.PartialAsync("_Alerts")
 <div class="card form-narrow"><div class="card-body">
@@ -15,7 +15,7 @@
         {
             <div class="alert alert-warning" role="alert">Bạn có chắc muốn xóa tài khoản này? Thao tác này không thể hoàn tác.</div>
             <div class="d-flex flex-wrap gap-2">
-                <button class="btn btn-danger" type="submit">Xác nhận xóa người dùng</button>
+                <button class="btn btn-danger" type="submit"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-trash" /></svg>Xác nhận xóa người dùng</button>
                 <a asp-action="Users" class="btn btn-secondary">Hủy</a>
             </div>
         }

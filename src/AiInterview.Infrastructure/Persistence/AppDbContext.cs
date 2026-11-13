@@ -26,6 +26,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
     public DbSet<QuestionSkillTag> QuestionSkillTags => Set<QuestionSkillTag>();
     public DbSet<Classroom> Classes => Set<Classroom>();
     public DbSet<ClassMember> ClassMembers => Set<ClassMember>();
+    public DbSet<ClassBan> ClassBans => Set<ClassBan>();
     public DbSet<Assignment> Assignments => Set<Assignment>();
     public DbSet<AssignmentSubmission> AssignmentSubmissions => Set<AssignmentSubmission>();
     public DbSet<LecturerComment> LecturerComments => Set<LecturerComment>();
@@ -196,6 +197,12 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
         model.Entity<ClassMember>(e =>
         {
             e.HasKey(x => new { x.ClassId, x.StudentId });
+            e.HasOne<ApplicationUser>().WithMany().HasForeignKey(x => x.StudentId);
+        });
+        model.Entity<ClassBan>(e =>
+        {
+            e.HasKey(x => new { x.ClassId, x.StudentId });
+            e.HasOne<Classroom>().WithMany().HasForeignKey(x => x.ClassId);
             e.HasOne<ApplicationUser>().WithMany().HasForeignKey(x => x.StudentId);
         });
         model.Entity<Assignment>(e =>

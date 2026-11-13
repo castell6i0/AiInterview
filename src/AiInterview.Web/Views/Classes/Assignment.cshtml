@@ -1,6 +1,6 @@
 @model AssignmentDetailVm
 @{ ViewData["Title"] = Model.Assignment.Title; }
-<a asp-action="Details" asp-route-id="@Model.Assignment.ClassId" class="page-back">← @Model.Assignment.Class.Name</a>
+<a asp-action="Details" asp-route-id="@Model.Assignment.ClassId" class="btn btn-secondary btn-back"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-back" /></svg>@Model.Assignment.Class.Name</a>
 <div class="page-heading"><div><h1>@Model.Assignment.Title</h1><p>@Model.Assignment.Position.Name · @ClassroomUi.Label(Model.Assignment.Level) · @ClassroomUi.Label(Model.Assignment.Language) · @ClassroomUi.Label(Model.Assignment.Kind) · @Model.Assignment.QuestionCount câu chính</p></div>@if (Model.Assignment.Class.IsActive) { <a href="/Interviews/Create?assignmentId=@Model.Assignment.Id" class="btn btn-primary">Bắt đầu luyện cho bài này</a> }</div>
 @if (TempData["ClassMessage"] is string message) { <div class="alert alert-success" role="status">@message</div> }
 @if (TempData["ClassError"] is string error) { <div class="alert alert-danger" role="alert">@error</div> }

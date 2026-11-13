@@ -1,6 +1,6 @@
 @model CreateJdModel
 @{ ViewData["Title"] = "Thêm tin tuyển dụng"; }
-<a asp-action="Index" class="page-back">← Hồ sơ & mục tiêu</a>
+<a asp-action="Index" class="btn btn-secondary btn-back"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-back" /></svg>Hồ sơ & mục tiêu</a>
 <div class="page-heading"><div><h1>Thêm tin tuyển dụng</h1><p>Dán JD thật để luyện đúng yêu cầu của công việc bạn quan tâm.</p></div></div>
 <div class="card"><div class="card-body p-4"><form asp-action="CreateJd" method="post">
     <div asp-validation-summary="All" class="text-danger" role="alert"></div>

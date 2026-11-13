@@ -13,15 +13,37 @@ public sealed class AdminService(AppDbContext db, UserManager<ApplicationUser> u
 {
     private static readonly string[] CriterionCodes = ["accuracy", "depth", "structure", "relevance", "language"];
 
-    public async Task<AdminIndexVm> IndexAsync() => new()
+    public async Task<AdminIndexVm> IndexAsync()
     {
-        UserCount = await db.Users.CountAsync(), SessionCount = await db.Sessions.CountAsync(), QuestionCount = await db.Questions.CountAsync(),
-        AiRequestCount = await db.AiRequestLogs.CountAsync(),
-        ReportedInputTokens = await db.AiRequestLogs.SumAsync(l => (long?)l.InputTokens) ?? 0,
-        ReportedOutputTokens = await db.AiRequestLogs.SumAsync(l => (long?)l.OutputTokens) ?? 0,
-        KnownEstimatedCostUsd = await db.AiRequestLogs.SumAsync(l => l.EstimatedCostUsd) ?? 0,
-        UnknownCostCount = await db.AiRequestLogs.CountAsync(l => l.EstimatedCostUsd == null)
-    };
+        var model = new AdminIndexVm
+        {
+            UserCount = await db.Users.CountAsync(), SessionCount = await db.Sessions.CountAsync(), QuestionCount = await db.Questions.CountAsync(),
+            AiRequestCount = await db.AiRequestLogs.CountAsync(),
+            ReportedInputTokens = await db.AiRequestLogs.SumAsync(l => (long?)l.InputTokens) ?? 0,
+            ReportedOutputTokens = await db.AiRequestLogs.SumAsync(l => (long?)l.OutputTokens) ?? 0,
+            KnownEstimatedCostUsd = await db.AiRequestLogs.SumAsync(l => l.EstimatedCostUsd) ?? 0,
+            UnknownCostCount = await db.AiRequestLogs.CountAsync(l => l.EstimatedCostUsd == null)
+        };
+        // Last 14 days in Vietnam time (UTC+7), grouped in memory: only timestamps are loaded.
+        var vn = TimeSpan.FromHours(7);
+        var firstDay = DateTimeOffset.UtcNow.ToOffset(vn).Date.AddDays(-13);
+        var since = new DateTimeOffset(firstDay, vn);
+        var sessionDays = (await db.Sessions.Where(s => s.CreatedAt >= since).Select(s => s.CreatedAt).ToListAsync()).Select(x => x.ToOffset(vn).Date).ToList();
+        var aiDays = (await db.AiRequestLogs.Where(l => l.CreatedAt >= since).Select(l => l.CreatedAt).ToListAsync()).Select(x => x.ToOffset(vn).Date).ToList();
+        for (var day = firstDay; day <= firstDay.AddDays(13); day = day.AddDays(1))
+        {
+            model.DayLabels.Add(day.ToString("dd/MM"));
+            model.SessionsPerDay.Add(sessionDays.Count(d => d == day));
+            model.AiCallsPerDay.Add(aiDays.Count(d => d == day));
+        }
+        var roles = await (from ur in db.UserRoles join r in db.Roles on ur.RoleId equals r.Id group ur by r.Name into g select new { g.Key, Count = g.Count() }).ToListAsync();
+        model.UsersByRole = new[] { Roles.Student, Roles.Lecturer, Roles.Admin }.Select(r => roles.FirstOrDefault(x => x.Key == r)?.Count ?? 0).ToList();
+        // Same cut-offs as Ui.Score: <5 cần cải thiện, <7 khá, <8.5 tốt, còn lại xuất sắc.
+        var scores = db.Evaluations.Where(e => !e.IsProvisional);
+        model.ScoreBands = [await scores.CountAsync(e => e.OverallScore < 5m), await scores.CountAsync(e => e.OverallScore >= 5m && e.OverallScore < 7m),
+            await scores.CountAsync(e => e.OverallScore >= 7m && e.OverallScore < 8.5m), await scores.CountAsync(e => e.OverallScore >= 8.5m)];
+        return model;
+    }
 
     public async Task<AdminUsersVm> UsersAsync(string? search)
     {
@@ -147,7 +169,7 @@ public sealed class AdminService(AppDbContext db, UserManager<ApplicationUser> u
         var id = user.Id;
         if (await db.CvProfiles.AnyAsync(x => x.StudentId == id) || await db.JobDescriptions.AnyAsync(x => x.StudentId == id)
             || await db.Sessions.AnyAsync(x => x.StudentId == id) || await db.AiRequestLogs.AnyAsync(x => x.UserId == id)
-            || await db.Classes.AnyAsync(x => x.LecturerId == id) || await db.ClassMembers.AnyAsync(x => x.StudentId == id)
+            || await db.Classes.AnyAsync(x => x.LecturerId == id) || await db.ClassMembers.AnyAsync(x => x.StudentId == id) || await db.ClassBans.AnyAsync(x => x.StudentId == id)
             || await db.AssignmentSubmissions.AnyAsync(x => x.StudentId == id) || await db.LecturerComments.AnyAsync(x => x.LecturerId == id))
             return "Tài khoản đã có CV, JD, lịch sử luyện tập hoặc dữ liệu lớp học nên không thể xóa. Hãy khóa tài khoản để bảo toàn lịch sử.";
         return null;

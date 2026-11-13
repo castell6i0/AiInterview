@@ -87,6 +87,30 @@ Solution liệt kê Web trước các project thư viện. Với solution đã m
 
 Không có mật khẩu mặc định trong source. Nếu chưa đặt `Seed:Password`, hệ thống vẫn tạo role và danh mục nhưng **không tạo tài khoản mẫu**. Đăng ký công khai chỉ tạo sinh viên. Seed không đổi mật khẩu tài khoản đã tồn tại, không nâng quyền một tài khoản cũ trùng email và không ghi đè các câu hỏi đã được quản trị viên sửa.
 
+#### Đặt và đổi mật khẩu tài khoản mẫu
+
+Mỗi máy dùng database LocalDB riêng. Ba tài khoản mẫu được tạo ở **lần chạy Development đầu tiên trên máy đó**, với mật khẩu lấy từ `Seed:Password` trong user-secrets của chính máy đó. Mật khẩu không nằm trong Git, nên máy khác **không** tự có mật khẩu của máy bạn.
+
+**Máy mới — đặt mật khẩu trước lần chạy đầu tiên** (chạy tại thư mục solution), rồi chạy ứng dụng:
+
+```powershell
+.\Configure.ps1
+# hoặc
+dotnet user-secrets set "Seed:Password" "MAT_KHAU_CUA_BAN" --project src/AiInterview.Web
+```
+
+Mật khẩu cần ít nhất 10 ký tự, có chữ hoa, chữ thường, số và ký tự đặc biệt. Xem lại giá trị đã đặt:
+
+```powershell
+dotnet user-secrets list --project src/AiInterview.Web
+```
+
+**Đổi mật khẩu sau khi tài khoản đã được tạo:** đổi `Seed:Password` lúc này **không có tác dụng**, vì seed không bao giờ sửa mật khẩu của tài khoản đã tồn tại. Ứng dụng hiện chưa có trang đổi mật khẩu. Cách làm:
+
+- Đăng nhập bằng mật khẩu cũ của máy đó. Nếu quên, chạy `dotnet user-secrets list` ở trên: nếu `Seed:Password` chưa bị đổi từ lúc tài khoản được tạo thì đó chính là mật khẩu.
+- Tạo tài khoản mới với mật khẩu tự chọn: đăng nhập quản trị → **Quản lý người dùng** → **Thêm người dùng**, chọn vai trò Quản trị hoặc Giảng viên.
+- Nhập sai mật khẩu 5 lần liên tiếp, tài khoản bị khóa 10 phút rồi tự mở lại.
+
 Tài khoản tự đăng ký mới **chỉ phải xác nhận email khi SMTP và địa chỉ website công khai đã được cấu hình hợp lệ**. Nếu chưa cấu hình email, người dùng vẫn đăng ký và đăng nhập được bằng email/mật khẩu ngay trên website, nhưng **địa chỉ email chưa được xác minh** (không tự đánh dấu `EmailConfirmed=true`). Khi cấu hình SMTP, các đăng ký mới quay về luồng xác nhận email thông thường. Tài khoản cũ và tài khoản cấp bởi quản trị viên/seed giữ cách đăng nhập hiện có.
 
 Profile chạy mặc định là `Development`: tự áp dụng migration và seed. Trên database mới, seed gồm 3 role, 7 vị trí, 63 câu hỏi, các tag kỹ năng và rubric 5 tiêu chí. Mở lại ứng dụng không tạo thêm các bản ghi seed trùng. Chỉ tài khoản demo bị giới hạn ở Development; role/danh mục cũng có thể seed ở môi trường khác nếu người vận hành chủ động bật `Seed:Enabled`.

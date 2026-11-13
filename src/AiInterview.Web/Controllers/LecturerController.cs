@@ -72,6 +72,14 @@ public sealed class LecturerController(LecturerService lecturers) : Controller
     }
 
     [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> Kick(int classId, string studentId)
+    {
+        try { await lecturers.KickAsync(classId, studentId, UserId); TempData["ClassMessage"] = "Đã mời sinh viên ra khỏi lớp. Sinh viên không thể dùng mã để vào lại; bài đã nộp vẫn được giữ."; }
+        catch (InvalidOperationException ex) { TempData["ClassError"] = ex.Message; }
+        return RedirectToAction(nameof(Details), new { id = classId });
+    }
+
+    [HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> Comment(LecturerCommentVm model)
     {
         if (!ModelState.IsValid) { TempData["ClassError"] = "Nhận xét cần có nội dung, tối đa 3.000 ký tự."; return RedirectToAction(nameof(Details), new { id = model.ClassId }); }
@@ -79,6 +87,7 @@ public sealed class LecturerController(LecturerService lecturers) : Controller
         {
             var studentId = await lecturers.AddCommentAsync(model, UserId);
             TempData["ClassMessage"] = "Đã lưu nhận xét cho sinh viên.";
+            if (await lecturers.StudentAsync(model.ClassId, studentId, UserId) is null) return RedirectToAction(nameof(Details), new { id = model.ClassId });
             return RedirectToAction(nameof(Student), new { classId = model.ClassId, studentId });
         }
         catch (InvalidOperationException ex) { TempData["ClassError"] = ex.Message; return RedirectToAction(nameof(Details), new { id = model.ClassId }); }

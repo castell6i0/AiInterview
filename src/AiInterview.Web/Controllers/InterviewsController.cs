@@ -110,12 +110,14 @@ public sealed class InterviewsController(InterviewService interviews, AppDbConte
         var isLecturer = User.IsInRole(Roles.Lecturer);
         // Authorize with a scalar projection before loading turns, snapshots and evaluations.
         var owner = await db.Sessions.Where(s => s.Id == id && (s.StudentId == UserId || isLecturer &&
-            db.Classes.Any(c => c.LecturerId == UserId && c.Members.Any(m => m.StudentId == s.StudentId))))
+            (db.Classes.Any(c => c.LecturerId == UserId && c.Members.Any(m => m.StudentId == s.StudentId))
+                || db.AssignmentSubmissions.Any(x => x.SessionId == s.Id && x.Assignment.Class.LecturerId == UserId))))
             .Select(s => s.StudentId).SingleOrDefaultAsync(ct);
         if (owner is null) return NotFound();
         // Repeat the predicate on the full read so revoking membership between reads is safe.
         var session = await interviews.FullSessions().AsNoTracking().SingleOrDefaultAsync(s => s.Id == id &&
-            (s.StudentId == UserId || isLecturer && db.Classes.Any(c => c.LecturerId == UserId && c.Members.Any(m => m.StudentId == s.StudentId))), ct);
+            (s.StudentId == UserId || isLecturer && (db.Classes.Any(c => c.LecturerId == UserId && c.Members.Any(m => m.StudentId == s.StudentId))
+                || db.AssignmentSubmissions.Any(x => x.SessionId == s.Id && x.Assignment.Class.LecturerId == UserId))), ct);
         if (session is null) return NotFound();
         if (session.Evaluation is null)
         {

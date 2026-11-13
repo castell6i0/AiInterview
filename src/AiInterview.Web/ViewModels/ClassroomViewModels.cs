@@ -18,14 +18,14 @@ public sealed class JoinClassVm
 public sealed class AssignmentEditVm
 {
     public int ClassId { get; set; }
-    [Required, StringLength(160), Display(Name = "Tên bài tập")] public string Title { get; set; } = "";
-    [Required, StringLength(4000), Display(Name = "Hướng dẫn")] public string Instructions { get; set; } = "";
+    [Required(ErrorMessage = "Chưa nhập tên bài tập."), StringLength(160, ErrorMessage = "Tên bài tập tối đa 160 ký tự."), Display(Name = "Tên bài tập")] public string Title { get; set; } = "";
+    [Required(ErrorMessage = "Chưa nhập hướng dẫn cho sinh viên."), StringLength(4000, ErrorMessage = "Hướng dẫn tối đa 4.000 ký tự."), Display(Name = "Hướng dẫn")] public string Instructions { get; set; } = "";
     [DataType(DataType.DateTime), Display(Name = "Hạn nộp (giờ Việt Nam, UTC+7)")] public DateTime DueAtVietnam { get; set; } = DateTime.UtcNow.AddDays(7).AddHours(7);
-    [Range(1, int.MaxValue), Display(Name = "Vị trí")] public int PositionId { get; set; }
+    [Range(1, int.MaxValue, ErrorMessage = "Chưa chọn vị trí phỏng vấn."), Display(Name = "Vị trí")] public int PositionId { get; set; }
     [EnumDataType(typeof(InterviewLevel))] public InterviewLevel Level { get; set; }
     [EnumDataType(typeof(InterviewLanguage))] public InterviewLanguage Language { get; set; }
     [EnumDataType(typeof(InterviewKind))] public InterviewKind Kind { get; set; }
-    [Range(5, 10), Display(Name = "Số câu chính")] public int QuestionCount { get; set; } = 5;
+    [Range(5, 10, ErrorMessage = "Số câu chính phải từ 5 đến 10."), Display(Name = "Số câu chính")] public int QuestionCount { get; set; } = 5;
     public List<Position> Positions { get; set; } = [];
 }
 public sealed class LecturerCommentVm

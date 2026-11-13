@@ -19,7 +19,7 @@ public class PersistenceModelTests
         using var db = Context();
         var domainTypes = typeof(InterviewSession).Assembly.GetTypes()
             .Where(x => x.IsClass && !x.IsAbstract && x.Namespace == typeof(InterviewSession).Namespace).ToArray();
-        Assert.Equal(21, domainTypes.Length);
+        Assert.Equal(22, domainTypes.Length);
         foreach (var type in domainTypes)
         {
             var entity = db.Model.FindEntityType(type);
@@ -41,6 +41,7 @@ public class PersistenceModelTests
     [InlineData(typeof(AiRequestLog), "UserId")]
     [InlineData(typeof(Classroom), "LecturerId")]
     [InlineData(typeof(ClassMember), "StudentId")]
+    [InlineData(typeof(ClassBan), "StudentId")]
     [InlineData(typeof(AssignmentSubmission), "StudentId")]
     [InlineData(typeof(LecturerComment), "LecturerId")]
     public void OwnershipReferencesARealIdentityUser(Type entityType, string userProperty)

@@ -1,6 +1,6 @@
 @model StudentClassVm
 @{ ViewData["Title"] = Model.Class.Name; }
-<a asp-action="Index" class="page-back">← Lớp học của tôi</a>
+<a asp-action="Index" class="btn btn-secondary btn-back"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-back" /></svg>Lớp học của tôi</a>
 <div class="page-heading"><div><h1>@Model.Class.Name</h1><p>Hạn nộp theo giờ Việt Nam (UTC+7). Bài nộp sau hạn vẫn được lưu và đánh dấu muộn.</p></div></div>
 @if (TempData["ClassMessage"] is string message) { <div class="alert alert-success" role="status">@message</div> }
 @if (!Model.Class.IsActive) { <div class="alert alert-secondary">Lớp đã đóng. Bạn vẫn xem được lịch sử bài tập, nhưng không thể nộp thêm bài.</div> }

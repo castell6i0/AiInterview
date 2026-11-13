@@ -1,6 +1,6 @@
 @model CvDetailModel
 @{ ViewData["Title"] = "Xem CV"; }
-<a asp-action="Index" class="page-back">← Hồ sơ & mục tiêu</a>
+<a asp-action="Index" class="btn btn-secondary btn-back"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-back" /></svg>Hồ sơ & mục tiêu</a>
 <div class="page-heading"><div><h1>@Model.Cv.FileName</h1><p>Phiên bản #@Model.Cv.Id · @Ui.Time(Model.Cv.CreatedAt) (UTC+7)</p></div><a asp-controller="Interviews" asp-action="Create" asp-route-cvProfileId="@Model.Cv.Id" class="btn btn-primary">Luyện với CV này</a></div>
 @await Html.PartialAsync("_Messages")
 @if (TempData["ProfileAiSettingsNeeded"] is true) { <p class="mb-4"><a asp-controller="AiSettings" asp-action="Index" asp-route-returnUrl="@Url.Action("Cv", "Profile", new { id = Model.Cv.Id })" class="btn btn-secondary">Sửa kết nối AI rồi quay lại CV này →</a></p> }
@@ -29,6 +29,6 @@
     </div></div></section>
 </div>
 <div class="mt-4">
-@if (Model.CanDelete) { <form asp-action="DeleteCv" asp-route-id="@Model.Cv.Id" method="post"><button class="btn btn-danger btn-sm" type="submit">Xóa CV chưa sử dụng</button></form> }
+@if (Model.CanDelete) { <form asp-action="DeleteCv" asp-route-id="@Model.Cv.Id" method="post"><button class="btn btn-danger btn-sm" type="submit"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-trash" /></svg>Xóa CV chưa sử dụng</button></form> }
 else { <p class="text-muted small">Phiên bản đã được dùng trong buổi luyện hoặc so sánh JD và được giữ để bảo toàn lịch sử.</p> }
 </div>

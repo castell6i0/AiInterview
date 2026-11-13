@@ -6,6 +6,6 @@
 <div class="table-responsive"><table class="table align-middle"><thead><tr><th>Vị trí</th><th>Mô tả</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody>
 @foreach (var position in Model)
 {
-    <tr><td><strong>@position.Name</strong></td><td>@position.Description</td><td><span class="pill @(position.IsActive ? "pill-ok" : "pill-off")">@(position.IsActive ? "Hoạt động" : "Đã tắt")</span></td><td><div class="d-flex gap-2"><a asp-action="Position" asp-route-id="@position.Id" class="btn btn-secondary btn-sm">Sửa</a><form asp-action="DeletePosition" method="post"><input type="hidden" name="id" value="@position.Id" /><button class="btn btn-danger btn-sm" type="submit">Xóa / tắt</button></form></div></td></tr>
+    <tr><td><strong>@position.Name</strong></td><td>@position.Description</td><td><span class="pill @(position.IsActive ? "pill-ok" : "pill-off")">@(position.IsActive ? "Hoạt động" : "Đã tắt")</span></td><td><div class="row-actions"><a asp-action="Position" asp-route-id="@position.Id" class="btn btn-secondary btn-sm" aria-label="Sửa vị trí @position.Name"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-edit" /></svg>Sửa</a><form asp-action="DeletePosition" method="post"><input type="hidden" name="id" value="@position.Id" /><button class="btn btn-danger btn-sm" type="submit" aria-label="Xóa hoặc tắt vị trí @position.Name"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-trash" /></svg>Xóa / tắt</button></form></div></td></tr>
 }
 </tbody></table></div>

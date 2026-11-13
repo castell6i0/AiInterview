@@ -1,17 +1,45 @@
 @model AssignmentEditVm
-@{ ViewData["Title"] = "Giao bài phỏng vấn"; }
-<a asp-action="Details" asp-route-id="@Model.ClassId" class="page-back">← Dashboard lớp</a><h1>Giao bài phỏng vấn</h1>
-<div class="card"><div class="card-body"><form asp-action="CreateAssignment" method="post">
-    <input asp-for="ClassId" type="hidden" /><div asp-validation-summary="All" class="text-danger" role="alert"></div>
+@{
+    ViewData["Title"] = "Giao bài phỏng vấn";
+    // Binding failures (empty select/date) come back as English "The value '' is invalid."; show what is actually missing.
+    string? Err(string key)
+    {
+        var state = ViewData.ModelState[key];
+        if (state is null || state.Errors.Count == 0) return null;
+        var message = state.Errors[0].ErrorMessage;
+        if (!string.IsNullOrEmpty(message) && !message.StartsWith("The ")) return message;
+        return key switch
+        {
+            nameof(Model.PositionId) => "Chưa chọn vị trí phỏng vấn.",
+            nameof(Model.DueAtVietnam) => "Chưa chọn hạn nộp hợp lệ.",
+            nameof(Model.QuestionCount) => "Số câu chính phải từ 5 đến 10.",
+            nameof(Model.Level) => "Chưa chọn cấp độ.",
+            nameof(Model.Language) => "Chưa chọn ngôn ngữ.",
+            nameof(Model.Kind) => "Chưa chọn loại phỏng vấn.",
+            _ => "Thông tin này chưa hợp lệ."
+        };
+    }
+    var fields = new[] { nameof(Model.Title), nameof(Model.DueAtVietnam), nameof(Model.Instructions), nameof(Model.PositionId), nameof(Model.Level), nameof(Model.Language), nameof(Model.Kind), nameof(Model.QuestionCount) };
+    var problems = fields.Select(Err).OfType<string>().ToList();
+    var general = ViewData.ModelState[string.Empty]?.Errors.Select(e => e.ErrorMessage).ToList() ?? [];
+    string Invalid(string key) => Err(key) is null ? "" : " is-invalid";
+}
+<a asp-action="Details" asp-route-id="@Model.ClassId" class="btn btn-secondary btn-back"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-back" /></svg>Dashboard lớp</a><h1>Giao bài phỏng vấn</h1>
+<div class="card"><div class="card-body"><form asp-action="CreateAssignment" method="post" novalidate>
+    <input asp-for="ClassId" type="hidden" />
+    @if (problems.Count + general.Count > 0)
+    {
+        <div class="alert alert-danger form-problems" role="alert"><strong>Chưa giao được bài — còn @(problems.Count + general.Count) mục cần sửa:</strong><ul>@foreach (var message in general.Concat(problems)) { <li>@message</li> }</ul></div>
+    }
     <div class="row g-3">
-        <div class="col-md-8"><label asp-for="Title" class="form-label"></label><input asp-for="Title" class="form-control" /></div>
-        <div class="col-md-4"><label asp-for="DueAtVietnam" class="form-label"></label><input asp-for="DueAtVietnam" type="datetime-local" class="form-control" asp-format="{0:yyyy-MM-ddTHH:mm}" /></div>
-        <div class="col-12"><label asp-for="Instructions" class="form-label"></label><textarea asp-for="Instructions" class="form-control" rows="4"></textarea></div>
-        <div class="col-md-6"><label asp-for="PositionId" class="form-label"></label><select asp-for="PositionId" class="form-select" asp-items="@(new SelectList(Model.Positions, "Id", "Name"))"><option value="">Chọn vị trí</option></select></div>
-        <div class="col-md-3"><label asp-for="Level" class="form-label">Cấp độ</label><select asp-for="Level" class="form-select" asp-items="ClassroomUi.Options<InterviewLevel>()"></select></div>
-        <div class="col-md-3"><label asp-for="Language" class="form-label">Ngôn ngữ</label><select asp-for="Language" class="form-select" asp-items="ClassroomUi.Options<InterviewLanguage>()"></select></div>
-        <div class="col-md-8"><label asp-for="Kind" class="form-label">Loại phỏng vấn</label><select asp-for="Kind" class="form-select" asp-items="ClassroomUi.Options<InterviewKind>()"></select></div>
-        <div class="col-md-4"><label asp-for="QuestionCount" class="form-label"></label><input asp-for="QuestionCount" type="number" min="5" max="10" class="form-control" /></div>
+        <div class="col-md-8"><label asp-for="Title" class="form-label"></label><input asp-for="Title" class="form-control@(Invalid("Title"))" placeholder="Ví dụ: Phỏng vấn REST API tuần 3" /><div class="invalid-feedback">@Err("Title")</div></div>
+        <div class="col-md-4"><label asp-for="DueAtVietnam" class="form-label"></label><input asp-for="DueAtVietnam" type="datetime-local" class="form-control@(Invalid("DueAtVietnam"))" asp-format="{0:yyyy-MM-ddTHH:mm}" /><div class="invalid-feedback">@Err("DueAtVietnam")</div></div>
+        <div class="col-12"><label asp-for="Instructions" class="form-label"></label><textarea asp-for="Instructions" class="form-control@(Invalid("Instructions"))" rows="4" placeholder="Sinh viên cần chuẩn bị gì, trả lời theo hướng nào…"></textarea><div class="invalid-feedback">@Err("Instructions")</div></div>
+        <div class="col-md-6"><label asp-for="PositionId" class="form-label"></label><select asp-for="PositionId" class="form-select@(Invalid("PositionId"))" asp-items="@(new SelectList(Model.Positions, "Id", "Name"))"><option value="0">Chọn vị trí</option></select><div class="invalid-feedback">@Err("PositionId")</div></div>
+        <div class="col-md-3"><label asp-for="Level" class="form-label">Cấp độ</label><select asp-for="Level" class="form-select@(Invalid("Level"))" asp-items="ClassroomUi.Options<InterviewLevel>()"></select><div class="invalid-feedback">@Err("Level")</div></div>
+        <div class="col-md-3"><label asp-for="Language" class="form-label">Ngôn ngữ</label><select asp-for="Language" class="form-select@(Invalid("Language"))" asp-items="ClassroomUi.Options<InterviewLanguage>()"></select><div class="invalid-feedback">@Err("Language")</div></div>
+        <div class="col-md-8"><label asp-for="Kind" class="form-label">Loại phỏng vấn</label><select asp-for="Kind" class="form-select@(Invalid("Kind"))" asp-items="ClassroomUi.Options<InterviewKind>()"></select><div class="invalid-feedback">@Err("Kind")</div></div>
+        <div class="col-md-4"><label asp-for="QuestionCount" class="form-label"></label><input asp-for="QuestionCount" type="number" min="5" max="10" class="form-control@(Invalid("QuestionCount"))" /><div class="invalid-feedback">@Err("QuestionCount")</div></div>
         <div class="col-12"><div class="alert alert-info mb-0">Bài tập giữ rubric đang hoạt động tại thời điểm giao. Với bài theo CV hoặc JD, sinh viên chọn tài liệu của mình khi tạo buổi. Bài nộp muộn vẫn được lưu và có nhãn riêng.</div></div>
         <div class="col-12"><button class="btn btn-primary" type="submit">Giao bài cho cả lớp</button></div>
     </div>

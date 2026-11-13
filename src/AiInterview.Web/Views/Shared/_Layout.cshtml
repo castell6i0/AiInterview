@@ -51,6 +51,11 @@
     <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></symbol>
     <symbol id="i-external" viewBox="0 0 24 24"><path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /></symbol>
     <symbol id="i-retry" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5" /></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="M19 12H5M11 18l-6-6 6-6" /></symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16v4ZM13.5 6.5l4 4" /></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" /></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2" /><path d="M5 15V6a2 2 0 0 1 2-2h9" /></symbol>
+    <symbol id="i-user-x" viewBox="0 0 24 24"><circle cx="9" cy="8" r="4" /><path d="M2 21a7 7 0 0 1 14 0M17 8l4 4M21 8l-4 4" /></symbol>
 </svg>
 @if (signedIn)
 {
@@ -97,7 +102,7 @@
     <div class="workspace-content">
         <header class="app-header">
             <button class="btn btn-sm btn-secondary mobile-menu" type="button" aria-label="Mở hoặc đóng menu điều hướng" aria-expanded="false" aria-controls="appNav" id="menuToggle"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-menu" /></svg></button>
-            <div class="header-path"><span class="header-context">Không gian học tập /</span><strong>@ViewData["Title"]</strong></div>
+            <div class="header-path"><span class="header-context">@(User.IsInRole(Roles.Admin) ? "Không gian quản lí" : User.IsInRole(Roles.Lecturer) ? "Không gian giảng dạy" : "Không gian học tập")</span><strong class="header-title">@(ViewData["Heading"] ?? ViewData["Title"])</strong></div>
             <button class="btn btn-secondary btn-sm bg-toggle" type="button" id="bgToggle" aria-pressed="true" title="Bật/tắt nền chuyển động và hiệu ứng" hidden><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-terminal" /></svg><span>Hiệu ứng</span></button>
         </header>
         <main id="main" class="page-content">

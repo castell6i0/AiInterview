@@ -200,6 +200,24 @@ namespace AiInterview.Infrastructure.Persistence.Migrations
                     b.ToTable("AssignmentSubmissions");
                 });
 
+            modelBuilder.Entity("AiInterview.Domain.Entities.ClassBan", b =>
+                {
+                    b.Property<int>("ClassId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("StudentId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTimeOffset>("BannedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("ClassId", "StudentId");
+
+                    b.HasIndex("StudentId");
+
+                    b.ToTable("ClassBans");
+                });
+
             modelBuilder.Entity("AiInterview.Domain.Entities.ClassMember", b =>
                 {
                     b.Property<int>("ClassId")
@@ -1314,6 +1332,21 @@ namespace AiInterview.Infrastructure.Persistence.Migrations
                     b.Navigation("Assignment");
 
                     b.Navigation("Session");
+                });
+
+            modelBuilder.Entity("AiInterview.Domain.Entities.ClassBan", b =>
+                {
+                    b.HasOne("AiInterview.Domain.Entities.Classroom", null)
+                        .WithMany()
+                        .HasForeignKey("ClassId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("AiInterview.Infrastructure.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("AiInterview.Domain.Entities.ClassMember", b =>

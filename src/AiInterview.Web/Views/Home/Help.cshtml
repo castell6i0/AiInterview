@@ -2,15 +2,17 @@
     ViewData["Title"] = "Hướng dẫn sử dụng";
     var signedIn = User.Identity?.IsAuthenticated == true;
     var student = User.IsInRole(Roles.Student);
+    var lecturer = User.IsInRole(Roles.Lecturer) && !student;
+    if (lecturer) { ViewData["Heading"] = "Hướng dẫn cho giảng viên"; }
 }
 <article class="container py-4">
     <div class="page-heading">
-        <div><h1>Hướng dẫn sử dụng</h1><p>Bốn bước từ tạo tài khoản đến đọc báo cáo, cộng phần hỏi đáp.</p></div>
+        <div><h1>Hướng dẫn sử dụng</h1></div>
     </div>
     <div class="guide" id="guide">
         @* Người que đứng giảng: luôn chuyển động, chỉ tay vào bảng khi đổi bước. Trang trí, không mang thông tin. *@
         <aside class="guide-coach" aria-hidden="true">
-            <p class="coach-tip" id="coachTip">Bắt đầu từ bước 1 nhé!</p>
+            <p class="coach-tip" id="coachTip">@(lecturer ? "Đầu tiên: tạo lớp và chia mã!" : "Bắt đầu từ bước 1 nhé!")</p>
             <svg class="coach" viewBox="0 0 200 300" focusable="false">
                 <ellipse class="coach-shadow" cx="82" cy="276" rx="46" ry="6" />
                 <g class="coach-body">
@@ -33,6 +35,40 @@
         <section class="guide-deck" id="guideDeck" aria-roledescription="trình chiếu" aria-label="Hướng dẫn từng bước">
             <div class="guide-top"><span class="guide-count" id="guideCount" aria-live="polite">BƯỚC 01 / 05</span><div class="guide-progress" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div></div>
             <div class="guide-slides">
+                @if (lecturer) {
+                <div class="guide-slide" role="group" aria-roledescription="bước" aria-label="1 / 5" data-tip="Đầu tiên: tạo lớp và chia mã!">
+                    <span class="guide-index">01</span><h2 id="lecturerClassHelp">Tạo lớp và chia sẻ mã tham gia</h2>
+                    <p>Vào <strong>Lớp giảng dạy</strong>, bấm <strong>Tạo lớp mới</strong> và đặt tên lớp. Hệ thống tạo một mã tham gia riêng cho lớp.</p>
+                    <p>Trong dashboard lớp, bấm <strong>Sao chép</strong> cạnh mã để gửi cho sinh viên. Sinh viên nhập mã ở mục <strong>Lớp học của tôi</strong> và đồng ý cho giảng viên xem lịch sử luyện tập.</p>
+                    <p class="help-text">Giảng viên xem được toàn bộ lịch sử luyện tập, transcript, điểm và tiến bộ của sinh viên trong lớp, kể cả các buổi trước khi vào lớp; không tải được tệp CV và JD gốc.</p>
+                    <div class="guide-actions"><a class="btn btn-primary" href="/Lecturer/Create">Tạo lớp mới</a><a class="btn btn-secondary" href="/Lecturer">Lớp giảng dạy</a></div>
+                </div>
+                <div class="guide-slide" role="group" aria-roledescription="bước" aria-label="2 / 5" data-tip="Giao bài cho cả lớp nào!">
+                    <span class="guide-index">02</span><h2 id="lecturerAssignHelp">Giao bài phỏng vấn</h2>
+                    <p>Trong dashboard lớp, bấm <strong>Giao bài tập</strong>. Nhập tên bài, hướng dẫn cho sinh viên, hạn nộp (giờ Việt Nam), rồi chọn vị trí, cấp độ, ngôn ngữ, loại phỏng vấn và số câu chính (5–10).</p>
+                    <p>Bài tập giữ cố định rubric đang hoạt động lúc giao để chấm nhất quán. Sinh viên bấm <strong>Bắt đầu luyện cho bài này</strong> để có đúng cấu hình, rồi nộp buổi đã hoàn thành.</p>
+                    <p class="help-text">Chỉ nộp được buổi tạo sau khi giao bài, đúng cấu hình và trả lời đủ mọi câu chính. Bài nộp sau hạn vẫn được lưu và có nhãn nộp muộn.</p>
+                </div>
+                <div class="guide-slide" role="group" aria-roledescription="bước" aria-label="3 / 5" data-tip="Xem lớp đang tiến bộ ra sao!">
+                    <span class="guide-index">03</span><h2 id="lecturerTrackHelp">Theo dõi sinh viên</h2>
+                    <p>Dashboard lớp cho biết số sinh viên, số người <strong>Cần theo dõi</strong> (không luyện từ 14 ngày, hoặc 3 buổi gần nhất dưới 5 điểm) và điểm trung bình của các buổi có báo cáo đầy đủ.</p>
+                    <p>Biểu đồ <strong>Kỹ năng cần củng cố của lớp</strong> cho thấy chủ đề lớp còn yếu. Bảng <strong>Sinh viên và cảnh báo</strong> liệt kê từng người; bấm <strong>Lịch sử và góp ý</strong> để xem tiến bộ của một sinh viên.</p>
+                    <p class="help-text">Bấm <strong>Xuất CSV cho Excel</strong> để tải bảng tổng hợp của lớp. Điểm chỉ dùng để hỗ trợ học tập, không dùng để xếp hạng.</p>
+                </div>
+                <div class="guide-slide" role="group" aria-roledescription="bước" aria-label="4 / 5" data-tip="Góp ý cho từng buổi luyện!">
+                    <span class="guide-index">04</span><h2 id="lecturerCommentHelp">Nhận xét bài làm</h2>
+                    <p>Mở <strong>Lịch sử và góp ý</strong> của sinh viên. Mỗi buổi luyện có điểm, nút <strong>Xem báo cáo chi tiết</strong> và mục <strong>Thêm nhận xét cho sinh viên</strong> để viết góp ý (tối đa 3.000 ký tự).</p>
+                    <p>Sinh viên thấy nhận xét trong tab <strong>Nhận xét giảng viên</strong> của báo cáo buổi đó. Ở mục <strong>Bài tập của lớp</strong>, mở <strong>Xem tất cả lần nộp</strong> để xem ai đã nộp, nộp lúc nào và mở báo cáo.</p>
+                </div>
+                <div class="guide-slide" role="group" aria-roledescription="bước" aria-label="5 / 5" data-tip="Quản lý lớp và hỏi đáp!">
+                    <span class="guide-index">05</span><h2 id="lecturerManageHelp">Quản lý lớp &amp; hỏi đáp</h2>
+                    <details><summary>Mời sinh viên ra khỏi lớp thì sao?</summary><p>Bấm <strong>Mời khỏi lớp</strong> ở hàng của sinh viên trong bảng Sinh viên và cảnh báo. Sinh viên không thể dùng mã để vào lại lớp. Bài đã nộp vẫn được giữ: bạn vẫn mở được báo cáo và nhận xét các bài đó, nhưng không xem được các buổi luyện mới của sinh viên.</p></details>
+                    <details><summary>Đóng lớp khác gì xóa lớp?</summary><p>Bấm <strong>Đóng lớp</strong> để ngừng nhận thành viên và bài nộp mới, không giao thêm bài. Lịch sử và báo cáo vẫn xem được; bấm <strong>Mở lại lớp</strong> khi cần dùng tiếp.</p></details>
+                    <details><summary>Điểm trung bình của lớp được tính thế nào?</summary><p>Từ các buổi có báo cáo đầy đủ của thành viên, có thể gồm nhiều vị trí và rubric. Buổi kết thúc sớm hoặc báo cáo tạm thời không được tính.</p></details>
+                    <details><summary>Sinh viên báo không thấy lớp hoặc không nộp được bài?</summary><p>Kiểm tra lớp đang mở và mã đã gửi đúng. Bài chỉ nộp được khi buổi luyện đúng cấu hình bài tập và trả lời đủ mọi câu chính; nhắc sinh viên bắt đầu từ nút <strong>Bắt đầu luyện cho bài này</strong>.</p></details>
+                    <div class="guide-actions"><a class="btn btn-secondary" href="/Lecturer">Về lớp giảng dạy</a></div>
+                </div>
+                } else {
                 <div class="guide-slide" role="group" aria-roledescription="bước" aria-label="1 / 5" data-tip="Đầu tiên: tạo tài khoản!">
                     <span class="guide-index">01</span><h2 id="accountHelp">Tạo tài khoản</h2>
                     <p>Điền họ tên, email và mật khẩu ngay trên website. Nếu hệ thống yêu cầu xác nhận email, mở thư từ InterviewLab, bấm <strong>Xác nhận email</strong> rồi đăng nhập. Nếu website chưa bật email, bạn đăng nhập được ngay; email khi đó chưa được xác minh.</p>
@@ -74,6 +110,7 @@
                     <details><summary>Microphone hoặc giọng đọc không hoạt động thì sao?</summary><p>Cho phép website dùng microphone khi bấm Bắt đầu nói. Nếu trình duyệt không hỗ trợ hoặc nhận sai, bạn vẫn gõ và sửa câu trả lời trước khi gửi. Mở Giọng đọc và tốc độ để chọn giọng, hoặc tắt Tự đọc câu mới; giọng có sẵn tùy trình duyệt và thiết bị.</p></details>
                     @if (signedIn && !student) { <div class="guide-actions"><a class="btn btn-secondary" href="/">Về trang làm việc của bạn</a></div> }
                 </div>
+                }
             </div>
             <nav class="guide-nav" aria-label="Chuyển bước hướng dẫn">
                 <button type="button" class="btn btn-secondary" id="guidePrev"><span aria-hidden="true">←</span> Trước</button>

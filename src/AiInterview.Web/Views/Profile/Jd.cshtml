@@ -1,6 +1,6 @@
 @model JdDetailModel
 @{ ViewData["Title"] = "JD & khoảng trống kỹ năng"; }
-<a asp-action="Index" class="page-back">← Hồ sơ & mục tiêu</a>
+<a asp-action="Index" class="btn btn-secondary btn-back"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-back" /></svg>Hồ sơ & mục tiêu</a>
 <div class="page-heading"><div><h1>@Model.Jd.Title</h1><p>@Model.Jd.Company · @Ui.Time(Model.Jd.CreatedAt) (UTC+7)</p></div><a asp-controller="Interviews" asp-action="Create" asp-route-jobDescriptionId="@Model.Jd.Id" asp-route-cvProfileId="@Model.Jd.ComparedCvId" asp-route-kind="JobDescription" class="btn btn-primary">Luyện bám JD này</a></div>
 @await Html.PartialAsync("_Messages")
 @if (TempData["ProfileAiSettingsNeeded"] is true) { <p class="mb-4"><a asp-controller="AiSettings" asp-action="Index" asp-route-returnUrl="@Url.Action("Jd", "Profile", new { id = Model.Jd.Id })" class="btn btn-secondary">Sửa kết nối AI rồi quay lại JD này →</a></p> }
@@ -31,4 +31,4 @@
         <div style="white-space:pre-wrap;overflow-wrap:anywhere">@Model.Jd.Content</div>
     </div></div></section>
 </div>
-<div class="mt-4">@if (Model.CanDelete) { <form asp-action="DeleteJd" asp-route-id="@Model.Jd.Id" method="post"><button class="btn btn-danger btn-sm" type="submit">Xóa JD chưa sử dụng</button></form> } else { <p class="small text-muted">JD đã dùng trong lịch sử và được giữ nguyên phiên bản. Tạo JD mới nếu nội dung tuyển dụng thay đổi.</p> }</div>
+<div class="mt-4">@if (Model.CanDelete) { <form asp-action="DeleteJd" asp-route-id="@Model.Jd.Id" method="post"><button class="btn btn-danger btn-sm" type="submit"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-trash" /></svg>Xóa JD chưa sử dụng</button></form> } else { <p class="small text-muted">JD đã dùng trong lịch sử và được giữ nguyên phiên bản. Tạo JD mới nếu nội dung tuyển dụng thay đổi.</p> }</div>

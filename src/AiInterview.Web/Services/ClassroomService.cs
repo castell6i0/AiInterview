@@ -20,6 +20,8 @@ public sealed class ClassroomService(AppDbContext db)
         var code = model.Code.Trim().ToUpperInvariant();
         var classroom = await db.Classes.SingleOrDefaultAsync(c => c.JoinCode == code && c.IsActive)
             ?? throw new InvalidOperationException("Mã lớp không đúng hoặc lớp đã đóng.");
+        if (await db.ClassBans.AnyAsync(b => b.ClassId == classroom.Id && b.StudentId == studentId))
+            throw new InvalidOperationException("Giảng viên đã mời bạn ra khỏi lớp này nên bạn không thể tham gia lại.");
         if (await db.ClassMembers.AnyAsync(m => m.ClassId == classroom.Id && m.StudentId == studentId)) return classroom.Id;
         db.ClassMembers.Add(new ClassMember { ClassId = classroom.Id, StudentId = studentId });
         try { await db.SaveChangesAsync(); }

@@ -111,6 +111,29 @@ public sealed class ClassroomSqlIntegrationTests
     }
 
     [SqlFact]
+    public async Task KickRemovesMemberBlocksRejoinAndKeepsSubmissionsForComments()
+    {
+        await using var sql = await SqlIntegrationTests.SqlDatabase.CreateAsync();
+        var lecturer = await CreateLecturer(sql);
+        var student = await sql.CreateStudentAsync();
+        await using var db = sql.Context();
+        var (classroom, assignment) = await CreateClassAndAssignment(db, lecturer.Id, student.Id);
+        var session = Completed(student.Id, assignment);
+        db.Sessions.Add(session);
+        await db.SaveChangesAsync();
+        var classes = new ClassroomService(db);
+        await classes.SubmitAsync(assignment.Id, session.Id, student.Id);
+
+        var lecturers = new LecturerService(db);
+        await lecturers.KickAsync(classroom.Id, student.Id, lecturer.Id);
+        Assert.False(await db.ClassMembers.AnyAsync());
+        await Assert.ThrowsAsync<InvalidOperationException>(() => classes.JoinAsync(student.Id, new JoinClassVm { Code = classroom.JoinCode, AcceptSharing = true }));
+        await Assert.ThrowsAsync<InvalidOperationException>(() => lecturers.KickAsync(classroom.Id, student.Id, lecturer.Id));
+        Assert.Single(await db.AssignmentSubmissions.ToListAsync());
+        Assert.Equal(student.Id, await lecturers.AddCommentAsync(new LecturerCommentVm { ClassId = classroom.Id, SessionId = session.Id, Content = "Giữ để nhận xét" }, lecturer.Id));
+    }
+
+    [SqlFact]
     public async Task JoinRequiresSharingConsentIsIdempotentAndClosedClassesRejectNewWork()
     {
         await using var sql = await SqlIntegrationTests.SqlDatabase.CreateAsync();

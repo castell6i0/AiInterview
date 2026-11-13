@@ -16,6 +16,22 @@ namespace AiInterview.Tests;
 public sealed class AdminUserSqlIntegrationTests
 {
     [SqlFact]
+    public async Task IndexChartsCoverFourteenDaysRolesAndScoreBands()
+    {
+        await using var sql = await SqlIntegrationTests.SqlDatabase.CreateAsync();
+        await using (var scope = Scope(sql)) await scope.Admin.CreateUserAsync(NewUser(Roles.Lecturer));
+        await using var verify = Scope(sql);
+        var model = await verify.Admin.IndexAsync();
+        Assert.Equal(14, model.DayLabels.Count);
+        Assert.Equal(14, model.SessionsPerDay.Count);
+        Assert.Equal(14, model.AiCallsPerDay.Count);
+        Assert.Equal(3, model.UsersByRole.Count);
+        Assert.True(model.UsersByRole[1] >= 1);
+        Assert.Equal(4, model.ScoreBands.Count);
+        Assert.Equal(await verify.Db.Evaluations.CountAsync(e => !e.IsProvisional), model.ScoreBands.Sum());
+    }
+
+    [SqlFact]
     public async Task CreateUsesIdentityPasswordsExplicitRolesAndStudentProfiles()
     {
         await using var sql = await SqlIntegrationTests.SqlDatabase.CreateAsync();

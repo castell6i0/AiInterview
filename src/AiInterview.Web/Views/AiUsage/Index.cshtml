@@ -1,6 +1,6 @@
 @model AiInterview.Web.Controllers.AiUsagePage
 @{ ViewData["Title"] = "Sử dụng AI theo ngày"; }
-<a asp-controller="Admin" asp-action="Index" class="page-back">← Quản trị hệ thống</a>
+<a asp-controller="Admin" asp-action="Index" class="btn btn-secondary btn-back"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-back" /></svg>Quản trị hệ thống</a>
 <div class="page-heading"><div><h1>Sử dụng AI theo ngày</h1><p>Lượt gọi, token và chi phí ước tính của từng tài khoản.</p></div></div>
 <dl class="kpi-grid">
     <div class="kpi"><dt>AI hệ thống</dt><dd><span class="kpi-value kpi-text">@(Model.SystemKeyEnabled ? "Đang bật" : "Đang tắt")</span></dd></div>

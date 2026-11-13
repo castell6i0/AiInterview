@@ -121,10 +121,23 @@ public sealed class LecturerService(AppDbContext db)
         return assignment.Id;
     }
 
+    /// <summary>Removes a student from the lecturer's class and bans rejoining; submissions stay for review and statistics.</summary>
+    public async Task KickAsync(int classId, string studentId, string lecturerId)
+    {
+        var member = await db.ClassMembers.SingleOrDefaultAsync(m => m.ClassId == classId && m.StudentId == studentId && m.Class.LecturerId == lecturerId)
+            ?? throw new InvalidOperationException("Sinh viên không còn trong lớp bạn quản lý.");
+        db.ClassMembers.Remove(member);
+        if (!await db.ClassBans.AnyAsync(b => b.ClassId == classId && b.StudentId == studentId))
+            db.ClassBans.Add(new ClassBan { ClassId = classId, StudentId = studentId });
+        await db.SaveChangesAsync();
+    }
+
     public async Task<string> AddCommentAsync(LecturerCommentVm model, string lecturerId)
     {
+        // Members' sessions, or sessions already submitted to this class (kept after the student is removed).
         var studentId = await db.Sessions.Where(s => s.Id == model.SessionId
-            && db.ClassMembers.Any(m => m.StudentId == s.StudentId && m.ClassId == model.ClassId && m.Class.LecturerId == lecturerId))
+            && (db.ClassMembers.Any(m => m.StudentId == s.StudentId && m.ClassId == model.ClassId && m.Class.LecturerId == lecturerId)
+                || db.AssignmentSubmissions.Any(x => x.SessionId == s.Id && x.Assignment.ClassId == model.ClassId && x.Assignment.Class.LecturerId == lecturerId)))
             .Select(s => s.StudentId).SingleOrDefaultAsync() ?? throw new InvalidOperationException("Buổi không thuộc sinh viên trong lớp bạn quản lý.");
         db.LecturerComments.Add(new LecturerComment { ClassId = model.ClassId, LecturerId = lecturerId, SessionId = model.SessionId, Content = model.Content.Trim() });
         await db.SaveChangesAsync();

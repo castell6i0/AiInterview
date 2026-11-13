@@ -1,8 +1,8 @@
 @model AdminUsersVm
 @{ ViewData["Title"] = "Quản lý người dùng"; }
-<div class="page-heading"><div><h1>Quản lý người dùng</h1><p>Đổi vai trò hoặc khóa tài khoản sẽ thu hồi phiên đăng nhập cũ.</p></div><a asp-action="CreateUser" class="btn btn-primary">Thêm người dùng</a></div>
+<div class="page-heading"><div><h1>Quản lý người dùng</h1><p>Đổi vai trò hoặc khóa tài khoản sẽ thu hồi phiên đăng nhập cũ.</p></div></div>
 @await Html.PartialAsync("_Alerts")
-<form asp-action="Users" method="get" class="row g-2 mb-3"><div class="col-sm-9"><label for="search" class="visually-hidden">Tên hoặc email</label><input id="search" name="search" value="@Model.Search" class="form-control" placeholder="Tìm theo tên hoặc email" maxlength="200" /></div><div class="col-sm-3"><button class="btn btn-primary" type="submit">Tìm người dùng</button></div></form>
+<form asp-action="Users" method="get" class="filter-bar toolbar mb-3"><label for="search" class="visually-hidden">Tên hoặc email</label><input id="search" name="search" value="@Model.Search" class="form-control toolbar-grow" placeholder="Tìm theo tên hoặc email" maxlength="200" /><button class="btn btn-secondary" type="submit">Tìm người dùng</button><a asp-action="CreateUser" class="btn btn-primary">Thêm người dùng</a></form>
 <p class="small text-muted">Không thể gỡ quyền hoặc khóa tài khoản quản trị cuối cùng, hay tự khóa chính mình.</p>
 @if (Model.HasMore) { <div class="alert alert-info">Đang hiển thị 100 kết quả đầu tiên. Tìm theo tên hoặc email để thu hẹp.</div> }
 <div class="table-responsive"><table class="table align-middle"><thead><tr><th>Người dùng</th><th>Quyền hiện tại</th><th>Trạng thái</th><th>Cập nhật quyền</th><th>Thao tác</th></tr></thead><tbody>
@@ -21,9 +21,9 @@
             <div class="form-check"><input name="Locked" value="true" type="checkbox" class="form-check-input" id="lock-@user.Id" checked="@user.Locked" /><label for="lock-@user.Id" class="form-check-label">Khóa</label></div>
             <button class="btn btn-primary btn-sm" type="submit">Lưu</button>
         </form></td>
-        <td><div class="d-flex gap-2">
-            <a asp-action="EditUser" asp-route-id="@user.Id" class="btn btn-secondary btn-sm" aria-label="Sửa người dùng @user.FullName">Sửa</a>
-            <a asp-action="DeleteUser" asp-route-id="@user.Id" class="btn btn-danger btn-sm" aria-label="Xóa người dùng @user.FullName">Xóa</a>
+        <td><div class="row-actions">
+            <a asp-action="EditUser" asp-route-id="@user.Id" class="btn btn-secondary btn-sm" aria-label="Sửa người dùng @user.FullName"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-edit" /></svg>Sửa</a>
+            <a asp-action="DeleteUser" asp-route-id="@user.Id" class="btn btn-danger btn-sm" aria-label="Xóa người dùng @user.FullName"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-trash" /></svg>Xóa</a>
         </div></td></tr>
 }
 @if (Model.Users.Count == 0) { <tr><td colspan="5">Không có người dùng phù hợp.</td></tr> }

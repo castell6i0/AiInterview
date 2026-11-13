@@ -13,6 +13,13 @@ public sealed class AdminIndexVm
     public decimal KnownEstimatedCostUsd { get; set; }
     public int UnknownCostCount { get; set; }
     public int AiRequestCount { get; set; }
+    public List<string> DayLabels { get; set; } = [];
+    public List<int> SessionsPerDay { get; set; } = [];
+    public List<int> AiCallsPerDay { get; set; } = [];
+    /// <summary>Student, lecturer, admin counts in that order.</summary>
+    public List<int> UsersByRole { get; set; } = [];
+    /// <summary>Full evaluations per score band: low, mid, good, top.</summary>
+    public List<int> ScoreBands { get; set; } = [];
 }
 public sealed class AdminUserVm
 {
