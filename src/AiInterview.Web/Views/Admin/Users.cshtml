@@ -1,11 +1,9 @@
 @model AdminUsersVm
 @{ ViewData["Title"] = "Quản lý người dùng"; }
-<h1>Quản lý người dùng</h1>
-@await Html.PartialAsync("_Nav")
+<div class="page-heading"><div><h1>Quản lý người dùng</h1><p>Đổi vai trò hoặc khóa tài khoản sẽ thu hồi phiên đăng nhập cũ.</p></div><a asp-action="CreateUser" class="btn btn-primary">Thêm người dùng</a></div>
 @await Html.PartialAsync("_Alerts")
-<p><a asp-action="CreateUser" class="btn btn-primary">Thêm người dùng</a></p>
 <form asp-action="Users" method="get" class="row g-2 mb-3"><div class="col-sm-9"><label for="search" class="visually-hidden">Tên hoặc email</label><input id="search" name="search" value="@Model.Search" class="form-control" placeholder="Tìm theo tên hoặc email" maxlength="200" /></div><div class="col-sm-3"><button class="btn btn-primary" type="submit">Tìm người dùng</button></div></form>
-<p class="text-muted">Đổi vai trò hoặc khóa tài khoản sẽ thu hồi phiên đăng nhập cũ. Hệ thống bảo vệ tài khoản quản trị cuối cùng và không cho bạn tự gỡ quyền/khóa chính mình.</p>
+<p class="small text-muted">Không thể gỡ quyền hoặc khóa tài khoản quản trị cuối cùng, hay tự khóa chính mình.</p>
 @if (Model.HasMore) { <div class="alert alert-info">Đang hiển thị 100 kết quả đầu tiên. Tìm theo tên hoặc email để thu hẹp.</div> }
 <div class="table-responsive"><table class="table align-middle"><thead><tr><th>Người dùng</th><th>Quyền hiện tại</th><th>Trạng thái</th><th>Cập nhật quyền</th><th>Thao tác</th></tr></thead><tbody>
 @foreach (var user in Model.Users)

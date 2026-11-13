@@ -1,25 +1,32 @@
 @using System.Text.Json
 @model LecturerClassVm
 @{ ViewData["Title"] = Model.Class.Name; var average = Ui.Score(Model.AverageScore); }
-<a asp-action="Index" class="mb-3 btn btn-secondary btn-sm">← Lớp giảng dạy</a>
-<div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
-    <div><h1>@Model.Class.Name</h1><p class="text-muted mb-1">Mã tham gia: <strong class="join-code">@Model.Class.JoinCode</strong> · @(Model.Class.IsActive ? "Lớp đang mở" : "Lớp đã đóng")</p></div>
-    <div class="d-flex flex-wrap gap-2"><a asp-action="Export" asp-route-id="@Model.Class.Id" class="btn btn-secondary">Xuất CSV cho Excel</a>
-        @if (Model.Class.IsActive) { <a asp-action="CreateAssignment" asp-route-classId="@Model.Class.Id" class="btn btn-primary">Giao bài tập</a> }
+<a asp-action="Index" class="page-back">← Lớp giảng dạy</a>
+<div class="page-heading">
+    <div><h1>@Model.Class.Name</h1><p>Mã tham gia <strong class="join-code">@Model.Class.JoinCode</strong> · @(Model.Class.IsActive ? "Lớp đang mở" : "Lớp đã đóng")</p></div>
+    <div class="page-actions">@if (Model.Class.IsActive) { <a asp-action="CreateAssignment" asp-route-classId="@Model.Class.Id" class="btn btn-primary">Giao bài tập</a> }
+        <a asp-action="Export" asp-route-id="@Model.Class.Id" class="btn btn-secondary">Xuất CSV cho Excel</a>
         <form asp-action="SetActive" method="post"><input type="hidden" name="id" value="@Model.Class.Id" /><input type="hidden" name="active" value="@((!Model.Class.IsActive).ToString().ToLowerInvariant())" /><button class="btn btn-secondary" type="submit">@(Model.Class.IsActive ? "Đóng lớp" : "Mở lại lớp")</button></form>
     </div>
 </div>
 @if (TempData["ClassMessage"] is string message) { <div class="alert alert-success" role="status">@message</div> }
 @if (TempData["ClassError"] is string error) { <div class="alert alert-danger" role="alert">@error</div> }
-<dl class="kpi-grid mb-2">
+<section class="page-section" aria-label="Tổng quan lớp">
+<dl class="kpi-grid">
     <div class="kpi reveal" style="--i:0"><dt>Sinh viên</dt><dd><span class="kpi-value">@Model.Students.Count</span><span class="kpi-unit">người</span></dd></div>
-    <div class="kpi reveal" style="--i:1"><dt>Buổi đầy đủ</dt><dd><span class="kpi-value">@Model.CompletedCount</span><span class="kpi-unit">buổi</span></dd></div>
-    <div class="kpi reveal" style="--i:2"><dt>Điểm trung bình</dt><dd class="score-@average.Band"><span class="kpi-value">@(Model.AverageScore?.ToString("0.0") ?? "—")</span><span class="kpi-unit">/10</span>@if (Model.AverageScore.HasValue) { <span class="score-label">@average.Label</span> }</dd></div>
-    <div class="kpi reveal" style="--i:3"><dt>Cần theo dõi</dt><dd><span class="kpi-value">@Model.Students.Count(s => s.Inactive || s.RepeatedLowScores)</span><span class="kpi-unit">người</span></dd><dd class="kpi-hint">Không luyện từ 14 ngày, hoặc 3 buổi gần nhất dưới 5 điểm.</dd></div>
+    <div class="kpi reveal" style="--i:1"><dt>Cần theo dõi</dt><dd><span class="kpi-value">@Model.Students.Count(s => s.Inactive || s.RepeatedLowScores)</span><span class="kpi-unit">người</span></dd><dd class="kpi-hint">Không luyện từ 14 ngày, hoặc 3 buổi gần nhất dưới 5 điểm.</dd></div>
+    <div class="kpi reveal" style="--i:2"><dt>Điểm trung bình</dt><dd class="score-@average.Band"><span class="kpi-value">@(Model.AverageScore?.ToString("0.0") ?? "—")</span><span class="kpi-unit">/10</span>@if (Model.AverageScore.HasValue) { <span class="score-label">@average.Label</span> }</dd><dd class="kpi-hint">Từ @Model.CompletedCount buổi có báo cáo đầy đủ; không dùng để xếp hạng.</dd></div>
 </dl>
-<p class="small text-muted">Điểm tổng hợp sử dụng toàn bộ buổi có báo cáo đầy đủ của thành viên, có thể gồm nhiều vị trí/rubric; không dùng để xếp hạng. Buổi kết thúc sớm hoặc báo cáo tạm thời không tính vào trung bình.</p>
-<h2 class="h4">Sinh viên và cảnh báo</h2>
-<div class="table-responsive mb-4"><table class="table align-middle"><thead><tr><th>Sinh viên</th><th class="num">Số buổi</th><th>TB /10</th><th>Luyện gần nhất (UTC+7)</th><th>Cảnh báo</th><th></th></tr></thead><tbody>
+<div class="card"><div class="card-body"><h2 class="h4">Kỹ năng cần củng cố của lớp</h2>
+@if (Model.Skills.Count == 0) { <div class="chart-empty"><p class="mb-3">Chưa có câu được chấm có gắn chủ đề kỹ năng. Biểu đồ xuất hiện khi sinh viên hoàn thành và nhận báo cáo cho ít nhất một buổi.</p>@if (Model.Class.IsActive) { <a asp-action="CreateAssignment" asp-route-classId="@Model.Class.Id" class="btn btn-secondary">Giao bài tập</a> }</div> }
+else { <div class="chart-box" style="height:330px"><canvas id="classSkills" aria-label="Biểu đồ cột điểm trung bình theo chủ đề kỹ năng, thang 0 đến 10" role="img"></canvas></div><p class="small text-muted mt-2 mb-0">Tính từ điểm câu chính; mỗi câu được tính cho các chủ đề gắn với câu đó.</p>
+    <details class="mt-3"><summary>Xem bảng số liệu</summary><div class="table-responsive mt-2"><table class="table table-sm"><thead><tr><th>Chủ đề</th><th class="num">TB /10</th><th>Mức</th><th class="num">Số mẫu</th></tr></thead><tbody>
+@foreach (var skill in Model.Skills) { <tr><td>@skill.Skill</td><td class="num">@skill.Score.ToString("0.0")</td><td class="score-@Ui.Score(skill.Score).Band">@Ui.Score(skill.Score).Label</td><td class="num">@skill.SampleCount</td></tr> }
+</tbody></table></div></details> }
+</div></div>
+</section>
+<section class="page-section" aria-labelledby="studentsHeading"><h2 class="h4" id="studentsHeading">Sinh viên và cảnh báo</h2>
+<div class="table-responsive"><table class="table align-middle"><thead><tr><th>Sinh viên</th><th class="num">Số buổi</th><th>TB /10</th><th>Luyện gần nhất (UTC+7)</th><th>Cảnh báo</th><th></th></tr></thead><tbody>
 @foreach (var student in Model.Students)
 {
     <tr><td><strong>@student.Name</strong><br /><span class="text-muted small">@student.Email</span></td><td class="num">@student.CompletedCount</td><td><span class="score-value score-@Ui.Score(student.AverageScore).Band">@(student.AverageScore?.ToString("0.0") ?? "—")</span>@if (student.AverageScore.HasValue) { <span class="small text-muted"> · @Ui.Score(student.AverageScore).Label</span> }</td><td>@ClassroomUi.Date(student.LastPracticeAt)</td>
@@ -28,12 +35,7 @@
 }
 @if (Model.Students.Count == 0) { <tr><td colspan="6">Chưa có sinh viên. Gửi mã <strong class="join-code">@Model.Class.JoinCode</strong> để sinh viên nhập ở mục Lớp của tôi.</td></tr> }
 </tbody></table></div>
-<div class="row g-4 mb-4"><div class="col-lg-7"><div class="card h-100"><div class="card-body"><h2 class="h4">Kỹ năng cần củng cố của lớp</h2>
-@if (Model.Skills.Count == 0) { <div class="chart-empty"><p class="mb-3">Chưa có câu được chấm có gắn chủ đề kỹ năng. Biểu đồ xuất hiện khi sinh viên hoàn thành và nhận báo cáo cho ít nhất một buổi.</p>@if (Model.Class.IsActive) { <a asp-action="CreateAssignment" asp-route-classId="@Model.Class.Id" class="btn btn-secondary">Giao bài tập</a> }</div> }
-else { <div class="chart-box" style="height:330px"><canvas id="classSkills" aria-label="Biểu đồ cột điểm trung bình theo chủ đề kỹ năng, thang 0 đến 10" role="img"></canvas></div><p class="small text-muted mt-2 mb-0">Từ điểm câu chính, mỗi câu được tính cho các chủ đề gắn với câu đó. Số mẫu là số câu được chấm.</p> }
-</div></div></div><div class="col-lg-5"><div class="card h-100"><div class="card-body"><h2 class="h4">Bảng số liệu kỹ năng</h2><div class="table-responsive"><table class="table table-sm"><thead><tr><th>Chủ đề</th><th class="num">TB /10</th><th>Mức</th><th class="num">Số mẫu</th></tr></thead><tbody>
-@foreach (var skill in Model.Skills) { <tr><td>@skill.Skill</td><td class="num">@skill.Score.ToString("0.0")</td><td class="score-@Ui.Score(skill.Score).Band">@Ui.Score(skill.Score).Label</td><td class="num">@skill.SampleCount</td></tr> }
-</tbody></table></div></div></div></div></div>
+</section>
 <h2 class="h4">Bài tập của lớp</h2>
 @foreach (var assignment in Model.Assignments)
 {

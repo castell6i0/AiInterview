@@ -1,46 +1,39 @@
 @model ProfileIndexModel
 @{ ViewData["Title"] = "Hồ sơ & mục tiêu"; }
-<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
-    <div><h1>Hồ sơ & mục tiêu</h1><p class="text-muted mb-0">Để mỗi câu hỏi gắn với kinh nghiệm và công việc bạn muốn ứng tuyển.</p></div>
+<div class="page-heading">
+    <div><h1>Hồ sơ & mục tiêu</h1><p>CV và JD giúp câu hỏi bám sát kinh nghiệm và công việc bạn muốn ứng tuyển.</p></div>
     <a asp-controller="Interviews" asp-action="Create" class="btn btn-primary">Tạo buổi luyện</a>
 </div>
 @await Html.PartialAsync("_Messages")
-<div class="row g-4">
-    <section class="col-lg-5" aria-labelledby="profileHeading"><div class="card h-100"><div class="card-body p-4">
+<div class="row g-4 page-section">
+    <section class="col-lg-5" aria-labelledby="profileHeading"><div class="card h-100"><div class="card-body">
         <h2 id="profileHeading" class="h4 mb-3">Thông tin sinh viên</h2>
         <form asp-action="Save" method="post">
             <div asp-validation-summary="All" class="text-danger" role="alert"></div>
             <div class="mb-3"><label asp-for="Profile.FullName" class="form-label"></label><input asp-for="Profile.FullName" class="form-control" autocomplete="name" required maxlength="160" /><span asp-validation-for="Profile.FullName" class="text-danger"></span></div>
             <div class="mb-3"><label asp-for="Profile.University" class="form-label"></label><input asp-for="Profile.University" class="form-control" maxlength="250" /></div>
-            <div class="mb-3"><label asp-for="Profile.Major" class="form-label"></label><input asp-for="Profile.Major" class="form-control" maxlength="160" /></div>
-            <div class="mb-3"><label asp-for="Profile.AcademicYear" class="form-label"></label><input asp-for="Profile.AcademicYear" type="number" min="1" max="8" class="form-control" /></div>
+            <div class="row g-3 mb-3"><div class="col-sm-8"><label asp-for="Profile.Major" class="form-label"></label><input asp-for="Profile.Major" class="form-control" maxlength="160" /></div>
+            <div class="col-sm-4"><label asp-for="Profile.AcademicYear" class="form-label"></label><input asp-for="Profile.AcademicYear" type="number" min="1" max="8" class="form-control" /></div></div>
             <button class="btn btn-primary" type="submit">Lưu hồ sơ</button>
         </form>
     </div></div></section>
-    <section class="col-lg-7" aria-labelledby="uploadHeading"><div class="card h-100"><div class="card-body p-4">
-        <h2 id="uploadHeading" class="h4 mb-3">Thêm phiên bản CV</h2>
-        <p>Hệ thống trích xuất văn bản để bạn kiểm tra trước. Chỉ gửi nội dung tới @ActiveAi.Provider khi bạn đồng ý phân tích hoặc chọn CV cho một buổi luyện.</p>
+    <section class="col-lg-7" aria-labelledby="cvHeading"><div class="card h-100"><div class="card-body">
+        <h2 id="cvHeading" class="h4 mb-3">CV của bạn</h2>
         <form asp-action="Upload" method="post" enctype="multipart/form-data" data-preserve-on-limit data-rate-group="upload-cv">
-            <label for="cvFile" class="form-label">Tệp PDF hoặc DOCX</label>
-            <input id="cvFile" name="cvFile" type="file" class="form-control mb-2" accept=".pdf,.docx" required aria-describedby="uploadHelp" />
-            <p id="uploadHelp" class="form-text">Tối đa 5 MB. PDF phải có văn bản chọn được; chưa hỗ trợ PDF scan. Không lưu tệp gốc hoặc audio.</p>
-            <button class="btn btn-primary" type="submit">Tải CV và trích xuất chữ</button>
+            <label for="cvFile" class="form-label">Thêm phiên bản CV (PDF hoặc DOCX)</label>
+            <div class="upload-row"><input id="cvFile" name="cvFile" type="file" class="form-control" accept=".pdf,.docx" required aria-describedby="uploadHelp" /><button class="btn btn-secondary" type="submit">Tải lên & trích xuất chữ</button></div>
+            <p id="uploadHelp" class="form-text">Tối đa 5 MB, PDF phải có chữ chọn được (chưa hỗ trợ bản scan). Chỉ gửi tới @ActiveAi.Provider khi bạn đồng ý phân tích hoặc chọn CV cho buổi luyện. Bản cũ được giữ nguyên để báo cáo cũ đúng bối cảnh.</p>
         </form>
-        <hr class="my-4" /><h3 class="h5">Giữ lịch sử rõ ràng</h3>
-        <p class="text-muted mb-0">CV và JD đã dùng trong buổi luyện được giữ nguyên phiên bản. Khi nội dung thay đổi, hãy thêm bản mới để các báo cáo cũ vẫn có đúng bối cảnh.</p>
+        @if (Model.Cvs.Count == 0) { <p class="text-muted mb-0">Chưa có CV.</p> }
+        else {
+            <div class="table-responsive mt-3"><table class="table align-middle mb-0"><thead><tr><th>Tệp / phiên bản</th><th>Ngày thêm (UTC+7)</th><th>Phân tích AI</th><th><span class="visually-hidden">Thao tác</span></th></tr></thead><tbody>
+            @foreach (var cv in Model.Cvs) { <tr><td>@cv.FileName <small class="text-muted">#@cv.Id</small></td><td>@Ui.Time(cv.CreatedAt)</td><td><span class="pill @(cv.AnalysisJson is null ? "pill-off" : "pill-ok")">@(cv.AnalysisJson is null ? "Chưa phân tích" : "Đã phân tích")</span></td><td><a asp-action="Cv" asp-route-id="@cv.Id" class="btn btn-sm btn-secondary">Xem CV</a></td></tr> }
+            </tbody></table></div>
+        }
     </div></div></section>
 </div>
-<section class="mt-4" aria-labelledby="cvHeading">
-    <h2 id="cvHeading" class="h4">Các CV của bạn</h2>
-    @if (Model.Cvs.Count == 0) { <p class="text-muted">Chưa có CV. Tải bản đầu tiên ở phía trên.</p> }
-    else {
-        <div class="table-responsive"><table class="table align-middle"><thead><tr><th>Tệp / phiên bản</th><th>Ngày thêm (UTC+7)</th><th>Phân tích AI</th><th><span class="visually-hidden">Thao tác</span></th></tr></thead><tbody>
-        @foreach (var cv in Model.Cvs) { <tr><td>@cv.FileName <small class="text-muted">#@cv.Id</small></td><td>@Ui.Time(cv.CreatedAt)</td><td><span class="pill @(cv.AnalysisJson is null ? "pill-off" : "pill-ok")">@(cv.AnalysisJson is null ? "Chưa phân tích" : "Đã phân tích")</span></td><td><a asp-action="Cv" asp-route-id="@cv.Id" class="btn btn-sm btn-secondary">Xem CV</a></td></tr> }
-        </tbody></table></div>
-    }
-</section>
-<section class="mt-4" aria-labelledby="jdHeading">
-    <div class="d-flex flex-wrap justify-content-between gap-3 mb-3"><h2 id="jdHeading" class="h4 mb-0">Tin tuyển dụng mục tiêu</h2><a asp-action="CreateJd" class="btn btn-sm btn-secondary">Dán JD mới</a></div>
+<section class="page-section" aria-labelledby="jdHeading">
+    <div class="section-head"><h2 id="jdHeading" class="h4 mb-0">Tin tuyển dụng mục tiêu</h2><a asp-action="CreateJd" class="btn btn-sm btn-secondary">Dán JD mới</a></div>
     @if (Model.Jds.Count == 0) { <p class="text-muted">Thêm mô tả công việc thật để so sánh yêu cầu với CV.</p> }
     else { <div class="row g-3">@foreach (var jd in Model.Jds) { <div class="col-md-6 col-xl-4"><div class="card h-100"><div class="card-body"><h3 class="h5">@jd.Title</h3><p class="text-muted">@jd.Company · @Ui.Time(jd.CreatedAt)</p><a asp-action="Jd" asp-route-id="@jd.Id" class="btn btn-sm btn-secondary">Xem JD & khoảng trống</a></div></div></div> }</div> }
 </section>

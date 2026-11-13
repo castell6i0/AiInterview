@@ -6,11 +6,11 @@
     var groups = completed.GroupBy(s => new { s.PositionId, s.RubricVersionId, s.Level, s.Language });
     var chartData = new { labels = completed.Select(s => ClassroomUi.Date(s.CreatedAt)), datasets = groups.Select(g => new { label = $"{g.First().Position.Name} · {ClassroomUi.Label(g.Key.Level)} · {ClassroomUi.Label(g.Key.Language)} · Rubric {g.Key.RubricVersionId}", data = completed.Select(s => s.PositionId == g.Key.PositionId && s.RubricVersionId == g.Key.RubricVersionId && s.Level == g.Key.Level && s.Language == g.Key.Language ? (decimal?)s.Evaluation!.OverallScore : null), spanGaps = true, tension = 0.15 }) };
 }
-<a asp-action="Details" asp-route-id="@Model.Class.Id" class="mb-3 btn btn-secondary btn-sm">← @Model.Class.Name</a>
-<h1>@Model.Student.Name</h1><p class="text-muted">@Model.Student.Email · Tham gia lớp @ClassroomUi.Date(Model.Student.JoinedAt)</p>
+<a asp-action="Details" asp-route-id="@Model.Class.Id" class="page-back">← @Model.Class.Name</a>
+<div class="page-heading"><div><h1>@Model.Student.Name</h1><p>@Model.Student.Email · Tham gia lớp @ClassroomUi.Date(Model.Student.JoinedAt)</p></div></div>
 @if (TempData["ClassMessage"] is string message) { <div class="alert alert-success" role="status">@message</div> }
 @if (TempData["ClassError"] is string error) { <div class="alert alert-danger" role="alert">@error</div> }
-<div class="card mb-4"><div class="card-body"><h2 class="h4">Tiến bộ qua các buổi</h2>
+<div class="card page-section"><div class="card-body"><h2 class="h4">Tiến bộ qua các buổi</h2>
     @if (completed.Count == 0) { <div class="chart-empty"><p class="mb-0">Chưa có buổi hoàn thành đầy đủ để vẽ biểu đồ. Biểu đồ xuất hiện khi sinh viên trả lời đủ các câu chính và nhận báo cáo; bạn có thể giao bài từ trang lớp.</p></div> }
     else { <div class="chart-box" style="height:330px"><canvas id="studentProgress" aria-label="Biểu đồ điểm phỏng vấn của sinh viên theo ngày, thang 0 đến 10" role="img"></canvas></div><p class="small text-muted mt-2 mb-0">Tách đường theo vị trí, cấp độ, ngôn ngữ và rubric. Báo cáo tạm thời không nằm trong biểu đồ.</p><details class="mt-3"><summary>Xem bảng số liệu</summary><div class="table-responsive mt-2"><table class="table table-sm"><thead><tr><th>Ngày (UTC+7)</th><th>Bối cảnh</th><th class="num">Điểm /10</th><th>Mức</th></tr></thead><tbody>@foreach (var item in completed) { var band = Ui.Score(item.Evaluation!.OverallScore); <tr><td>@ClassroomUi.Date(item.CreatedAt)</td><td>@item.Position.Name · @ClassroomUi.Label(item.Level) · @ClassroomUi.Label(item.Language)</td><td class="num">@item.Evaluation.OverallScore.ToString("0.0")</td><td class="score-@band.Band">@band.Label</td></tr> }</tbody></table></div></details> }
 </div></div>
@@ -20,14 +20,14 @@
     var comments = Model.Comments.Where(c => c.SessionId == session.Id).ToList();
     <div class="card mb-3"><div class="card-body">
         <div class="d-flex flex-wrap justify-content-between gap-2"><div><h3 class="h5">@session.Position.Name · @ClassroomUi.Label(session.Kind)</h3><p class="text-muted mb-2">@ClassroomUi.Date(session.CreatedAt) (UTC+7) · @ClassroomUi.Label(session.Language) · @ClassroomUi.Label(session.Level)</p></div>
-            <div class="text-end"><span class="pill">@ClassroomUi.Label(session.Status)</span>
+            <div class="text-end"><span class="pill @(session.Status == SessionStatus.Completed ? "pill-ok" : session.Status == SessionStatus.ReadyForEvaluation ? "pill-warn" : "pill-off")">@ClassroomUi.Label(session.Status)</span>
                 @if (session.Evaluation is not null) { <p class="mt-2 mb-1 score-@Ui.Score(session.Evaluation.OverallScore).Band"><strong class="score-value">@session.Evaluation.OverallScore.ToString("0.0")/10</strong> <span class="score-label">@Ui.Score(session.Evaluation.OverallScore).Label</span> @(session.Evaluation.IsProvisional ? "(tạm thời)" : "")</p><a href="/Interviews/Report/@session.Id" class="btn btn-secondary btn-sm">Xem báo cáo chi tiết</a> }
             </div>
         </div>
         @foreach (var comment in comments) { <div class="quote my-2"><p class="mb-1 preserve">@comment.Content</p><small class="text-muted">@ClassroomUi.Date(comment.CreatedAt) (UTC+7)</small></div> }
         <details class="mt-3"><summary>Thêm nhận xét cho sinh viên</summary><form asp-action="Comment" method="post" class="mt-2">
             <input type="hidden" name="ClassId" value="@Model.Class.Id" /><input type="hidden" name="SessionId" value="@session.Id" />
-            <label for="comment-@session.Id" class="form-label">Nội dung nhận xét</label><textarea id="comment-@session.Id" name="Content" class="form-control mb-2" rows="3" maxlength="3000" required></textarea><button type="submit" class="btn btn-primary btn-sm">Lưu nhận xét</button>
+            <label for="comment-@session.Id" class="form-label">Nội dung nhận xét</label><textarea id="comment-@session.Id" name="Content" class="form-control mb-2" rows="3" maxlength="3000" required></textarea><button type="submit" class="btn btn-secondary btn-sm">Lưu nhận xét</button>
         </form></details>
     </div></div>
 }

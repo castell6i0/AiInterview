@@ -1,7 +1,6 @@
 @model RubricEditVm
 @{ ViewData["Title"] = "Rubric và trọng số"; }
-<h1>Rubric và trọng số</h1>
-@await Html.PartialAsync("_Nav")
+<div class="page-heading"><div><h1>Rubric và trọng số</h1></div></div>
 @await Html.PartialAsync("_Alerts")
 <div class="alert alert-info">Mỗi lần lưu tạo một phiên bản mới và áp dụng cho buổi/bài tập tạo tiếp theo. Rubric của các buổi và bài tập đã có được giữ nguyên. Điểm tổng = tổng (điểm × trọng số) / tổng trọng số.</div>
 <form asp-action="Rubric" method="post">

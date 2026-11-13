@@ -1,14 +1,8 @@
 @model CreateInterviewModel
 @{ ViewData["Title"] = "Tạo buổi luyện"; }
 <div class="page-heading">
-    <div><span class="eyebrow">LUYỆN PHỎNG VẤN</span><h1>Chuẩn bị buổi luyện của bạn</h1><p>Chọn vị trí và cách trả lời. Bạn có thể bắt đầu ngay với 5 câu hỏi.</p></div>
-    <a href="/Dashboard/History" class="btn btn-secondary">Xem các buổi đã luyện</a>
+    <div><h1>Tạo buổi luyện</h1><p>Chọn vị trí và cách trả lời. Mới bắt đầu thì để 5 câu.</p></div>
 </div>
-<ol class="flow-steps" aria-label="Các bước luyện phỏng vấn">
-    <li class="current" aria-current="step"><span>1</span> Chọn buổi luyện</li>
-    <li><span>2</span> Trả lời câu hỏi</li>
-    <li><span>3</span> Nhận góp ý & luyện tiếp</li>
-</ol>
 @if (!Model.AiConfigured) { <div class="alert alert-warning" role="alert"><p><strong>Cần kết nối @ActiveAi.Provider để bắt đầu.</strong> Hãy kết nối AI trước, rồi quay lại chọn buổi luyện.</p><div class="support-actions"><a asp-controller="AiSettings" asp-action="Index" asp-route-returnUrl="@Url.Action("Create", "Interviews", new { assignmentId = Model.AssignmentId, cvProfileId = Model.CvProfileId, jobDescriptionId = Model.JobDescriptionId, kind = Model.Kind })" class="btn btn-secondary btn-sm">Mở Cài đặt AI để nhập key →</a></div></div> }
 @if (Model.AssignmentId.HasValue) { <div class="alert alert-info"><strong>Bài tập: @Model.AssignmentTitle.</strong> Giữ đúng vị trí, cấp độ, ngôn ngữ, loại và số câu giảng viên yêu cầu.</div> }
 <form asp-action="Create" method="post" id="createInterviewForm">
@@ -51,7 +45,7 @@
             </details>
         </div>
         <aside class="setup-summary" aria-labelledby="summaryHeading"><div class="card"><div class="card-body">
-            <span class="eyebrow">SẴN SÀNG CHO BƯỚC TIẾP THEO</span><h2 id="summaryHeading" class="h4 mt-2">Buổi luyện của bạn</h2>
+            <h2 id="summaryHeading" class="h4">Buổi luyện của bạn</h2>
             <dl class="setup-summary-list">
                 <dt>Vị trí</dt><dd id="summaryPosition">Chưa chọn vị trí</dd>
                 <dt>Nội dung</dt><dd id="summaryKind">@Ui.Label(Model.Kind)</dd>
@@ -60,10 +54,10 @@
                 <dt>Số câu chính</dt><dd id="summaryCount">@Model.QuestionCount câu</dd>
             </dl>
             <div class="consent-panel"><label class="form-check mb-0"><input asp-for="ConsentToAi" class="form-check-input" required /><span class="form-check-label">Tôi đồng ý gửi CV/JD đã chọn và câu trả lời tới @ActiveAi.Provider để tạo câu hỏi và chấm điểm.</span></label></div>
-            <button class="btn btn-primary w-100 mt-3" type="submit">Vào phòng phỏng vấn →</button>
+            <button class="btn btn-primary w-100 mt-3" type="submit">Vào phòng phỏng vấn <span class="btn-arrow" aria-hidden="true">→</span></button>
             <p class="help-text mt-3 mb-0">Vào phòng trước, rồi bấm bắt đầu khi bạn sẵn sàng.</p>
         </div></div>
-        <div class="room-tip mt-3"><h3>Sau buổi luyện, bạn nhận được</h3><ul class="mb-0 ps-3"><li>Điểm theo 5 tiêu chí rõ ràng.</li><li>Góp ý kèm dẫn chứng từ câu trả lời.</li><li>Gợi ý trả lời tốt hơn và kế hoạch ôn tập.</li></ul></div></aside>
+        </aside>
     </div>
 </form>
 @section Scripts { <script src="~/js/interview-setup.js" asp-append-version="true"></script> }

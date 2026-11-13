@@ -1,22 +1,21 @@
 @model StudentClassVm
 @{ ViewData["Title"] = Model.Class.Name; }
-<a asp-action="Index" class="mb-3 btn btn-secondary btn-sm">← Lớp học của tôi</a>
-<h1>@Model.Class.Name</h1>
+<a asp-action="Index" class="page-back">← Lớp học của tôi</a>
+<div class="page-heading"><div><h1>@Model.Class.Name</h1><p>Hạn nộp theo giờ Việt Nam (UTC+7). Bài nộp sau hạn vẫn được lưu và đánh dấu muộn.</p></div></div>
 @if (TempData["ClassMessage"] is string message) { <div class="alert alert-success" role="status">@message</div> }
 @if (!Model.Class.IsActive) { <div class="alert alert-secondary">Lớp đã đóng. Bạn vẫn xem được lịch sử bài tập, nhưng không thể nộp thêm bài.</div> }
-<p class="text-muted">Hạn nộp hiển thị theo giờ Việt Nam (UTC+7). Nộp sau hạn vẫn được lưu và đánh dấu nộp muộn.</p>
 @if (Model.Assignments.Count == 0) { <div class="card"><div class="card-body">Giảng viên chưa giao bài tập.</div></div> }
 <div class="row g-3">
 @foreach (var assignment in Model.Assignments)
 {
     var latest = Model.Submissions.FirstOrDefault(s => s.AssignmentId == assignment.Id);
-    <div class="col-md-6"><div class="card h-100"><div class="card-body">
+    <div class="col-md-6 col-xl-4"><div class="card h-100"><div class="card-body">
         <h2 class="h4">@assignment.Title</h2>
         <p>@assignment.Position.Name · @ClassroomUi.Label(assignment.Level) · @ClassroomUi.Label(assignment.Language)</p>
         <p class="text-muted">@assignment.QuestionCount câu · @ClassroomUi.Label(assignment.Kind)<br />Hạn nộp: @ClassroomUi.Date(assignment.DueAt)</p>
         @if (latest is not null) { <p><span class="pill @(latest.IsLate ? "pill-warn" : "pill-ok")">Đã nộp lần @latest.AttemptNumber @(latest.IsLate ? "· Muộn" : "")</span> Điểm: <span class="score-value score-@Ui.Score(latest.Session.Evaluation?.OverallScore).Band">@(latest.Session.Evaluation?.OverallScore.ToString("0.0") ?? "—")/10</span> @(latest.Session.Evaluation is null ? "" : Ui.Score(latest.Session.Evaluation.OverallScore).Label)</p> }
         else { <p><span class="pill">Chưa nộp</span></p> }
-        <a asp-action="Assignment" asp-route-id="@assignment.Id" class="btn btn-primary">Chi tiết và nộp bài</a>
+        <a asp-action="Assignment" asp-route-id="@assignment.Id" class="btn @(latest is null && Model.Class.IsActive ? "btn-primary" : "btn-secondary")">@(latest is null ? "Chi tiết và nộp bài" : "Xem chi tiết")</a>
     </div></div></div>
 }
 </div>

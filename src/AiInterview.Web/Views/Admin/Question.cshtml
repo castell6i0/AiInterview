@@ -1,6 +1,6 @@
 @model QuestionEditVm
 @{ ViewData["Title"] = Model.Id == 0 ? "Thêm câu hỏi" : "Sửa câu hỏi"; }
-<a asp-action="Questions" class="btn btn-secondary btn-sm">← Ngân hàng câu hỏi</a><h1 class="mt-3">@ViewData["Title"]</h1>
+<a asp-action="Questions" class="page-back">← Ngân hàng câu hỏi</a><h1>@ViewData["Title"]</h1>
 <div class="card"><div class="card-body"><form asp-action="Question" method="post">
     <input asp-for="Id" type="hidden" /><div asp-validation-summary="All" class="text-danger" role="alert"></div>
     <div class="row g-3">

@@ -1,7 +1,6 @@
 @model List<Position>
 @{ ViewData["Title"] = "Vị trí ứng tuyển"; }
-<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3"><h1>Vị trí ứng tuyển</h1><a asp-action="Position" class="btn btn-primary">Thêm vị trí</a></div>
-@await Html.PartialAsync("_Nav")
+<div class="page-heading"><div><h1>Vị trí ứng tuyển</h1></div><a asp-action="Position" class="btn btn-primary">Thêm vị trí</a></div>
 @await Html.PartialAsync("_Alerts")
 <p class="small text-muted">Vị trí đã được dùng trong câu hỏi, bài tập hoặc buổi phỏng vấn sẽ chuyển sang ngừng hoạt động khi xóa để giữ lịch sử.</p>
 <div class="table-responsive"><table class="table align-middle"><thead><tr><th>Vị trí</th><th>Mô tả</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody>

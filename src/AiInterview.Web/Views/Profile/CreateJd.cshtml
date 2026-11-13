@@ -1,7 +1,7 @@
 @model CreateJdModel
 @{ ViewData["Title"] = "Thêm tin tuyển dụng"; }
-<a asp-action="Index" class="mb-3 btn btn-secondary btn-sm">← Hồ sơ & mục tiêu</a>
-<h1>Thêm tin tuyển dụng</h1><p class="text-muted">Dán JD thật để luyện vào yêu cầu của công việc bạn quan tâm.</p>
+<a asp-action="Index" class="page-back">← Hồ sơ & mục tiêu</a>
+<div class="page-heading"><div><h1>Thêm tin tuyển dụng</h1><p>Dán JD thật để luyện đúng yêu cầu của công việc bạn quan tâm.</p></div></div>
 <div class="card"><div class="card-body p-4"><form asp-action="CreateJd" method="post">
     <div asp-validation-summary="All" class="text-danger" role="alert"></div>
     <div class="row g-3"><div class="col-md-7"><label asp-for="Title" class="form-label"></label><input asp-for="Title" class="form-control" maxlength="200" required /></div><div class="col-md-5"><label asp-for="Company" class="form-label"></label><input asp-for="Company" class="form-control" maxlength="160" /></div></div>

@@ -1,6 +1,6 @@
 @model List<Classroom>
 @{ ViewData["Title"] = "Lớp giảng dạy"; }
-<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4"><div><h1>Lớp giảng dạy</h1><p class="text-muted mb-0">Theo dõi luyện tập, giao bài và góp ý cho sinh viên.</p></div><a asp-action="Create" class="btn btn-primary">Tạo lớp mới</a></div>
+<div class="page-heading"><div><h1>Lớp giảng dạy</h1><p>Theo dõi luyện tập, giao bài và góp ý cho sinh viên.</p></div><a asp-action="Create" class="btn btn-primary">Tạo lớp mới</a></div>
 @if (Model.Count == 0) { <div class="card"><div class="card-body">Tạo lớp đầu tiên rồi chia sẻ mã tham gia cho sinh viên.</div></div> }
 <div class="row g-3">@foreach (var classroom in Model)
 {

@@ -1,6 +1,6 @@
 @model CreateClassVm
 @{ ViewData["Title"] = "Tạo lớp"; }
-<div class="row justify-content-center"><div class="col-lg-7"><a asp-action="Index" class="btn btn-secondary btn-sm">← Lớp giảng dạy</a><h1 class="mt-3">Tạo lớp mới</h1>
+<div class="row justify-content-center"><div class="col-lg-7"><a asp-action="Index" class="page-back">← Lớp giảng dạy</a><h1>Tạo lớp mới</h1>
 <div class="card"><div class="card-body"><form asp-action="Create" method="post">
     <div asp-validation-summary="All" class="text-danger" role="alert"></div>
     <div class="mb-3"><label asp-for="Name" class="form-label"></label><input asp-for="Name" class="form-control" placeholder="Ví dụ: Kỹ năng phỏng vấn CNTT K21" /><span asp-validation-for="Name" class="text-danger"></span></div>

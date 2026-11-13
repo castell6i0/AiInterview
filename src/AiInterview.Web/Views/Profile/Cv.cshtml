@@ -1,7 +1,7 @@
 @model CvDetailModel
 @{ ViewData["Title"] = "Xem CV"; }
-<a asp-action="Index" class="mb-3 btn btn-secondary btn-sm">← Hồ sơ & mục tiêu</a>
-<div class="d-flex flex-wrap justify-content-between gap-3 mb-4"><div><h1 class="h2">@Model.Cv.FileName</h1><p class="text-muted mb-0">Phiên bản #@Model.Cv.Id · @Ui.Time(Model.Cv.CreatedAt) (UTC+7)</p></div><a asp-controller="Interviews" asp-action="Create" asp-route-cvProfileId="@Model.Cv.Id" class="btn btn-primary align-self-start">Luyện với CV này</a></div>
+<a asp-action="Index" class="page-back">← Hồ sơ & mục tiêu</a>
+<div class="page-heading"><div><h1>@Model.Cv.FileName</h1><p>Phiên bản #@Model.Cv.Id · @Ui.Time(Model.Cv.CreatedAt) (UTC+7)</p></div><a asp-controller="Interviews" asp-action="Create" asp-route-cvProfileId="@Model.Cv.Id" class="btn btn-primary">Luyện với CV này</a></div>
 @await Html.PartialAsync("_Messages")
 @if (TempData["ProfileAiSettingsNeeded"] is true) { <p class="mb-4"><a asp-controller="AiSettings" asp-action="Index" asp-route-returnUrl="@Url.Action("Cv", "Profile", new { id = Model.Cv.Id })" class="btn btn-secondary">Sửa kết nối AI rồi quay lại CV này →</a></p> }
 <div class="row g-4">

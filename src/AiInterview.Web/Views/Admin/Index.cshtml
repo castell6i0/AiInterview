@@ -1,20 +1,20 @@
 @model AdminIndexVm
 @{ ViewData["Title"] = "Quản trị hệ thống"; }
-<h1>Quản trị hệ thống</h1><p class="text-muted">Quản lý quyền truy cập, nội dung luyện tập và tiêu chí đánh giá.</p>
-@await Html.PartialAsync("_Nav")
+<div class="page-heading"><div><h1>Quản trị hệ thống</h1><p>Quyền truy cập, nội dung luyện tập và mức sử dụng AI.</p></div></div>
 @await Html.PartialAsync("_Alerts")
-<a asp-controller="AiUsage" asp-action="Index" class="btn btn-secondary mb-3">Xem sử dụng AI theo tài khoản và ngày →</a>
-<dl class="kpi-grid mb-2">
-    <div class="kpi reveal" style="--i:0"><dt>Người dùng</dt><dd><span class="kpi-value">@Model.UserCount</span><span class="kpi-unit">tài khoản</span></dd></div>
-    <div class="kpi reveal" style="--i:1"><dt>Buổi phỏng vấn</dt><dd><span class="kpi-value">@Model.SessionCount</span><span class="kpi-unit">buổi</span></dd><dd class="kpi-hint">Mọi trạng thái, kể cả buổi chưa xong.</dd></div>
-    <div class="kpi reveal" style="--i:2"><dt>Câu hỏi ngân hàng</dt><dd><span class="kpi-value">@Model.QuestionCount</span><span class="kpi-unit">câu</span></dd></div>
-</dl>
-<div class="support-actions mb-4"><a asp-action="Users" class="btn btn-secondary btn-sm">Quản lý tài khoản →</a><a asp-action="Questions" class="btn btn-secondary btn-sm">Bổ sung câu hỏi →</a></div>
-<h2 class="h4">Sử dụng AI</h2>
-<dl class="kpi-grid mb-2">
-    <div class="kpi reveal" style="--i:3"><dt>Lượt gọi</dt><dd><span class="kpi-value">@Model.AiRequestCount.ToString("N0")</span><span class="kpi-unit">lượt</span></dd><dd class="kpi-hint">Gồm cả lượt thử lại.</dd></div>
-    <div class="kpi reveal" style="--i:4"><dt>Token vào</dt><dd><span class="kpi-value">@Model.ReportedInputTokens.ToString("N0")</span><span class="kpi-unit">token</span></dd><dd class="kpi-hint">Chỉ số provider trả về.</dd></div>
-    <div class="kpi reveal" style="--i:5"><dt>Token ra</dt><dd><span class="kpi-value">@Model.ReportedOutputTokens.ToString("N0")</span><span class="kpi-unit">token</span></dd><dd class="kpi-hint">Chỉ số provider trả về.</dd></div>
-    <div class="kpi reveal" style="--i:6"><dt>Chi phí đã biết</dt><dd><span class="kpi-value">@Model.KnownEstimatedCostUsd.ToString("0.0000")</span><span class="kpi-unit">USD</span></dd><dd class="kpi-hint">Ước tính, không phải hóa đơn.</dd></div>
-</dl>
-<div><p class="small text-muted mb-0">Có @Model.UnknownCostCount lượt chưa xác định chi phí; tổng trên chỉ cộng các giá trị đã biết, không phải hóa đơn. Token chỉ tổng hợp số lượng provider thực sự trả về.</p></div>
+<section class="page-section" aria-labelledby="systemHeading">
+    <div class="section-head"><h2 id="systemHeading" class="h4 mb-0">Hệ thống</h2></div>
+    <dl class="kpi-grid">
+        <div class="kpi reveal" style="--i:0"><dt>Người dùng</dt><dd><span class="kpi-value">@Model.UserCount</span><span class="kpi-unit">tài khoản</span></dd></div>
+        <div class="kpi reveal" style="--i:1"><dt>Buổi phỏng vấn</dt><dd><span class="kpi-value">@Model.SessionCount</span><span class="kpi-unit">buổi</span></dd><dd class="kpi-hint">Mọi trạng thái, kể cả buổi chưa xong.</dd></div>
+        <div class="kpi reveal" style="--i:2"><dt>Câu hỏi ngân hàng</dt><dd><span class="kpi-value">@Model.QuestionCount</span><span class="kpi-unit">câu</span></dd></div>
+    </dl>
+</section>
+<section class="page-section" aria-labelledby="aiHeading">
+    <div class="section-head"><h2 id="aiHeading" class="h4 mb-0">Sử dụng AI</h2><a asp-controller="AiUsage" asp-action="Index" class="btn btn-secondary btn-sm">Chi tiết theo tài khoản và ngày <span class="btn-arrow" aria-hidden="true">→</span></a></div>
+    <dl class="kpi-grid">
+        <div class="kpi reveal" style="--i:3"><dt>Lượt gọi</dt><dd><span class="kpi-value">@Model.AiRequestCount.ToString("N0")</span><span class="kpi-unit">lượt</span></dd><dd class="kpi-hint">Gồm cả lượt thử lại.</dd></div>
+        <div class="kpi reveal" style="--i:4"><dt>Token vào / ra</dt><dd><span class="kpi-value">@Model.ReportedInputTokens.ToString("N0")</span><span class="kpi-unit">vào</span></dd><dd><span class="kpi-value">@Model.ReportedOutputTokens.ToString("N0")</span><span class="kpi-unit">ra</span></dd><dd class="kpi-hint">Chỉ số provider trả về.</dd></div>
+        <div class="kpi reveal" style="--i:5"><dt>Chi phí đã biết</dt><dd><span class="kpi-value">@Model.KnownEstimatedCostUsd.ToString("0.0000")</span><span class="kpi-unit">USD</span></dd><dd class="kpi-hint">Ước tính, không phải hóa đơn. @Model.UnknownCostCount lượt chưa rõ chi phí.</dd></div>
+    </dl>
+</section>

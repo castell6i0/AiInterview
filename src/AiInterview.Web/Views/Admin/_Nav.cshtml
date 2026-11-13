@@ -1,8 +1,0 @@
-@{ var current = ViewContext.RouteData.Values["action"]?.ToString(); string? On(params string[] actions) => actions.Contains(current) ? "page" : null; }
-<nav class="admin-nav d-flex flex-wrap gap-2 mb-4" aria-label="Quản trị">
-    <a asp-action="Index" class="btn btn-secondary btn-sm" aria-current="@On("Index")">Tổng quan</a>
-    <a asp-action="Users" class="btn btn-secondary btn-sm" aria-current="@On("Users")">Người dùng</a>
-    <a asp-action="Positions" class="btn btn-secondary btn-sm" aria-current="@On("Positions")">Vị trí ứng tuyển</a>
-    <a asp-action="Questions" class="btn btn-secondary btn-sm" aria-current="@On("Questions")">Ngân hàng câu hỏi</a>
-    <a asp-action="Rubric" class="btn btn-secondary btn-sm" aria-current="@On("Rubric")">Rubric và trọng số</a>
-</nav>
