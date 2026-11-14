@@ -7,8 +7,6 @@ document.querySelectorAll('form[data-confirm]').forEach(form=>form.addEventListe
 const sync=()=>toggle.setAttribute('aria-expanded',String(!root.classList.contains('sidebar-collapsed')));sync();
 toggle.addEventListener('click',()=>{if(window.matchMedia('(max-width: 767px)').matches){document.getElementById('appNav')?.classList.remove('open');document.getElementById('menuToggle')?.setAttribute('aria-expanded','false');return;}
 const collapsed=root.classList.toggle('sidebar-collapsed');sync();try{localStorage.setItem('sidebar',collapsed?'collapsed':'open');}catch{}});})();
-// Public top bar: show its solid background once the page is scrolled.
-(()=>{const bar=document.getElementById('publicBar');if(!bar)return;const update=()=>bar.classList.toggle('is-scrolled',window.scrollY>8);update();window.addEventListener('scroll',update,{passive:true});})();
 // Click ripple on buttons, from the pointer position (skipped when effects are off).
 document.addEventListener('pointerdown',e=>{const b=e.target.closest?.('.btn');if(!b||b.disabled||document.documentElement.classList.contains('motion-off'))return;const r=b.getBoundingClientRect(),size=Math.max(r.width,r.height)*2.2,dot=document.createElement('span');dot.className='ripple';dot.style.cssText=`width:${size}px;height:${size}px;left:${e.clientX-r.left-size/2}px;top:${e.clientY-r.top-size/2}px`;dot.addEventListener('animationend',()=>dot.remove());b.append(dot);});
 // Copy buttons (e.g. class join code): [data-copy] puts its value on the clipboard and confirms in place.

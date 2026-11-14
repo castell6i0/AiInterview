@@ -1,15 +1,18 @@
 (() => {
     'use strict';
-    // One canvas, three looks: 'sphere' (signed-in: rotating globe of "Hello World"), 'matrix' (account pages: falling 0/1),
-    // 'ascii' (public pages: drifting IT tokens). The header "Hiệu ứng" button is the on/off switch (html.motion-off = off).
+    // One canvas, four looks: 'sphere' (signed-in: rotating globe of "Hello World"), 'matrix' (account pages: falling 0/1),
+    // 'wave' (home page: ribbon of keyword waves), 'ascii' (other public pages: drifting IT tokens).
+    // The header "Hiệu ứng" button is the on/off switch (html.motion-off = off).
     const canvas = document.getElementById('asciiBg');
     const toggle = document.getElementById('bgToggle');
     const mode = document.body.dataset.bg;
-    if (!canvas || !['sphere', 'matrix', 'ascii'].includes(mode)) { canvas?.remove(); return; }
+    if (!canvas || !['sphere', 'matrix', 'wave', 'ascii'].includes(mode)) { canvas?.remove(); return; }
     const root = document.documentElement;
     const ctx = canvas.getContext('2d');
     const css = getComputedStyle(root);
-    const accent = css.getPropertyValue('--accent').trim(), text = css.getPropertyValue('--text').trim(), font = css.getPropertyValue('--font-mono').trim();
+    const accent = css.getPropertyValue('--accent').trim(), cyan = css.getPropertyValue('--cyan').trim(), text = css.getPropertyValue('--text').trim(), font = css.getPropertyValue('--font-mono').trim();
+    const tokens = ['SELECT *', 'O(n log n)', 'git commit', 'async/await', '404', 'HashMap', '{}', '=>', '0x1F', 'try/catch',
+        'LEFT JOIN', 'GROUP BY', 'O(1)', 'git rebase', '200 OK', 'null', 'yield', 'queue.pop()', 'mutex', 'TCP/IP', 'ACID', 'git diff', '[]', '&&', 'REST', 'index'];
     let width = 0, height = 0, raf = 0, last = 0, resizeTimer = 0, scene = null;
     const enabled = () => !root.classList.contains('motion-off');
 
@@ -68,8 +71,6 @@
     }
     // Drifting IT tokens (public pages).
     function asciiScene() {
-        const tokens = ['SELECT *', 'O(n log n)', 'git commit', 'async/await', '404', 'HashMap', '{}', '=>', '0x1F', 'try/catch',
-            'LEFT JOIN', 'GROUP BY', 'O(1)', 'git rebase', '200 OK', 'null', 'yield', 'queue.pop()', 'mutex', 'TCP/IP', 'ACID', 'git diff', '[]', '&&', 'REST', 'index'];
         const spawn = y => ({ x: Math.random() * width, y, speed: 6 + Math.random() * 10, text: tokens[Math.random() * tokens.length | 0], alpha: 0.4 + Math.random() * 0.6 });
         const items = Array.from({ length: Math.round(width * height / (width <= 767 ? 40000 : 18000)) }, () => spawn(Math.random() * height));
         return {
@@ -81,17 +82,47 @@
         };
     }
 
+    // Keyword waves: a wide bundle of lines made of code tokens. Each point only bobs up and down (standing waves: a fixed
+    // shape along x times a slow sine in time, with a per-line phase so the bundle twists); text never slides sideways.
+    function waveScene() {
+        const small = width <= 767, lines = small ? 14 : 22, gap = small ? 11 : 13;
+        const stream = tokens.join('   ') + '   ';
+        const rgb = hex => hex.replace('#', '').match(/../g).map(h => parseInt(h, 16));
+        const [from, to] = [rgb(cyan), rgb(accent)];
+        const colours = Array.from({ length: lines }, (_, i) => `rgb(${from.map((v, k) => Math.round(v + (to[k] - v) * i / (lines - 1))).join(',')})`);
+        let t = 0;
+        return {
+            step(seconds) { t += seconds; },
+            draw() {
+                ctx.font = `${small ? 12 : 14}px ${font}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                const mid = height * 0.5, amp = height * 0.3, cols = Math.ceil(width / gap) + 1;
+                for (let i = 0; i < lines; i++) {
+                    const f = i / (lines - 1), a = Math.sin(t * 0.55 + f * 1.2), b = Math.cos(t * 0.37 + f * 0.9);
+                    ctx.fillStyle = colours[i];
+                    ctx.globalAlpha = 0.1 + 0.3 * Math.sin(Math.PI * f);
+                    for (let j = 0; j < cols; j++) {
+                        const ch = stream[(j + i * 11) % stream.length];
+                        if (ch === ' ') continue;
+                        const x = j * gap, u = x / width, swell = 0.5 + 0.5 * Math.sin(Math.PI * u);
+                        const y = mid + amp * swell * (Math.sin(u * 7 + f * 0.8) * a + 0.4 * Math.sin(u * 15 + 1.3) * b)
+                            + amp * 0.6 * (f - 0.5) * (1 + 0.5 * Math.cos(u * 4));
+                        ctx.fillText(ch, x, y);
+                    }
+                }
+            }
+        };
+    }
+
     function draw() { ctx.clearRect(0, 0, width, height); scene.draw(); }
     function resize() {
         const dpr = Math.min(window.devicePixelRatio || 1, 2);
         width = window.innerWidth; height = window.innerHeight;
         canvas.width = Math.round(width * dpr); canvas.height = Math.round(height * dpr);
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        scene = mode === 'sphere' ? sphereScene() : mode === 'matrix' ? matrixScene() : asciiScene();
+        scene = mode === 'sphere' ? sphereScene() : mode === 'matrix' ? matrixScene() : mode === 'wave' ? waveScene() : asciiScene();
     }
     function frame(now) {
         raf = requestAnimationFrame(frame);
-        if (now - last < 33) return; // ~30fps cap
         const seconds = Math.min(now - last, 100) / 1000; last = now;
         scene.step(seconds); draw();
     }
@@ -111,14 +142,6 @@
         start();
     });
     window.addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(() => { resize(); start(); }, 150); });
-    // Hold the background still while the page scrolls: every canvas frame forces each glass panel to re-blur it.
-    let scrollTimer = 0;
-    window.addEventListener('scroll', () => {
-        if (!enabled()) return;
-        if (raf) stop();
-        clearTimeout(scrollTimer);
-        scrollTimer = setTimeout(start, 180);
-    }, { passive: true });
     document.addEventListener('visibilitychange', () => document.hidden ? stop() : start());
     resize();
     start();

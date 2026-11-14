@@ -105,25 +105,22 @@
         <header class="app-header">
             <button class="btn btn-sm btn-secondary mobile-menu" type="button" aria-label="Mở hoặc đóng menu điều hướng" aria-expanded="false" aria-controls="appNav" id="menuToggle"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-menu" /></svg></button>
             <div class="header-path"><span class="header-context">@(User.IsInRole(Roles.Admin) ? "Không gian quản lí" : User.IsInRole(Roles.Lecturer) ? "Không gian giảng dạy" : "Không gian học tập")</span><strong class="header-title">@(ViewData["Heading"] ?? ViewData["Title"])</strong></div>
+            <a class="btn btn-secondary btn-sm" href="/Home/Privacy">Quyền riêng tư</a>
             <button class="btn btn-secondary btn-sm bg-toggle" type="button" id="bgToggle" aria-pressed="true" title="Bật/tắt nền chuyển động và hiệu ứng" hidden><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-terminal" /></svg><span>Hiệu ứng</span></button>
         </header>
         <main id="main" class="page-content">
             @if (TempData["Message"] is string message) { <div class="alert alert-info" role="status">@message</div> }
             @RenderBody()
         </main>
-        <footer class="app-footer"><span>InterviewLab · Luyện phỏng vấn IT</span><a class="btn btn-secondary btn-sm" href="/Home/Privacy">Quyền riêng tư</a></footer>
     </div>
 }
 else
 {
-    <div class="public-bar" id="publicBar">
     <header class="public-header container">
         <a class="brand" href="/"><span class="brand-mark" aria-hidden="true">il</span>InterviewLab<span class="brand-dot" aria-hidden="true">.</span></a>
-        <nav class="d-flex flex-wrap align-items-center gap-2" aria-label="Hướng dẫn và tài khoản"><button class="btn btn-secondary btn-sm bg-toggle" type="button" id="bgToggle" aria-pressed="true" title="Bật/tắt nền chuyển động và hiệu ứng" hidden><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-terminal" /></svg><span>Hiệu ứng</span></button><a class="btn btn-secondary btn-sm" href="/Home/Help" aria-current="@Current(controller == "Home" && action == "Help")">Hướng dẫn</a><a class="btn btn-secondary btn-sm" href="/Account/Login" aria-current="@Current(controller == "Account" && action == "Login")">Đăng nhập</a><a class="btn btn-primary btn-sm" href="/Account/Register">Bắt đầu luyện tập →</a></nav>
+        <nav class="d-flex flex-wrap align-items-center gap-2" aria-label="Hướng dẫn và tài khoản"><button class="btn btn-secondary btn-sm bg-toggle" type="button" id="bgToggle" aria-pressed="true" title="Bật/tắt nền chuyển động và hiệu ứng" hidden><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-terminal" /></svg><span>Hiệu ứng</span></button><a class="btn btn-secondary btn-sm" href="/Home/Help" aria-current="@Current(controller == "Home" && action == "Help")">Hướng dẫn</a><a class="btn btn-secondary btn-sm" href="/Home/Privacy" aria-current="@Current(controller == "Home" && action == "Privacy")">Dữ liệu &amp; quyền riêng tư</a><a class="btn btn-secondary btn-sm" href="/Account/Login" aria-current="@Current(controller == "Account" && action == "Login")">Đăng nhập</a><a class="btn btn-primary btn-sm" href="/Account/Register">Bắt đầu luyện tập →</a></nav>
     </header>
-    </div>
     <main id="main">@RenderBody()</main>
-    <footer class="container public-footer"><span>InterviewLab · Luyện phỏng vấn IT</span><a class="btn btn-secondary btn-sm" href="/Home/Privacy">Dữ liệu &amp; quyền riêng tư</a></footer>
 }
 <script src="~/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script src="~/lib/chart/chart.umd.min.js"></script>
