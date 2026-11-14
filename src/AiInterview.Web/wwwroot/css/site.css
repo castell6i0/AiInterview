@@ -19,12 +19,9 @@
 --bs-body-font-family:var(--font-sans);--bs-font-monospace:var(--font-mono);
 /* One control height: buttons match .form-control/.form-select (measured 48px). */
 --control-h:48px;
---radius-sm:10px;--radius:18px;
---glass:color-mix(in srgb,color-mix(in srgb,var(--surface-2) 92%,var(--text)) 78%,transparent);
---glass-raised:color-mix(in srgb,var(--surface-2) 85%,transparent);
---glass-line:color-mix(in srgb,var(--text) 15%,transparent);
---glass-edge:inset 0 1px 0 color-mix(in srgb,var(--text) 24%,transparent),inset 0 -1px 0 color-mix(in srgb,var(--bg) 45%,transparent);
---glass-shadow:0 20px 44px -24px color-mix(in srgb,var(--bg) 92%,transparent);
+--glass:color-mix(in srgb,var(--surface-1) 72%,transparent);
+--glass-line:color-mix(in srgb,var(--text) 12%,transparent);
+--blur:blur(8px);
 }
 
 *{box-sizing:border-box}
@@ -776,7 +773,7 @@ details[open]>:not(summary){animation:fadeIn .18s ease-out}
 .menu-dots .icon{width:22px;height:22px}
 .menu-dots:hover,.menu-dots:focus-visible,.menu-dots:has(+ :popover-open){background:color-mix(in srgb,var(--text) 10%,transparent);color:var(--text)}
 .menu-dots:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.glass-pop{margin:0;inset:auto;padding:6px;color:var(--text);background:color-mix(in srgb,var(--surface-2) 94%,transparent);border:1px solid var(--glass-line);border-radius:16px;box-shadow:var(--glass-edge),0 24px 48px -20px color-mix(in srgb,var(--bg) 95%,transparent);overflow:visible;opacity:1;transform:none;transition:opacity .16s ease-out,transform .26s cubic-bezier(.2,.9,.25,1.25),display .26s allow-discrete,overlay .26s allow-discrete}
+.glass-pop{margin:0;inset:auto;padding:6px;color:var(--text);background:var(--glass);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);border:1px solid var(--glass-line);border-radius:8px;box-shadow:0 24px 48px -20px color-mix(in srgb,var(--bg) 95%,transparent);overflow:visible;opacity:1;transform:none;transition:opacity .16s ease-out,transform .26s cubic-bezier(.2,.9,.25,1.25),display .26s allow-discrete,overlay .26s allow-discrete}
 .glass-pop:not(:popover-open){display:none;opacity:0;transform:scale(.55)}
 @starting-style{.glass-pop:popover-open{opacity:0;transform:scale(.55)}}
 .row-menu{display:flex;gap:4px;position-area:left center;position-try-fallbacks:flip-inline;margin-inline:8px;transform-origin:right center}
@@ -798,13 +795,11 @@ html:not(.js) .access-confirm-text,html:not(.js) [data-access-cancel]{display:no
 body::before{content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;background:radial-gradient(60vw 50vh at 85% -10%,color-mix(in srgb,var(--accent) 20%,transparent),transparent 70%),radial-gradient(55vw 45vh at -5% 105%,color-mix(in srgb,var(--cyan) 16%,transparent),transparent 70%)}
 body{-webkit-font-smoothing:antialiased}
 h1,h2,h3,h4,h5{font-weight:650;letter-spacing:-.022em}
-.card,.kpi-grid,.filter-bar,.session-list,.dashboard-hero,.ai-panel,.room-main,.room-bar,.guide-deck,.auth-card,.page-content>.table-responsive,.soft-panel,.terminal,.story-card,.landing-cta-inner,.empty-state,.score-panel,.chart-empty,.coach-tip,.alert{position:relative;background-color:var(--glass);background-image:radial-gradient(130% 90% at 20% 0%,color-mix(in srgb,var(--text) 9%,transparent),transparent 62%);border:1px solid var(--glass-line);border-radius:var(--radius);box-shadow:var(--glass-edge),var(--glass-shadow)}
-/* Rim light: a static 1.5px masked ring with two bright arcs (the moving light is the compositor-only glint further down). */
-.card::before,.kpi-grid::before,.filter-bar::before,.session-list::before,.dashboard-hero::before,.ai-panel::before,.room-main::before,.room-bar::before,.guide-deck::before,.auth-card::before,.page-content>.table-responsive::before,.soft-panel::before,.terminal::before,.story-card::before,.landing-cta-inner::before,.empty-state::before,.score-panel::before,.chart-empty::before,.coach-tip::before,.alert::before{content:"";position:absolute;inset:0;z-index:1;border-radius:inherit;padding:1.5px;pointer-events:none;background:conic-gradient(from 120deg,transparent 0deg,color-mix(in srgb,var(--text) 95%,var(--cyan)) 22deg,color-mix(in srgb,var(--cyan) 55%,transparent) 40deg,transparent 78deg,transparent 180deg,color-mix(in srgb,var(--cyan) 75%,var(--text)) 205deg,transparent 250deg);-webkit-mask:linear-gradient(black 0 0) content-box,linear-gradient(black 0 0);-webkit-mask-composite:xor;mask:linear-gradient(black 0 0) content-box exclude,linear-gradient(black 0 0)}
-.card{--bs-card-bg:transparent;--bs-card-border-color:var(--glass-line);--bs-card-border-radius:var(--radius);--bs-card-inner-border-radius:calc(var(--radius) - 1px)}
+.card,.kpi-grid,.filter-bar,.session-list,.dashboard-hero,.ai-panel,.room-main,.room-bar,.guide-deck,.auth-card,.page-content>.table-responsive,.soft-panel,.terminal,.story-card,.landing-cta-inner,.empty-state,.score-panel,.chart-empty,.coach-tip,.alert{position:relative;background-color:var(--glass);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);border:1px solid var(--glass-line);border-radius:8px}
+.card{--bs-card-bg:transparent;--bs-card-border-color:var(--glass-line);--bs-card-border-radius:8px;--bs-card-inner-border-radius:7px}
 .alert{--bs-alert-bg:color-mix(in srgb,var(--tone) 12%,var(--glass));--bs-alert-border-color:color-mix(in srgb,var(--tone) 34%,transparent);background-color:var(--bs-alert-bg);border-color:var(--bs-alert-border-color)}
 .chart-empty{border-style:dashed}
-.dashboard-hero,.room-main,.guide-deck{background-color:color-mix(in srgb,var(--accent) 7%,var(--glass));border-color:color-mix(in srgb,var(--accent) 30%,var(--glass-line));box-shadow:var(--glass-edge),0 26px 60px -30px var(--accent-glow)}
+.dashboard-hero,.room-main,.guide-deck{background-color:color-mix(in srgb,var(--accent) 7%,var(--glass));border-color:color-mix(in srgb,var(--accent) 30%,var(--glass-line));box-shadow:0 26px 60px -30px var(--accent-glow)}
 .ai-panel-head{background:color-mix(in srgb,var(--accent) 7%,transparent);box-shadow:none;border-bottom:1px solid var(--glass-line)}
 .kpi-grid{gap:0;background:var(--glass)}
 .kpi{background:transparent}
@@ -815,32 +810,10 @@ h1,h2,h3,h4,h5{font-weight:650;letter-spacing:-.022em}
 .table>:not(caption)>*>*{border-bottom-color:var(--glass-line)}
 .table>tbody>tr:hover>*{--bs-table-bg-state:color-mix(in srgb,var(--text) 5%,transparent)}
 .table>thead>tr>*{background:color-mix(in srgb,var(--text) 4%,transparent)}
-.sidebar{background:color-mix(in srgb,var(--surface-1) 90%,transparent);border-color:var(--glass-line)}
-.nav-item{border-radius:12px}
-.nav-item.active{background:color-mix(in srgb,var(--text) 9%,transparent);box-shadow:var(--glass-edge)}
-.nav-item.active::before{display:none}
-.nav-item:hover{background:color-mix(in srgb,var(--text) 6%,transparent)}
-.skill-chip,.skill-cell,.answer-compare,.ai-model-selection,.ai-inline-notice,.tag,.ai-source-label,.join-code-row .join-code{border-radius:12px}
-.skill-chip,.skill-cell,.answer-compare,.ai-model-selection,.tag,.join-code-row .join-code{background:var(--glass-raised);border-color:var(--glass-line)}
-.btn{--bs-btn-border-radius:999px}
-.btn-secondary{--bs-btn-bg:color-mix(in srgb,var(--text) 7%,transparent);--bs-btn-border-color:var(--glass-line);--bs-btn-hover-bg:color-mix(in srgb,var(--text) 13%,transparent);--bs-btn-hover-border-color:color-mix(in srgb,var(--text) 22%,transparent);--bs-btn-active-bg:color-mix(in srgb,var(--text) 17%,transparent);box-shadow:var(--glass-edge)}
-.btn-primary{background-image:linear-gradient(180deg,color-mix(in srgb,var(--text) 26%,transparent),transparent 58%);box-shadow:inset 0 1px 0 color-mix(in srgb,var(--text) 45%,transparent),0 10px 24px -12px var(--accent-glow)}
-.btn-primary:hover{box-shadow:inset 0 1px 0 color-mix(in srgb,var(--text) 45%,transparent),0 0 0 4px var(--accent-glow),0 12px 28px -12px var(--accent-glow)}
-.btn-ai,.btn-danger,.btn-warning{--bs-btn-bg:color-mix(in srgb,var(--tone) 9%,transparent);box-shadow:var(--glass-edge)}
-.form-control,.form-select{border-radius:14px;background-color:color-mix(in srgb,var(--surface-2) 52%,transparent);border-color:var(--glass-line);box-shadow:inset 0 1px 2px color-mix(in srgb,var(--bg) 50%,transparent)}
-.form-control:focus,.form-select:focus{background-color:color-mix(in srgb,var(--surface-2) 70%,transparent);border-color:color-mix(in srgb,var(--accent) 70%,transparent);box-shadow:0 0 0 4px var(--accent-glow)}
-.room-answer textarea,.room-answer textarea:focus{border-radius:0;box-shadow:none;background-color:transparent}
-.room-answer textarea:focus{box-shadow:inset 0 0 0 2px var(--accent)}
-.form-select option{background:var(--surface-2)}
-.form-check-input{border-radius:6px;background-color:color-mix(in srgb,var(--text) 8%,transparent);border-color:var(--glass-line)}
+.sidebar{background:var(--glass);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);border-color:var(--glass-line)}
 .table th,.eyebrow,.section-label,.nav-caption,.small-pill,.step-dot,.metric-number,.brand-mark,.avatar,.story-index,.room-progress-count,.room-timer,.ai-avatar,.question-label,.voice-stage-label,.score-panel .big-score,.hero-steps li::before,.ai-row-index,.ai-source-label,.kpi dt,.kpi-value,.kpi-unit,.score-value,.table .num,.num,.coach-tip,.guide-count,.guide-index,.landing-scroll,.room-shell[data-mode="text"] .question-text,.room-shell[data-mode="text"] .room-answer textarea{font-family:var(--font-sans);font-variant-numeric:tabular-nums}
 .kpi-value,.score-value,.guide-index,.room-timer,.metric-number,.score-panel .big-score{font-weight:650;letter-spacing:-.02em}
 .table th,.eyebrow,.kpi dt,.section-label,.nav-caption{letter-spacing:.06em;font-weight:600}
-@supports (animation-timeline:view()){
-.card,.kpi-grid,.filter-bar,.session-list,.dashboard-hero,.ai-panel,.room-main,.room-bar,.auth-card,.soft-panel,.terminal,.story-card,.landing-cta-inner,.empty-state,.score-panel,.chart-empty,.alert{overflow:clip}
-.card::after,.kpi-grid::after,.filter-bar::after,.session-list::after,.dashboard-hero::after,.ai-panel::after,.room-main::after,.room-bar::after,.auth-card::after,.page-content>.table-responsive::after,.soft-panel::after,.terminal::after,.story-card::after,.landing-cta-inner::after,.empty-state::after,.score-panel::after,.chart-empty::after,.alert::after{content:"";position:absolute;inset:-60% -30%;z-index:-1;pointer-events:none;background:radial-gradient(28% 22% at 50% 50%,color-mix(in srgb,var(--text) 9%,transparent),transparent 72%);animation:glint linear both;animation-timeline:view();will-change:transform}
-@keyframes glint{from{transform:translate3d(-28%,-30%,0)}to{transform:translate3d(28%,30%,0)}}
-}
 /* The header "Hiệu ứng" button is the motion switch (html.motion-off, remembered). Default is on, even when the OS asks for reduced motion. */
 .motion-off *,.motion-off *::before,.motion-off *::after{animation:none!important;transition:none!important}
 .motion-off::view-transition-group(*),.motion-off::view-transition-old(*),.motion-off::view-transition-new(*){animation:none!important}
