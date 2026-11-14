@@ -111,6 +111,14 @@
         start();
     });
     window.addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(() => { resize(); start(); }, 150); });
+    // Hold the background still while the page scrolls: every canvas frame forces each glass panel to re-blur it.
+    let scrollTimer = 0;
+    window.addEventListener('scroll', () => {
+        if (!enabled()) return;
+        if (raf) stop();
+        clearTimeout(scrollTimer);
+        scrollTimer = setTimeout(start, 180);
+    }, { passive: true });
     document.addEventListener('visibilitychange', () => document.hidden ? stop() : start());
     resize();
     start();
