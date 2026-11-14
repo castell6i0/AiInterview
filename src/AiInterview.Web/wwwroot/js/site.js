@@ -20,3 +20,47 @@ document.addEventListener('click',async e=>{
     try{await navigator.clipboard.writeText(button.dataset.copy);done('Đã sao chép');}
     catch{const area=Object.assign(document.createElement('textarea'),{value:button.dataset.copy});area.setAttribute('readonly','');area.style.position='fixed';area.style.opacity='0';document.body.append(area);area.select();const ok=document.execCommand('copy');area.remove();done(ok?'Đã sao chép':'Không sao chép được');}
 });
+
+// Popovers (.glass-pop) are native; CSS anchor positioning places them. Where that is unsupported, place them here instead.
+(() => {
+    if (CSS.supports('anchor-name: --a')) return;
+    const place = pop => {
+        const anchor = document.querySelector(`[popovertarget="${pop.id}"]`) || document.getElementById(pop.dataset.anchor || '');
+        if (!anchor) return;
+        const r = anchor.getBoundingClientRect(), w = pop.offsetWidth, h = pop.offsetHeight;
+        let left, top;
+        if (pop.classList.contains('row-menu')) { left = r.left - w - 8; if (left < 8) left = r.right + 8; top = r.top + r.height / 2 - h / 2; }
+        else { left = Math.min(r.left, innerWidth - w - 8); top = r.bottom + 8; }
+        Object.assign(pop.style, { position: 'fixed', left: `${Math.max(8, left)}px`, top: `${Math.max(8, top)}px` });
+    };
+    document.addEventListener('toggle', e => { if (e.newState === 'open' && e.target.classList?.contains('glass-pop')) place(e.target); }, true);
+    addEventListener('scroll', () => document.querySelectorAll('.glass-pop:popover-open').forEach(place), { passive: true });
+})();
+
+// Role / lock forms: changing either opens a small confirm popover with Lưu; Hủy (or Escape) restores the old values.
+(() => {
+    document.querySelectorAll('[data-access-form]').forEach(form => {
+        const role = form.querySelector('select[name="Role"]');
+        const lock = form.querySelector('input[name="Locked"]');
+        const pop = form.querySelector('.access-confirm');
+        const text = form.querySelector('.access-confirm-text');
+        if (!pop || !pop.showPopover) return; // no Popover API: the inline Lưu button stays visible
+        pop.setAttribute('popover', 'manual');
+        pop.classList.add('glass-pop');
+        const initialRole = role?.value, initialLock = lock?.checked;
+        const update = () => {
+            const roleChanged = role && role.value !== initialRole, lockChanged = lock && lock.checked !== initialLock;
+            if (text) text.textContent = roleChanged && lockChanged ? 'Bạn vừa đổi quyền và trạng thái khóa của người dùng này. Bạn có đồng ý lưu?'
+                : lockChanged ? 'Bạn vừa đổi trạng thái khóa của người dùng này. Bạn có đồng ý lưu?'
+                : 'Bạn vừa đổi quyền của người dùng này. Bạn có đồng ý lưu?';
+            const open = pop.matches(':popover-open');
+            if ((roleChanged || lockChanged) && !open) pop.showPopover();
+            if (!(roleChanged || lockChanged) && open) pop.hidePopover();
+        };
+        const cancel = () => { if (role) role.value = initialRole; if (lock) lock.checked = initialLock; update(); role?.focus(); };
+        role?.addEventListener('change', update);
+        lock?.addEventListener('change', update);
+        form.querySelector('[data-access-cancel]')?.addEventListener('click', cancel);
+        form.addEventListener('keydown', e => { if (e.key === 'Escape' && pop.matches(':popover-open')) cancel(); });
+    });
+})();

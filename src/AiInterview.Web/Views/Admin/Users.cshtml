@@ -2,7 +2,7 @@
 @{ ViewData["Title"] = "Quản lý người dùng"; }
 <div class="page-heading"><div><h1>Quản lý người dùng</h1><p>Đổi vai trò hoặc khóa tài khoản sẽ thu hồi phiên đăng nhập cũ.</p></div></div>
 @await Html.PartialAsync("_Alerts")
-<form asp-action="Users" method="get" class="filter-bar toolbar mb-3"><label for="search" class="visually-hidden">Tên hoặc email</label><input id="search" name="search" value="@Model.Search" class="form-control toolbar-grow" placeholder="Tìm theo tên hoặc email" maxlength="200" /><button class="btn btn-secondary" type="submit">Tìm người dùng</button><a asp-action="CreateUser" class="btn btn-primary">Thêm người dùng</a></form>
+<form asp-action="Users" method="get" class="toolbar mb-3"><label for="search" class="visually-hidden">Tên hoặc email</label><input id="search" name="search" value="@Model.Search" class="form-control toolbar-grow" placeholder="Tìm theo tên hoặc email" maxlength="200" /><button class="btn btn-secondary" type="submit">Tìm người dùng</button><a asp-action="CreateUser" class="btn btn-primary">Thêm người dùng</a></form>
 <p class="small text-muted">Không thể gỡ quyền hoặc khóa tài khoản quản trị cuối cùng, hay tự khóa chính mình.</p>
 @if (Model.HasMore) { <div class="alert alert-info">Đang hiển thị 100 kết quả đầu tiên. Tìm theo tên hoặc email để thu hẹp.</div> }
 <div class="table-responsive"><table class="table align-middle"><thead><tr><th>Người dùng</th><th>Quyền hiện tại</th><th>Trạng thái</th><th>Cập nhật quyền</th><th>Thao tác</th></tr></thead><tbody>
@@ -11,20 +11,20 @@
     <tr><td><strong>@user.FullName</strong><br /><span class="text-muted small">@user.Email</span></td>
         <td>@foreach (var role in user.Roles) { <span class="pill pill-info me-1">@(role == Roles.Admin ? "Quản trị" : role == Roles.Lecturer ? "Giảng viên" : "Sinh viên")</span> }</td>
         <td><span class="pill @(user.Locked ? "pill-danger" : "pill-ok")">@(user.Locked ? "Đang khóa" : "Hoạt động")</span></td>
-        <td><form asp-action="UserAccess" method="post" class="d-flex align-items-center gap-2">
+        <td><form asp-action="UserAccess" method="post" class="access-form" data-access-form>
             <input type="hidden" name="UserId" value="@user.Id" /><label for="role-@user.Id" class="visually-hidden">Vai trò của @user.FullName</label>
-            <select name="Role" id="role-@user.Id" class="form-select form-select-sm select-compact">
+            <select name="Role" id="role-@user.Id" class="form-select form-select-sm select-compact" style="anchor-name:--role-@user.Id">
                 <option value="Student" selected="@user.Roles.Contains(Roles.Student)">Sinh viên</option>
                 <option value="Lecturer" selected="@user.Roles.Contains(Roles.Lecturer)">Giảng viên</option>
                 <option value="Admin" selected="@user.Roles.Contains(Roles.Admin)">Quản trị</option>
             </select>
             <div class="form-check"><input name="Locked" value="true" type="checkbox" class="form-check-input" id="lock-@user.Id" checked="@user.Locked" /><label for="lock-@user.Id" class="form-check-label">Khóa</label></div>
-            <button class="btn btn-primary btn-sm" type="submit">Lưu</button>
+            <div class="access-confirm" role="group" aria-label="Xác nhận lưu thay đổi của @user.FullName" data-anchor="role-@user.Id" style="position-anchor:--role-@user.Id">
+                <p class="access-confirm-text" aria-live="polite">Bạn vừa đổi quyền của người dùng này. Bạn có đồng ý lưu?</p>
+                <div class="access-confirm-actions"><button type="button" class="btn btn-secondary btn-sm" data-access-cancel>Hủy</button><button class="btn btn-primary btn-sm" type="submit">Lưu</button></div>
+            </div>
         </form></td>
-        <td><div class="row-actions">
-            <a asp-action="EditUser" asp-route-id="@user.Id" class="btn btn-secondary btn-sm" aria-label="Sửa người dùng @user.FullName"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-edit" /></svg>Sửa</a>
-            <a asp-action="DeleteUser" asp-route-id="@user.Id" class="btn btn-danger btn-sm" aria-label="Xóa người dùng @user.FullName"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-trash" /></svg>Xóa</a>
-        </div></td></tr>
+        <td><button type="button" class="menu-dots" popovertarget="menu-u@(user.Id)" style="anchor-name:--menu-u@(user.Id)" aria-label="Thao tác cho @user.FullName"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-more-v" /></svg></button><div id="menu-u@(user.Id)" popover class="glass-pop row-menu" style="position-anchor:--menu-u@(user.Id)"><a asp-action="EditUser" asp-route-id="@user.Id" class="row-menu-item"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-edit" /></svg>Sửa</a><a asp-action="DeleteUser" asp-route-id="@user.Id" class="row-menu-item is-danger"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-trash" /></svg>Xóa</a></div></td></tr>
 }
 @if (Model.Users.Count == 0) { <tr><td colspan="5">Không có người dùng phù hợp.</td></tr> }
 </tbody></table></div>
