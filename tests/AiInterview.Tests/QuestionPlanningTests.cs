@@ -35,13 +35,13 @@ public class QuestionPlanningTests
         Assert.False(QuestionPlanning.IsNearDuplicate("Bạn phân biệt mức độ nghiêm trọng và độ ưu tiên của một lỗi như thế nào?",history));
     }
     [Fact]
-    public void QuestionSchemaPreventsPrematureGoodbyeAndUnrequestedCoding()
+    public void QuestionSchemaLeavesServerOwnedFlagsUnconstrained()
     {
-        var root=JsonSerializer.SerializeToElement(AiPrompts.QuestionSchema(false,false));
+        var root=JsonSerializer.SerializeToElement(AiPrompts.QuestionSchema(false));
         var fields=root.GetProperty("properties");
-        Assert.False(fields.GetProperty("finished").GetProperty("enum")[0].GetBoolean());
-        Assert.False(fields.GetProperty("followUp").GetProperty("enum")[0].GetBoolean());
-        Assert.False(fields.GetProperty("isCoding").GetProperty("enum")[0].GetBoolean());
+        Assert.False(fields.GetProperty("finished").TryGetProperty("enum",out _));
+        Assert.False(fields.GetProperty("followUp").TryGetProperty("enum",out _));
+        Assert.False(fields.GetProperty("isCoding").TryGetProperty("enum",out _));
         Assert.Equal("",fields.GetProperty("codeLanguage").GetProperty("enum")[0].GetString());
     }
 }
