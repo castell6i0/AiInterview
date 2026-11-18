@@ -10,11 +10,9 @@
     const prev = document.getElementById('guidePrev');
     const next = document.getElementById('guideNext');
     const count = document.getElementById('guideCount');
-    const tip = document.getElementById('coachTip');
-    const coach = guide.querySelector('.guide-coach');
     const dotsBox = document.getElementById('guideDots');
     const pad = n => String(n).padStart(2, '0');
-    let current = 0, timer = 0, cueTimer = 0;
+    let current = 0, timer = 0;
 
     const dots = slides.map((slide, i) => {
         const dot = document.createElement('button');
@@ -38,7 +36,6 @@
         count.textContent = `BƯỚC ${pad(current + 1)} / ${pad(slides.length)}`;
         prev.disabled = current === 0;
         next.disabled = current === slides.length - 1;
-        if (tip) tip.textContent = slides[current].dataset.tip || '';
     }
 
     function go(index) {
@@ -48,12 +45,10 @@
         leaving.classList.add('is-leaving');
         current = index;
         render();
-        // Restart the scan line and the coach's pointing cue.
+        // Restart the scan line.
         deck.classList.remove('is-switching'); void deck.offsetWidth; deck.classList.add('is-switching');
-        coach?.classList.remove('is-cue'); void coach?.offsetWidth; coach?.classList.add('is-cue');
-        clearTimeout(timer); clearTimeout(cueTimer);
+        clearTimeout(timer);
         timer = setTimeout(() => { slides.forEach(s => s.classList.remove('is-leaving')); deck.classList.remove('is-switching'); }, 650);
-        cueTimer = setTimeout(() => coach?.classList.remove('is-cue'), 1000);
         try { history.replaceState(null, '', `#${slides[current].querySelector('h2').id}`); } catch { /* hash not updated */ }
     }
 

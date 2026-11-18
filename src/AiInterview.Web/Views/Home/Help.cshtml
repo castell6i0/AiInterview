@@ -10,57 +10,35 @@
         <div><h1>Hướng dẫn sử dụng</h1></div>
     </div>
     <div class="guide" id="guide">
-        @* Người que đứng giảng: luôn chuyển động, chỉ tay vào bảng khi đổi bước. Trang trí, không mang thông tin. *@
-        <aside class="guide-coach" aria-hidden="true">
-            <p class="coach-tip" id="coachTip">@(lecturer ? "Đầu tiên: tạo lớp và chia mã!" : "Bắt đầu từ bước 1 nhé!")</p>
-            <svg class="coach" viewBox="0 0 200 300" focusable="false">
-                <ellipse class="coach-shadow" cx="82" cy="276" rx="46" ry="6" />
-                <g class="coach-body">
-                    <g class="coach-head">
-                        <circle class="coach-line" cx="80" cy="58" r="22" />
-                        <circle class="coach-eye" cx="89" cy="54" r="2.6" />
-                        <line class="coach-mouth" x1="84" y1="68" x2="95" y2="68" />
-                    </g>
-                    <line class="coach-line" x1="80" y1="82" x2="80" y2="182" />
-                    <g class="coach-arm-back"><polyline class="coach-line" points="80,104 58,138 66,170" /></g>
-                    <g class="coach-arm-front">
-                        <line class="coach-line" x1="80" y1="104" x2="112" y2="124" />
-                        <g class="coach-forearm"><line class="coach-line" x1="112" y1="124" x2="138" y2="108" /><line class="coach-pointer" x1="138" y1="108" x2="186" y2="74" /><circle class="coach-pointer-tip" cx="186" cy="74" r="3.5" /></g>
-                    </g>
-                    <g class="coach-legs"><polyline class="coach-line" points="62,270 80,182 100,270" /><line class="coach-line" x1="62" y1="270" x2="50" y2="272" /><line class="coach-line" x1="100" y1="270" x2="112" y2="272" /></g>
-                </g>
-            </svg>
-        </aside>
-
         <section class="guide-deck" id="guideDeck" aria-roledescription="trình chiếu" aria-label="Hướng dẫn từng bước">
             <div class="guide-top"><span class="guide-count" id="guideCount" aria-live="polite">BƯỚC 01 / 05</span><div class="guide-progress" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div></div>
             <div class="guide-slides">
                 @if (lecturer) {
-                <div class="guide-slide" role="group" aria-roledescription="bước" aria-label="1 / 5" data-tip="Đầu tiên: tạo lớp và chia mã!">
+                <div class="guide-slide" role="group" aria-roledescription="bước" aria-label="1 / 5">
                     <span class="guide-index">01</span><h2 id="lecturerClassHelp">Tạo lớp và chia sẻ mã tham gia</h2>
                     <p>Vào <strong>Lớp giảng dạy</strong>, bấm <strong>Tạo lớp mới</strong> và đặt tên lớp. Hệ thống tạo một mã tham gia riêng cho lớp.</p>
                     <p>Trong dashboard lớp, bấm <strong>Sao chép</strong> cạnh mã để gửi cho sinh viên. Sinh viên nhập mã ở mục <strong>Lớp học của tôi</strong> và đồng ý cho giảng viên xem lịch sử luyện tập.</p>
                     <p class="help-text">Giảng viên xem được toàn bộ lịch sử luyện tập, transcript, điểm và tiến bộ của sinh viên trong lớp, kể cả các buổi trước khi vào lớp; không tải được tệp CV và JD gốc.</p>
                     <div class="guide-actions"><a class="btn btn-primary" href="/Lecturer/Create">Tạo lớp mới</a><a class="btn btn-secondary" href="/Lecturer">Lớp giảng dạy</a></div>
                 </div>
-                <div class="guide-slide" role="group" aria-roledescription="bước" aria-label="2 / 5" data-tip="Giao bài cho cả lớp nào!">
+                <div class="guide-slide" role="group" aria-roledescription="bước" aria-label="2 / 5">
                     <span class="guide-index">02</span><h2 id="lecturerAssignHelp">Giao bài phỏng vấn</h2>
                     <p>Trong dashboard lớp, bấm <strong>Giao bài tập</strong>. Nhập tên bài, hướng dẫn cho sinh viên, hạn nộp (giờ Việt Nam), rồi chọn vị trí, cấp độ, ngôn ngữ, loại phỏng vấn và số câu chính (5–10).</p>
                     <p>Bài tập giữ cố định rubric đang hoạt động lúc giao để chấm nhất quán. Sinh viên bấm <strong>Bắt đầu luyện cho bài này</strong> để có đúng cấu hình, rồi nộp buổi đã hoàn thành.</p>
                     <p class="help-text">Chỉ nộp được buổi tạo sau khi giao bài, đúng cấu hình và trả lời đủ mọi câu chính. Bài nộp sau hạn vẫn được lưu và có nhãn nộp muộn.</p>
                 </div>
-                <div class="guide-slide" role="group" aria-roledescription="bước" aria-label="3 / 5" data-tip="Xem lớp đang tiến bộ ra sao!">
+                <div class="guide-slide" role="group" aria-roledescription="bước" aria-label="3 / 5">
                     <span class="guide-index">03</span><h2 id="lecturerTrackHelp">Theo dõi sinh viên</h2>
                     <p>Dashboard lớp cho biết số sinh viên, số người <strong>Cần theo dõi</strong> (không luyện từ 14 ngày, hoặc 3 buổi gần nhất dưới 5 điểm) và điểm trung bình của các buổi có báo cáo đầy đủ.</p>
                     <p>Biểu đồ <strong>Kỹ năng cần củng cố của lớp</strong> cho thấy chủ đề lớp còn yếu. Bảng <strong>Sinh viên và cảnh báo</strong> liệt kê từng người; bấm <strong>Lịch sử và góp ý</strong> để xem tiến bộ của một sinh viên.</p>
                     <p class="help-text">Bấm <strong>Xuất CSV cho Excel</strong> để tải bảng tổng hợp của lớp. Điểm chỉ dùng để hỗ trợ học tập, không dùng để xếp hạng.</p>
                 </div>
-                <div class="guide-slide" role="group" aria-roledescription="bước" aria-label="4 / 5" data-tip="Góp ý cho từng buổi luyện!">
+                <div class="guide-slide" role="group" aria-roledescription="bước" aria-label="4 / 5">
                     <span class="guide-index">04</span><h2 id="lecturerCommentHelp">Nhận xét bài làm</h2>
                     <p>Mở <strong>Lịch sử và góp ý</strong> của sinh viên. Mỗi buổi luyện có điểm, nút <strong>Xem báo cáo chi tiết</strong> và mục <strong>Thêm nhận xét cho sinh viên</strong> để viết góp ý (tối đa 3.000 ký tự).</p>
                     <p>Sinh viên thấy nhận xét trong tab <strong>Nhận xét giảng viên</strong> của báo cáo buổi đó. Ở mục <strong>Bài tập của lớp</strong>, mở <strong>Xem tất cả lần nộp</strong> để xem ai đã nộp, nộp lúc nào và mở báo cáo.</p>
                 </div>
-                <div class="guide-slide" role="group" aria-roledescription="bước" aria-label="5 / 5" data-tip="Quản lý lớp và hỏi đáp!">
+                <div class="guide-slide" role="group" aria-roledescription="bước" aria-label="5 / 5">
                     <span class="guide-index">05</span><h2 id="lecturerManageHelp">Quản lý lớp &amp; hỏi đáp</h2>
                     <details><summary>Mời sinh viên ra khỏi lớp thì sao?</summary><p>Bấm <strong>Mời khỏi lớp</strong> ở hàng của sinh viên trong bảng Sinh viên và cảnh báo. Sinh viên không thể dùng mã để vào lại lớp. Bài đã nộp vẫn được giữ: bạn vẫn mở được báo cáo và nhận xét các bài đó, nhưng không xem được các buổi luyện mới của sinh viên.</p></details>
                     <details><summary>Đóng lớp khác gì xóa lớp?</summary><p>Bấm <strong>Đóng lớp</strong> để ngừng nhận thành viên và bài nộp mới, không giao thêm bài. Lịch sử và báo cáo vẫn xem được; bấm <strong>Mở lại lớp</strong> khi cần dùng tiếp.</p></details>
@@ -69,7 +47,7 @@
                     <div class="guide-actions"><a class="btn btn-secondary" href="/Lecturer">Về lớp giảng dạy</a></div>
                 </div>
                 } else {
-                <div class="guide-slide" role="group" aria-roledescription="bước" aria-label="1 / 5" data-tip="Đầu tiên: tạo tài khoản!">
+                <div class="guide-slide" role="group" aria-roledescription="bước" aria-label="1 / 5">
                     <span class="guide-index">01</span><h2 id="accountHelp">Tạo tài khoản</h2>
                     <p>Điền họ tên, email và mật khẩu ngay trên website. Nếu hệ thống yêu cầu xác nhận email, mở thư từ InterviewLab, bấm <strong>Xác nhận email</strong> rồi đăng nhập. Nếu website chưa bật email, bạn đăng nhập được ngay; email khi đó chưa được xác minh.</p>
                     <p class="help-text">Chưa thấy thư? Kiểm tra thư rác, gửi lại email xác nhận hoặc liên hệ quản trị viên.</p>
@@ -79,14 +57,14 @@
                     </div>
                     @if (signedIn) { <p class="help-text mb-0">Bạn đã đăng nhập — bấm Tiếp theo để kết nối AI.</p> }
                 </div>
-                <div class="guide-slide" role="group" aria-roledescription="bước" aria-label="2 / 5" data-tip="Giờ kết nối AI nào!">
+                <div class="guide-slide" role="group" aria-roledescription="bước" aria-label="2 / 5">
                     <span class="guide-index">02</span><h2 id="connectionHelp">Chọn kết nối AI</h2>
                     <p>Mở <strong>Cài đặt AI</strong> để xem kết nối đang dùng. Cần kết nối cá nhân thì chọn Gemini, dán API key Google AI Studio rồi chọn model có hạn mức miễn phí (vẫn tự nhập được tên model).</p>
                     <p>Bấm <strong>Lưu &amp; kiểm tra model</strong> để lưu và thử tạo một nội dung mẫu ngắn; bấm <strong>Chỉ lưu</strong> nếu chưa muốn gọi API.</p>
                     <p class="help-text">Danh sách chỉ gợi ý model Gemini có hạn mức miễn phí cho tài khoản đủ điều kiện; dự án Google AI Studio đã bật thanh toán vẫn có thể tính phí. Model tự nhập không được xác nhận miễn phí. Kiểm tra có thể dùng một ít hạn mức, không gửi CV hay câu trả lời. OpenAI cũ vẫn được giữ trong phần nâng cao có nhãn phí.</p>
                     <div class="guide-actions"><a class="btn btn-primary" href="/AiSettings">Mở Cài đặt AI</a><a class="btn btn-secondary" href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">Google AI Studio <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-external" /></svg></a></div>
                 </div>
-                <div class="guide-slide" role="group" aria-roledescription="bước" aria-label="3 / 5" data-tip="Chọn vị trí rồi trả lời thôi!">
+                <div class="guide-slide" role="group" aria-roledescription="bước" aria-label="3 / 5">
                     <span class="guide-index">03</span><h2 id="practiceHelp">Chọn vị trí và trả lời câu hỏi</h2>
                     <p>Vào <strong>Luyện phỏng vấn</strong>, chọn vị trí ứng tuyển, cấp độ, ngôn ngữ và cách trả lời. Lần đầu nên chọn 5 câu và nhập văn bản.</p>
                     <p>Đọc phần đồng ý gửi dữ liệu tới nhà cung cấp AI đang hiển thị. Vào phòng, bấm <strong>Bắt đầu phỏng vấn</strong> khi sẵn sàng, rồi viết hoặc nói câu trả lời và bấm <strong>Gửi câu trả lời</strong>.</p>
@@ -95,14 +73,14 @@
                     else if (!signedIn) { <p class="help-text mb-0">Đăng nhập bằng tài khoản sinh viên để bắt đầu.</p> }
                     else { <p class="help-text mb-0">Phần luyện phỏng vấn dành cho tài khoản sinh viên.</p> }
                 </div>
-                <div class="guide-slide" role="group" aria-roledescription="bước" aria-label="4 / 5" data-tip="Đọc góp ý, luyện tiếp điểm yếu!">
+                <div class="guide-slide" role="group" aria-roledescription="bước" aria-label="4 / 5">
                     <span class="guide-index">04</span><h2 id="reportHelp">Đọc góp ý và luyện tiếp</h2>
                     <p>Hoàn tất các câu rồi bấm <strong>Tạo và xem báo cáo</strong>. Đọc điểm theo tiêu chí, dẫn chứng từ câu trả lời và gợi ý cải thiện, rồi chọn một điểm còn yếu cho buổi tiếp theo.</p>
                     <p>Trong <strong>Lịch sử &amp; tiến bộ</strong>, bạn đọc lại báo cáo hoặc bấm <strong>Tiếp tục</strong> ở buổi chưa xong.</p>
                     <p class="help-text">AI báo lỗi thì làm theo thông báo và thử lại trong buổi hiện tại. Câu trả lời đã gửi thành công vẫn được giữ; với bản nháp, chờ báo lưu xong rồi hãy rời trang.</p>
                     @if (student) { <div class="guide-actions"><a class="btn btn-secondary" href="/Dashboard/History">Mở lịch sử luyện tập</a></div> }
                 </div>
-                <div class="guide-slide" role="group" aria-roledescription="bước" aria-label="5 / 5" data-tip="Còn thắc mắc? Xem ở đây!">
+                <div class="guide-slide" role="group" aria-roledescription="bước" aria-label="5 / 5">
                     <span class="guide-index">05</span><h2 id="faqHeading">Câu hỏi thường gặp</h2>
                     <details><summary>API key là gì? Người khác có thấy key của tôi không?</summary><p>API key là mã cho phép website dùng dịch vụ AI từ tài khoản của bạn. Key cá nhân được mã hóa khi lưu trên máy chủ, chỉ áp dụng cho tài khoản của bạn và không hiển thị lại. Bạn thay hoặc xóa key tại Cài đặt AI. Nội dung bạn đồng ý phân tích được gửi tới nhà cung cấp đã chọn. <a href="/Home/Privacy">Cách xử lý dữ liệu</a>.</p></details>
                     <details><summary>Key sai, hết hạn mức hoặc AI không trả lời thì làm gì?</summary><p>Mở Cài đặt AI, kiểm tra đúng nhà cung cấp và lưu lại key nếu cần. Xem quyền truy cập, hạn mức và thanh toán trên website nhà cung cấp; dùng kết nối chung thì liên hệ quản trị viên. Sau đó quay lại buổi đang luyện và thử lại. Nếu đổi nhà cung cấp, website sẽ hỏi lại sự đồng ý gửi dữ liệu.</p></details>

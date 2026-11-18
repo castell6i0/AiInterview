@@ -672,42 +672,6 @@ details[open]>:not(summary){animation:fadeIn .18s ease-out}
 .ai-key-input{gap:8px}
 }
 .guide{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;align-items:start}
-.guide-coach{display:flex;flex-direction:row-reverse;justify-content:center;align-items:center;gap:4px}
-.coach{width:110px;height:auto;overflow:visible}
-@container (min-width:1340px){
-.guide{grid-template-columns:minmax(0,1fr) minmax(0,940px) minmax(0,1fr);gap:28px}
-.guide-deck{grid-column:2;grid-row:1}
-.guide-coach{grid-column:1;grid-row:1;justify-self:end;width:100%;max-width:240px;position:sticky;top:112px;flex-direction:column;gap:12px}
-.coach{width:100%;max-width:220px}
-.coach-tip::after{left:38%;top:auto;bottom:-7px;border:0;border-right:1px solid var(--border-strong);border-bottom:1px solid var(--border-strong)}
-}
-.coach-line{fill:none;stroke:var(--text);stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
-.coach-eye{fill:var(--text)}
-.coach-mouth{stroke:var(--text);stroke-width:3.5;stroke-linecap:round}
-.coach-pointer{stroke:var(--accent);stroke-width:4;stroke-linecap:round}
-.coach-pointer-tip{fill:var(--accent)}
-.coach-shadow{fill:var(--border-strong);opacity:.55}
-.coach *{transform-box:view-box}
-.coach-body{transform-origin:80px 270px;animation:coachBob 3.2s ease-in-out infinite}
-.coach-head{transform-origin:80px 80px;animation:coachNod 3.2s ease-in-out infinite}
-.coach-mouth{transform-origin:89px 68px;animation:coachTalk .42s ease-in-out infinite alternate}
-.coach-arm-front{transform-origin:80px 104px;animation:coachGesture 2.8s ease-in-out infinite}
-.coach-forearm{transform-origin:112px 124px;animation:coachTap 1.4s ease-in-out infinite}
-.coach-arm-back{transform-origin:80px 104px;animation:coachSwing 3.6s ease-in-out infinite}
-.coach-shadow{transform-origin:82px 276px;animation:coachShadow 3.2s ease-in-out infinite}
-.guide-coach.is-cue .coach-arm-front{animation:coachCue .9s cubic-bezier(.3,1.4,.5,1)}
-.guide-coach.is-cue .coach-tip{animation:tipPop .45s cubic-bezier(.3,1.4,.5,1)}
-@keyframes coachBob{50%{transform:translateY(3px)}}
-@keyframes coachNod{0%,100%{transform:rotate(-3deg)}30%{transform:rotate(5deg)}60%{transform:rotate(-1deg)}}
-@keyframes coachTalk{from{transform:scaleX(.35)}to{transform:scaleX(1)}}
-@keyframes coachGesture{0%,100%{transform:rotate(0)}35%{transform:rotate(-12deg)}70%{transform:rotate(5deg)}}
-@keyframes coachTap{0%,100%{transform:rotate(0)}50%{transform:rotate(-12deg)}}
-@keyframes coachSwing{0%,100%{transform:rotate(0)}40%{transform:rotate(16deg)}75%{transform:rotate(-6deg)}}
-@keyframes coachShadow{50%{transform:scaleX(.9)}}
-@keyframes coachCue{35%{transform:rotate(-30deg)}65%{transform:rotate(-24deg)}}
-@keyframes tipPop{from{transform:translateY(6px) scale(.92);opacity:.3}}
-.coach-tip{position:relative;margin:0;padding:12px 16px;max-width:220px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface-2);font-family:var(--font-mono);font-size:.8125rem;line-height:1.5;color:var(--text);text-align:center}
-.coach-tip::after{content:"";position:absolute;left:-7px;top:calc(50% - 6px);width:12px;height:12px;background:var(--surface-2);border-left:1px solid var(--border-strong);border-bottom:1px solid var(--border-strong);transform:rotate(45deg)}
 
 .guide-deck{position:relative;overflow:hidden;width:100%;max-width:940px;justify-self:center;padding:36px 44px 28px;background:var(--surface-1);border:1px solid var(--border-strong);border-radius:8px;box-shadow:inset 3px 0 0 var(--accent);outline:none}
 .guide-top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px;margin-bottom:20px}
@@ -795,7 +759,7 @@ html:not(.js) .access-confirm-text,html:not(.js) [data-access-cancel]{display:no
 
 body{-webkit-font-smoothing:antialiased}
 h1,h2,h3,h4,h5{font-weight:600;letter-spacing:-.022em}
-.card,.kpi-grid,.filter-bar,.session-list,.dashboard-hero,.ai-panel,.room-main,.room-bar,.guide-deck,.auth-card,.page-content>.table-responsive,.soft-panel,.terminal,.story-card,.landing-cta-inner,.empty-state,.score-panel,.chart-empty,.coach-tip,.alert{position:relative;background-color:var(--surface-1);border:1px solid var(--line);border-radius:8px}
+.card,.kpi-grid,.filter-bar,.session-list,.dashboard-hero,.ai-panel,.room-main,.room-bar,.guide-deck,.auth-card,.page-content>.table-responsive,.soft-panel,.terminal,.story-card,.landing-cta-inner,.empty-state,.score-panel,.chart-empty,.alert{position:relative;background-color:var(--surface-1);border:1px solid var(--line);border-radius:8px}
 .card{--bs-card-bg:transparent;--bs-card-border-color:var(--line);--bs-card-border-radius:8px;--bs-card-inner-border-radius:7px}
 .alert{--bs-alert-bg:color-mix(in srgb,var(--tone) 12%,var(--surface-1));--bs-alert-border-color:color-mix(in srgb,var(--tone) 34%,transparent);background-color:var(--bs-alert-bg);border-color:var(--bs-alert-border-color)}
 .chart-empty{border-style:dashed}
@@ -811,7 +775,7 @@ h1,h2,h3,h4,h5{font-weight:600;letter-spacing:-.022em}
 .table>tbody>tr:hover>*{--bs-table-bg-state:color-mix(in srgb,var(--text) 5%,transparent)}
 .table>thead>tr>*{background:color-mix(in srgb,var(--text) 4%,transparent)}
 .sidebar{background:var(--surface-1);border-color:var(--line)}
-.table th,.eyebrow,.section-label,.nav-caption,.small-pill,.step-dot,.metric-number,.brand-mark,.avatar,.story-index,.room-progress-count,.room-timer,.ai-avatar,.question-label,.voice-stage-label,.score-panel .big-score,.hero-steps li::before,.ai-row-index,.ai-source-label,.kpi dt,.kpi-value,.kpi-unit,.score-value,.table .num,.num,.coach-tip,.guide-count,.guide-index,.landing-scroll,.room-shell[data-mode="text"] .question-text,.room-shell[data-mode="text"] .room-answer textarea{font-family:var(--font-sans);font-variant-numeric:tabular-nums}
+.table th,.eyebrow,.section-label,.nav-caption,.small-pill,.step-dot,.metric-number,.brand-mark,.avatar,.story-index,.room-progress-count,.room-timer,.ai-avatar,.question-label,.voice-stage-label,.score-panel .big-score,.hero-steps li::before,.ai-row-index,.ai-source-label,.kpi dt,.kpi-value,.kpi-unit,.score-value,.table .num,.num,.guide-count,.guide-index,.landing-scroll,.room-shell[data-mode="text"] .question-text,.room-shell[data-mode="text"] .room-answer textarea{font-family:var(--font-sans);font-variant-numeric:tabular-nums}
 .kpi-value,.score-value,.guide-index,.room-timer,.metric-number,.score-panel .big-score{font-weight:600;letter-spacing:-.02em}
 .table th,.eyebrow,.kpi dt,.section-label,.nav-caption{font-weight:600}
 /* The header "Hiệu ứng" button is the motion switch (html.motion-off, remembered). Default is on, even when the OS asks for reduced motion. */
