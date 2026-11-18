@@ -25,13 +25,10 @@ public static class AiPrompts
     private static object Bool() => new { type = "boolean" };
     private static object Arr(object item) => new { type = "array", items = item };
     private static object Obj(Dictionary<string, object> properties) => new { type = "object", properties, required = properties.Keys.ToArray(), additionalProperties = false };
-    public static object QuestionSchema(bool allowFollowUp, bool coding)
+    public static object QuestionSchema(bool coding)
     {
         var schema = JsonSerializer.SerializeToNode(Schema<QuestionResult>())!;
         var fields = schema["properties"]!;
-        fields["finished"]!["enum"] = JsonSerializer.SerializeToNode(new[] { false });
-        if (!allowFollowUp) fields["followUp"]!["enum"] = JsonSerializer.SerializeToNode(new[] { false });
-        fields["isCoding"]!["enum"] = JsonSerializer.SerializeToNode(new[] { coding });
         fields["codeLanguage"]!["enum"] = JsonSerializer.SerializeToNode(coding ? new[] { "csharp", "javascript", "python" } : new[] { "" });
         fields["question"]!["minLength"] = 15;
         fields["question"]!["maxLength"] = 5000;
