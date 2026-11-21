@@ -22,6 +22,7 @@ public sealed class RequestProtectionTests
     {
         new[] { "Account", "Login", "auth" }, new[] { "Account", "Register", "auth" },
         new[] { "Account", "ResendConfirmation", "email" }, new[] { "Account", "ConfirmEmail", "confirm-email" },
+        new[] { "Account", "VerifyCode", "auth" }, new[] { "Account", "ResendCode", "email" },
         new[] { "AiSettings", "Save", "ai-settings" }, new[] { "AiSettings", "TestConnection", "ai-settings" },
         new[] { "Interviews", "Stream", "ai-stream" }, new[] { "Interviews", "Answer", "answer" },
         new[] { "Interviews", "Draft", "draft" }, new[] { "Interviews", "Create", "session-create" },

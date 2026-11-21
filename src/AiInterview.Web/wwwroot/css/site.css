@@ -795,3 +795,20 @@ h1,h2,h3,h4,h5{font-weight:600;letter-spacing:-.022em}
 /* The header "Hiệu ứng" switch turns motion off (html.motion-off, remembered); the switch itself still slides. Default is on, even when the OS asks for reduced motion. */
 .motion-off :not(.fx-track),.motion-off :not(.fx-track)::before,.motion-off :not(.fx-track)::after{animation:none!important;transition:none!important}
 .motion-off::view-transition-group(*),.motion-off::view-transition-old(*),.motion-off::view-transition-new(*){animation:none!important}
+
+/* Login code popup over the login card: digits gather into a spinning ring, then a spinner (login-code.js) */
+.otp-backdrop{position:absolute;inset:0;z-index:5;display:grid;place-items:center;padding:16px;background:color-mix(in srgb,var(--bg) 72%,transparent);backdrop-filter:blur(3px);border-radius:inherit;animation:otp-in .2s ease-out}
+.otp-card{width:100%;padding:28px 20px;background:var(--surface-1);border:1px solid var(--line);border-radius:8px;text-align:center;box-shadow:0 18px 48px rgb(0 0 0/.45)}
+.otp-card h2{font-size:1.35rem;margin:0 0 6px}
+.otp-digits{position:relative;display:flex;justify-content:center;gap:8px;margin:22px 0 10px}
+.otp-input{position:absolute;inset:0;z-index:1;width:100%;opacity:0;font-size:16px;cursor:text}
+.otp-digit{flex:0 1 44px;min-width:0;height:54px;display:flex;align-items:center;justify-content:center;font:700 1.5rem var(--font-mono);color:#00ff66;background:#000;border:1px solid var(--line);border-radius:8px;transition:transform .45s cubic-bezier(.6,0,.3,1),opacity .3s,border-radius .45s}
+.otp-digit.is-active{outline:2px solid var(--accent);outline-offset:1px}
+.otp-digits.is-gather{animation:spin .9s linear .4s infinite}
+.otp-digits.is-gather .otp-digit{outline:0;transform:translateX(var(--dx)) rotate(var(--a)) translateY(-30px) rotate(calc(-1 * var(--a))) scale(.6);border-radius:50%}
+.otp-spinner{position:absolute;left:50%;top:50%;width:46px;height:46px;margin:-23px 0 0 -23px;border:3px solid color-mix(in srgb,#00ff66 22%,transparent);border-top-color:#00ff66;border-radius:50%;opacity:0;transition:opacity .35s;pointer-events:none}
+.otp-digits.is-loading .otp-digit{opacity:0}
+.otp-digits.is-loading .otp-spinner{opacity:1}
+.otp-digits.is-shake{animation:shake .3s ease-out}
+.otp-error{min-height:1.4em;margin:0 0 12px;color:rgb(var(--bs-danger-rgb));font-size:.9rem}
+@keyframes otp-in{from{opacity:0}}

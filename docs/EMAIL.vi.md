@@ -4,7 +4,7 @@
 
 Khi SMTP và địa chỉ website công khai đã được thiết lập, InterviewLab gửi email xác nhận cho tài khoản tự đăng ký mới. Người dùng phải mở liên kết trong thư để xác nhận địa chỉ trước khi đăng nhập. Khi **chưa có SMTP**, nút đăng ký vẫn hoạt động: tài khoản mới đăng nhập ngay bằng mật khẩu nhưng **chưa xác minh email** (`EmailConfirmed` vẫn `false`). Để tránh người khác đăng ký bằng email không thuộc về họ trên website công khai, nên cấu hình email và HTTPS trước khi mời người dùng đăng ký.
 
-Sau khi đăng nhập thành công, hệ thống gửi email thông báo đăng nhập. Đây là thông báo, không phải mã OTP hoặc bước xác thực thứ hai. Hiện chưa có chức năng quên/đặt lại mật khẩu qua email.
+Sinh viên có email đã xác nhận: sau khi nhập đúng mật khẩu, hệ thống gửi mã 6 chữ số (hiệu lực 2 phút, dùng một lần) và hiện khung nhập mã ngay trên trang đăng nhập. Sai 5 lần thì tài khoản bị khóa 10 phút. Chọn "Ghi nhớ đăng nhập" thì trình duyệt đó không bị hỏi mã ở lần sau. Khi chưa cấu hình SMTP, sinh viên đăng nhập thẳng không cần mã. Giảng viên và quản trị viên không cần mã, vẫn nhận email thông báo đăng nhập như cũ. Hiện chưa có chức năng quên/đặt lại mật khẩu qua email.
 
 ## Cấu hình Gmail trên máy của bạn
 

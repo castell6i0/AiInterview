@@ -22,5 +22,25 @@
             <a class="btn btn-secondary btn-sm" asp-action="CheckEmail">Nhận lại email xác nhận <span class="btn-arrow" aria-hidden="true">→</span></a>
         </nav>
         <div class="auth-switch"><span>Chưa có tài khoản?</span><a class="btn btn-secondary btn-sm" asp-action="Register">Tạo tài khoản <span class="btn-arrow" aria-hidden="true">→</span></a></div>
+        @if (ViewData["LoginCode"] is string codeState)
+        {
+            <div class="otp-backdrop">
+                <form class="otp-card" asp-action="VerifyCode" method="post" role="dialog" aria-modal="true" aria-labelledby="otp-title" data-otp data-resend="@Url.Action("ResendCode")">
+                    <h2 id="otp-title">Nhập mã 6 chữ số</h2>
+                    <p class="auth-lead">@(codeState == "sent" ? $"Mã vừa được gửi tới {Model.Email}. Hiệu lực 2 phút." : "Chưa gửi được mã. Bấm Gửi lại mã.")</p>
+                    <input type="hidden" name="rememberMe" value="@(Model.RememberMe ? "true" : "false")" />
+                    <input type="hidden" name="returnUrl" value="@Model.ReturnUrl" />
+                    <div class="otp-digits">
+                        @* One real input over 6 display boxes: per-box inputs break with Vietnamese IMEs (one key filled every box). *@
+                        <input class="otp-input" name="code" inputmode="numeric" maxlength="6" autocomplete="one-time-code" aria-label="Mã 6 chữ số" />
+                        @for (var i = 0; i < 6; i++) { <span class="otp-digit" aria-hidden="true"></span> }
+                        <span class="otp-spinner" aria-hidden="true"></span>
+                    </div>
+                    <p class="otp-error" role="alert"></p>
+                    <button type="button" class="btn btn-secondary btn-sm" data-otp-resend>Gửi lại mã</button>
+                </form>
+            </div>
+        }
     </section>
 </div>
+@section Scripts { <script src="~/js/login-code.js" asp-append-version="true"></script> }

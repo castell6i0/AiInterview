@@ -26,7 +26,8 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
     options.Password.RequiredLength = 10;
     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(10);
     options.Lockout.MaxFailedAccessAttempts = 5;
-}).AddEntityFrameworkStores<AppDbContext>().AddDefaultTokenProviders();
+}).AddEntityFrameworkStores<AppDbContext>().AddDefaultTokenProviders()
+    .AddTokenProvider<LoginCodeTokenProvider>(LoginCodeTokenProvider.Name).AddSignInManager<StudentSignInManager>();
 builder.Services.AddScoped<IUserConfirmation<ApplicationUser>, AccountEmailConfirmation>();
 builder.Services.Configure<DataProtectionTokenProviderOptions>(options => options.TokenLifespan = TimeSpan.FromHours(24));
 builder.Services.Configure<EmailOptions>(builder.Configuration.GetSection("Email"));
