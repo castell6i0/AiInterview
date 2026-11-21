@@ -43,7 +43,7 @@ p a:not(.btn),.help-text a:not(.btn),.alert a:not(.btn){text-decoration:underlin
 .nav-icon{width:20px;height:20px}
 
 /* Buttons: five variants only — primary, secondary, ai, danger, warning. One size everywhere (.btn-sm is the same size). */
-.btn{--bs-btn-border-radius:6px;--bs-btn-padding-y:.5rem;--bs-btn-padding-x:1rem;--bs-btn-font-weight:600;--bs-btn-font-size:.9375rem;--bs-btn-line-height:1.5;--bs-btn-focus-box-shadow:none;--bs-btn-disabled-opacity:.5;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;min-height:var(--control-h);max-width:100%;white-space:normal;overflow-wrap:anywhere;text-decoration:none;transition:none}
+.btn{--bs-btn-border-radius:6px;--bs-btn-padding-y:.5rem;--bs-btn-padding-x:1rem;--bs-btn-font-weight:500;--bs-btn-font-size:.9375rem;--bs-btn-line-height:1.5;--bs-btn-focus-box-shadow:none;--bs-btn-disabled-opacity:.5;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;min-height:var(--control-h);max-width:100%;white-space:normal;overflow-wrap:anywhere;text-decoration:none;transition:none}
 .btn[hidden],.support-action-row[hidden]{display:none!important}
 .table .btn{white-space:nowrap;overflow-wrap:normal}
 .btn-primary{--bs-btn-color:var(--on-accent);--bs-btn-bg:var(--accent);--bs-btn-border-color:var(--accent);--bs-btn-hover-color:var(--on-accent);--bs-btn-hover-bg:var(--accent-hover);--bs-btn-hover-border-color:var(--accent-hover);--bs-btn-active-color:var(--on-accent);--bs-btn-active-bg:var(--accent-active);--bs-btn-active-border-color:var(--accent-active);--bs-btn-disabled-color:var(--on-accent);--bs-btn-disabled-bg:var(--accent);--bs-btn-disabled-border-color:var(--accent)}
@@ -184,8 +184,15 @@ b,strong{font-weight:600}
 .page-content .page-heading .eyebrow,.page-content .eyebrow:has(+h1){display:none}
 .page-content .page-heading{align-items:center;margin-bottom:24px}
 .page-content .page-heading:not(:has(p,.btn,.page-actions,.tag)){margin:0}
-.bg-toggle{flex-shrink:0}
-.bg-toggle[aria-pressed="false"]{--bs-btn-color:var(--muted)}
+.app-header .btn,.public-header .btn{min-height:36px;--bs-btn-padding-y:.375rem;--bs-btn-padding-x:.875rem;--bs-btn-font-size:.875rem}
+.header-link{display:inline-flex;align-items:center;min-height:36px;padding:0 8px;color:var(--muted);font-size:.875rem;font-weight:500;transition:color .2s ease-out}
+.header-link:hover,.header-link[aria-current="page"]{color:var(--text)}
+/* Motion switch: green track with the knob right = on, dark track with the knob left = off. */
+.fx-switch{display:inline-flex;align-items:center;flex-shrink:0;min-height:36px;padding:0 4px;border:0;border-radius:6px;background:none;cursor:pointer}
+.fx-track{position:relative;width:40px;height:24px;border-radius:12px;background:var(--bg);border:1px solid var(--border-strong);transition:background-color .25s ease-out,border-color .25s ease-out}
+.fx-track::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:var(--muted);transition:transform .25s cubic-bezier(.3,.7,.4,1),background-color .25s ease-out}
+.fx-switch[aria-checked="true"] .fx-track{background:var(--accent);border-color:var(--accent)}
+.fx-switch[aria-checked="true"] .fx-track::after{transform:translateX(16px);background:var(--text)}
 .page-content{width:100%;max-width:1480px;margin:0 auto;padding:36px 40px 44px;flex:1;view-transition-name:page}
 .mobile-menu{display:none}
 .page-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin-bottom:28px}
@@ -290,8 +297,8 @@ section[id],article[id]{scroll-margin-top:24px}
 .feature-list h2{font-size:1.05rem;margin:4px 0 0}
 .feature-list p{margin:2px 0 0;color:var(--muted)}
 .auth-shell{display:flex;justify-content:center;padding:32px 16px 72px}
-.auth-card{width:100%;max-width:460px;padding:36px;background:var(--surface-1);border:1px solid var(--border);border-radius:8px;animation:authIn .4s ease-out both}
-.auth-card:has(.validation-summary-errors,.field-validation-error){animation:authIn .4s ease-out both,shake .3s ease-out .4s}
+.auth-card{width:100%;max-width:460px;padding:36px;background:var(--surface-1);border:1px solid var(--border);border-radius:8px;view-transition-name:auth-card}
+.auth-card:has(.validation-summary-errors,.field-validation-error){animation:shake .3s ease-out}
 .auth-card h1{font-size:1.9rem;margin:0 0 8px;text-align:center}
 .auth-lead{color:var(--muted);margin-bottom:20px;text-align:center}
 .auth-avatar{display:block;width:104px;height:104px;margin:0 auto 24px}
@@ -314,7 +321,6 @@ section[id],article[id]{scroll-margin-top:24px}
 .auth-field{margin-bottom:1rem}
 .auth-field:focus-within>.form-label{color:var(--accent)}
 .auth-steps{margin:12px 0 20px;padding-left:1.25rem;display:grid;gap:8px;color:var(--muted)}
-@keyframes authIn{from{opacity:0;transform:translateY(14px) scale(.98)}}
 .auth-support{display:grid;gap:12px;margin-top:24px;padding-top:20px;border-top:1px solid var(--border)}
 .auth-support>.btn{width:100%}
 .auth-switch{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-top:20px;font-size:.875rem;color:var(--muted)}
@@ -595,6 +601,14 @@ details[open]>:not(summary){animation:fadeIn .18s ease-out}
 ::view-transition-old(ascii-bg){display:none}
 ::view-transition-new(ascii-bg){animation:none}
 ::view-transition-group(nav-active){animation-duration:.2s;animation-timing-function:ease-out}
+/* Login ⇄ Register (type tagged in _Layout): the old card breaks into jittering scanlines, the new one locks in. */
+@property --scan{syntax:"<number>";inherits:false;initial-value:1}
+html:active-view-transition-type(auth-swap)::view-transition-group(auth-card){animation:none}
+html:active-view-transition-type(auth-swap)::view-transition-old(auth-card),html:active-view-transition-type(auth-swap)::view-transition-new(auth-card){mask-image:repeating-linear-gradient(#000 0 calc(var(--scan)*4px),transparent 0 4px)}
+html:active-view-transition-type(auth-swap)::view-transition-old(auth-card){filter:drop-shadow(-4px 0 0 color-mix(in srgb,var(--danger) 70%,transparent)) drop-shadow(4px 0 0 color-mix(in srgb,var(--cyan) 70%,transparent));animation:glitchOut .38s linear both}
+html:active-view-transition-type(auth-swap)::view-transition-new(auth-card){animation:glitchIn .42s .16s linear backwards}
+@keyframes glitchOut{0%{--scan:1;opacity:1;transform:none;clip-path:inset(0)}12%{transform:translateX(-6px);clip-path:inset(8% 0 62% 0)}24%{transform:translateX(8px);clip-path:inset(0)}36%{--scan:.6;transform:translateX(-10px) skewX(4deg);clip-path:inset(46% 0 22% 0)}50%{transform:translateX(4px);clip-path:inset(0)}64%{--scan:.35;opacity:.7;transform:translateX(12px) skewX(-6deg);clip-path:inset(18% 0 52% 0)}80%{opacity:.4;transform:translateX(-14px);clip-path:inset(0)}100%{--scan:0;opacity:0;transform:translateX(18px) scaleY(.96);clip-path:inset(50% 0 50% 0)}}
+@keyframes glitchIn{0%{--scan:0;opacity:0;transform:translateX(-16px);clip-path:inset(48% 0 48% 0);filter:drop-shadow(-4px 0 0 var(--danger)) drop-shadow(4px 0 0 var(--cyan))}20%{--scan:.3;opacity:.5;transform:translateX(10px) skewX(5deg);clip-path:inset(20% 0 50% 0)}40%{--scan:.55;opacity:.85;transform:translateX(-6px);clip-path:inset(0)}60%{--scan:.8;opacity:1;transform:translateX(4px) skewX(-2deg);clip-path:inset(60% 0 10% 0)}78%{transform:translateX(-2px);clip-path:inset(0);filter:drop-shadow(-2px 0 0 var(--danger)) drop-shadow(2px 0 0 var(--cyan))}100%{--scan:1;opacity:1;transform:none;clip-path:inset(0);filter:drop-shadow(0 0 0 transparent) drop-shadow(0 0 0 transparent)}}
 @supports not (view-transition-name:x){.page-content{animation:pageIn .2s ease-out}}
 @keyframes pageIn{from{opacity:0;transform:translateY(8px)}}
 @keyframes revealIn{from{opacity:0;transform:translateY(6px)}}
@@ -640,7 +654,7 @@ details[open]>:not(summary){animation:fadeIn .18s ease-out}
 .app-header .btn{white-space:nowrap}
 .header-title{font-size:1.2rem}
 .header-path .header-context{display:none}
-.bg-toggle span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.app-header .mobile-menu{min-width:44px;min-height:44px}
 .page-content{padding:24px 16px}
 .page-heading{flex-direction:column;gap:16px}
 .page-heading h1,h1{font-size:1.85rem}
@@ -778,6 +792,6 @@ h1,h2,h3,h4,h5{font-weight:600;letter-spacing:-.022em}
 .table th,.eyebrow,.section-label,.nav-caption,.small-pill,.step-dot,.metric-number,.brand-mark,.avatar,.story-index,.room-progress-count,.room-timer,.ai-avatar,.question-label,.voice-stage-label,.score-panel .big-score,.hero-steps li::before,.ai-row-index,.ai-source-label,.kpi dt,.kpi-value,.kpi-unit,.score-value,.table .num,.num,.guide-count,.guide-index,.landing-scroll,.room-shell[data-mode="text"] .question-text,.room-shell[data-mode="text"] .room-answer textarea{font-family:var(--font-sans);font-variant-numeric:tabular-nums}
 .kpi-value,.score-value,.guide-index,.room-timer,.metric-number,.score-panel .big-score{font-weight:600;letter-spacing:-.02em}
 .table th,.eyebrow,.kpi dt,.section-label,.nav-caption{font-weight:600}
-/* The header "Hiệu ứng" button is the motion switch (html.motion-off, remembered). Default is on, even when the OS asks for reduced motion. */
-.motion-off *,.motion-off *::before,.motion-off *::after{animation:none!important;transition:none!important}
+/* The header "Hiệu ứng" switch turns motion off (html.motion-off, remembered); the switch itself still slides. Default is on, even when the OS asks for reduced motion. */
+.motion-off :not(.fx-track),.motion-off :not(.fx-track)::before,.motion-off :not(.fx-track)::after{animation:none!important;transition:none!important}
 .motion-off::view-transition-group(*),.motion-off::view-transition-old(*),.motion-off::view-transition-new(*){animation:none!important}

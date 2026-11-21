@@ -33,7 +33,7 @@
         });
         dots.forEach((dot, i) => { dot.classList.toggle('is-active', i === current); dot.classList.toggle('is-done', i < current); dot.toggleAttribute('aria-current', i === current); });
         bars.forEach((bar, i) => bar.classList.toggle('is-done', i <= current));
-        count.textContent = `BƯỚC ${pad(current + 1)} / ${pad(slides.length)}`;
+        count.textContent = `Bước ${pad(current + 1)} / ${pad(slides.length)}`;
         prev.disabled = current === 0;
         next.disabled = current === slides.length - 1;
     }

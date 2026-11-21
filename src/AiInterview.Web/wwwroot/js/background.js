@@ -2,7 +2,7 @@
     'use strict';
     // One canvas, four looks: 'sphere' (signed-in: rotating globe of "Hello World"), 'matrix' (account pages: falling 0/1),
     // 'wave' (home page: ribbon of keyword waves), 'ascii' (other public pages: drifting IT tokens).
-    // The header "Hiệu ứng" button is the on/off switch (html.motion-off = off).
+    // The header "Hiệu ứng" switch turns it on/off (html.motion-off = off).
     const canvas = document.getElementById('asciiBg');
     const toggle = document.getElementById('bgToggle');
     const mode = document.body.dataset.bg;
@@ -130,7 +130,7 @@
     function start() {
         stop();
         canvas.hidden = !enabled();
-        if (toggle) { toggle.hidden = false; toggle.setAttribute('aria-pressed', String(enabled())); }
+        if (toggle) { toggle.hidden = false; toggle.setAttribute('aria-checked', String(enabled())); }
         if (!enabled()) return;
         draw();
         if (!document.hidden) raf = requestAnimationFrame(now => { last = now; frame(now); });

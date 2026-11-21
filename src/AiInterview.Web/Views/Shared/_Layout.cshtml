@@ -23,6 +23,11 @@
     <link rel="stylesheet" href="~/lib/bootstrap/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <script>try{var c=document.documentElement.classList;c.add("js");if(localStorage.getItem("sidebar")==="collapsed")c.add("sidebar-collapsed");if(localStorage.getItem("effects")==="off")c.add("motion-off")}catch(e){}</script>
+    @if (controller == "Account")
+    {
+        @* Login ⇄ Register: tag the page transition so the card glitches across (css: auth-swap). Must run before first render. *@
+        <script>addEventListener("pagereveal",function(e){var f=self.navigation&&navigation.activation&&navigation.activation.from,r=/^\/account\/(login|register)$/,a,b;if(!e.viewTransition||!f)return;a=new URL(f.url).pathname.toLowerCase();b=location.pathname.toLowerCase();if(a!==b&&r.test(a)&&r.test(b))e.viewTransition.types.add("auth-swap")})</script>
+    }
 </head>
 <body class="@(signedIn ? "workspace" : "public-page")" data-bg="@background">
 <a class="skip-link" href="#main">Đến nội dung</a>
@@ -105,8 +110,7 @@
         <header class="app-header">
             <button class="btn btn-sm btn-secondary mobile-menu" type="button" aria-label="Mở hoặc đóng menu điều hướng" aria-expanded="false" aria-controls="appNav" id="menuToggle"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-menu" /></svg></button>
             <div class="header-path"><span class="header-context">@(User.IsInRole(Roles.Admin) ? "Không gian quản lí" : User.IsInRole(Roles.Lecturer) ? "Không gian giảng dạy" : "Không gian học tập")</span><strong class="header-title">@(ViewData["Heading"] ?? ViewData["Title"])</strong></div>
-            <a class="btn btn-secondary btn-sm" href="/Home/Privacy">Quyền riêng tư</a>
-            <button class="btn btn-secondary btn-sm bg-toggle" type="button" id="bgToggle" aria-pressed="true" title="Bật/tắt nền chuyển động và hiệu ứng" hidden><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-terminal" /></svg><span>Hiệu ứng</span></button>
+            <button class="fx-switch" type="button" id="bgToggle" role="switch" aria-checked="true" aria-label="Hiệu ứng" title="Bật/tắt nền chuyển động và hiệu ứng" hidden><span class="fx-track" aria-hidden="true"></span></button>
         </header>
         <main id="main" class="page-content">
             @if (TempData["Message"] is string message) { <div class="alert alert-info" role="status">@message</div> }
@@ -118,7 +122,7 @@ else
 {
     <header class="public-header container">
         <a class="brand" href="/"><span class="brand-mark" aria-hidden="true">il</span>InterviewLab<span class="brand-dot" aria-hidden="true">.</span></a>
-        <nav class="d-flex flex-wrap align-items-center gap-2" aria-label="Hướng dẫn và tài khoản"><button class="btn btn-secondary btn-sm bg-toggle" type="button" id="bgToggle" aria-pressed="true" title="Bật/tắt nền chuyển động và hiệu ứng" hidden><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-terminal" /></svg><span>Hiệu ứng</span></button><a class="btn btn-secondary btn-sm" href="/Home/Help" aria-current="@Current(controller == "Home" && action == "Help")">Hướng dẫn</a><a class="btn btn-secondary btn-sm" href="/Home/Privacy" aria-current="@Current(controller == "Home" && action == "Privacy")">Dữ liệu &amp; quyền riêng tư</a><a class="btn btn-secondary btn-sm" href="/Account/Login" aria-current="@Current(controller == "Account" && action == "Login")">Đăng nhập</a><a class="btn btn-primary btn-sm" href="/Account/Register">Bắt đầu luyện tập →</a></nav>
+        <nav class="d-flex flex-wrap align-items-center gap-2" aria-label="Hướng dẫn và tài khoản"><button class="fx-switch" type="button" id="bgToggle" role="switch" aria-checked="true" aria-label="Hiệu ứng" title="Bật/tắt nền chuyển động và hiệu ứng" hidden><span class="fx-track" aria-hidden="true"></span></button><a class="btn btn-secondary btn-sm" href="/Home/Help" aria-current="@Current(controller == "Home" && action == "Help")">Hướng dẫn</a>@if (controller == "Home" && action == "Index") {<a class="btn btn-secondary btn-sm" href="/Home/Privacy">Dữ liệu &amp; quyền riêng tư</a>}<a class="header-link" href="/Account/Login" aria-current="@Current(controller == "Account" && action == "Login")">Đăng nhập</a><a class="btn btn-primary btn-sm" href="/Account/Register">Bắt đầu luyện tập →</a></nav>
     </header>
     <main id="main">@RenderBody()</main>
 }
