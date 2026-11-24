@@ -90,11 +90,11 @@
                 <div class="ai-field-heading"><span class="ai-source-label" id="modelTierLabel">@(selectedIsOpenAi ? "Cần số dư API" : "Có lựa chọn miễn phí")</span><a id="modelPricingLink" href="@(selectedIsOpenAi ? "https://developers.openai.com/api/docs/pricing" : "https://ai.google.dev/gemini-api/docs/pricing")" class="ai-key-link" target="_blank" rel="noopener noreferrer">Xem phí &amp; hạn mức <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-external" /></svg></a></div>
                 <p class="help-text" id="modelProviderNote">@(selectedIsOpenAi ? "Đây là kết nối OpenAI cũ có phí; không có model gợi ý miễn phí. Chọn Google Gemini và nhập key Gemini để xem các lựa chọn có hạn mức miễn phí." : "Chỉ gồm model có hạn mức miễn phí cho tài khoản đủ điều kiện. Dự án Google AI Studio đã bật thanh toán vẫn có thể tính phí.")</p>
                 <div class="row g-3">
-                    <div class="col-md" id="modelQuickPick" hidden>
+                    <div class="col-xl" id="modelQuickPick" hidden>
                         <label for="ModelPreset" class="form-label">Chọn nhanh</label>
                         <select id="ModelPreset" class="form-select" aria-describedby="modelSelectionNote modelProviderNote"></select>
                     </div>
-                    <div class="col-md">
+                    <div class="col-xl">
                         <label asp-for="Model" class="form-label">Tên model · có thể tự nhập</label>
                         <input asp-for="Model" class="form-control" maxlength="100" autocomplete="off" spellcheck="false" autocapitalize="off" required aria-describedby="modelHelp modelSelectionNote" />
                     </div>

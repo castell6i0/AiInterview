@@ -36,10 +36,10 @@
 <section id="progress" class="page-section" aria-labelledby="progressTitle">
     <div class="section-head"><h2 class="h4 mb-0" id="progressTitle">Tiến bộ</h2></div>
     <form asp-action="Index" method="get" class="filter-bar mb-3" aria-label="Lọc theo bối cảnh luyện"><div class="row g-2 align-items-end">
-        <div class="col-md-3"><label asp-for="PositionId" class="form-label">Vị trí</label><select asp-for="PositionId" class="form-select form-select-sm"><option value="">Tất cả vị trí</option>@foreach (var position in Model.Positions) { <option value="@position.Id">@position.Name</option> }</select></div>
-        <div class="col-6 col-md-3"><label asp-for="Language" class="form-label">Ngôn ngữ</label><select asp-for="Language" class="form-select form-select-sm"><option value="">Cả hai ngôn ngữ</option>@foreach (var value in Enum.GetValues<InterviewLanguage>()) { <option value="@value">@Ui.Label(value)</option> }</select></div>
-        <div class="col-6 col-md-3"><label asp-for="Level" class="form-label">Cấp độ</label><select asp-for="Level" class="form-select form-select-sm"><option value="">Cả hai cấp độ</option>@foreach (var value in Enum.GetValues<InterviewLevel>()) { <option value="@value">@value</option> }</select></div>
-        <div class="col-md-3"><button type="submit" class="btn btn-secondary btn-sm w-100">Áp dụng bộ lọc</button></div>
+        <div class="col-sm-6 col-xl-3"><label asp-for="PositionId" class="form-label">Vị trí</label><select asp-for="PositionId" class="form-select form-select-sm"><option value="">Tất cả vị trí</option>@foreach (var position in Model.Positions) { <option value="@position.Id">@position.Name</option> }</select></div>
+        <div class="col-sm-6 col-xl-3"><label asp-for="Language" class="form-label">Ngôn ngữ</label><select asp-for="Language" class="form-select form-select-sm"><option value="">Cả hai ngôn ngữ</option>@foreach (var value in Enum.GetValues<InterviewLanguage>()) { <option value="@value">@Ui.Label(value)</option> }</select></div>
+        <div class="col-sm-6 col-xl-3"><label asp-for="Level" class="form-label">Cấp độ</label><select asp-for="Level" class="form-select form-select-sm"><option value="">Cả hai cấp độ</option>@foreach (var value in Enum.GetValues<InterviewLevel>()) { <option value="@value">@value</option> }</select></div>
+        <div class="col-sm-6 col-xl-3"><button type="submit" class="btn btn-secondary btn-sm w-100">Áp dụng bộ lọc</button></div>
     </div></form>
     <dl class="kpi-grid">
         <div class="kpi reveal" style="--i:0"><dt>Buổi luyện</dt><dd><span class="kpi-value">@Model.TotalSessions</span><span class="kpi-unit">buổi</span></dd><dd class="kpi-hint">@Model.CompletedSessions buổi đã có báo cáo.</dd></div>
