@@ -1,5 +1,8 @@
 using System.Collections.Concurrent;
 using System.Text;
+using System.Text.Json;
+using System.Text.RegularExpressions;
+using AiInterview.Domain.Entities;
 using AiInterview.Application.Interfaces;
 using AiInterview.Infrastructure.Email;
 using AiInterview.Infrastructure.Identity;
@@ -56,14 +59,41 @@ public sealed class AccountEmailSqlTests
         Assert.Equal(0, request.Context.Response.Headers.SetCookie.Count); // Clicking a link is not a login.
         Assert.Equal("no-referrer", request.Context.Response.Headers["Referrer-Policy"]);
         request.Controller.ModelState.Clear();
-        var login = Assert.IsType<RedirectToActionResult>(await request.Controller.Login(new LoginModel { Email = input.Email, Password = input.Password }));
-        Assert.Equal("Dashboard", login.ControllerName);
-        Assert.True(request.Context.Response.Headers.SetCookie.Count > 0);
+        // A confirmed student is asked for the emailed code instead of being signed in.
+        var login = Assert.IsType<ViewResult>(await request.Controller.Login(new LoginModel { Email = input.Email, Password = input.Password }));
+        Assert.Equal("sent", login.ViewData["LoginCode"]);
         Assert.Equal(2, app.Mail.Messages.Count);
-        var notification = app.Mail.Messages.Last();
-        Assert.Contains("12:30:00, 12/10/2026", notification.Text);
-        Assert.DoesNotContain(input.Password, notification.Text);
-        Assert.DoesNotContain("<img", notification.Html);
+        var codeMail = app.Mail.Messages.Last();
+        Assert.Matches(@"\b\d{6}\b", codeMail.Text);
+        Assert.DoesNotContain(input.Password, codeMail.Text);
+        Assert.DoesNotContain("<img", codeMail.Html);
+    }
+
+    [SqlFact]
+    public async Task StudentLoginCodeIsSingleUseAndExpiresAfterTwoMinutes()
+    {
+        await using var sql = await SqlIntegrationTests.SqlDatabase.CreateAsync();
+        await using var app = Harness.Create(sql);
+        using var request = app.Request();
+        var user = await request.CreateUser(confirmed: true);
+        Assert.True((await request.Users.AddToRoleAsync(user, Roles.Student)).Succeeded);
+        Assert.Equal("sent", Assert.IsType<ViewResult>(await request.Controller.Login(Login(user))).ViewData["LoginCode"]);
+        var mail = Assert.Single(app.Mail.Messages); // code only, no login notification for students
+        Assert.Contains("#00ff66", mail.Html);
+        var code = Code(mail);
+        using (var verify = app.Request(TwoFactorCookie(request)))
+        {
+            Assert.False(Ok(await verify.Controller.VerifyCode(code == "000000" ? "111111" : "000000", false, "/Dashboard")));
+            Assert.False(Ok(await verify.Controller.VerifyCode("12ab56", false, "/Dashboard")));
+            Assert.True(Ok(await verify.Controller.VerifyCode(code, false, "/Dashboard")));
+            Assert.False(Ok(await verify.Controller.VerifyCode(code, false, "/Dashboard")));
+        }
+        using var again = app.Request();
+        Assert.IsType<ViewResult>(await again.Controller.Login(Login(user)));
+        var late = Code(app.Mail.Messages.Last());
+        app.Clock.Advance(TimeSpan.FromSeconds(121));
+        using var expired = app.Request(TwoFactorCookie(again));
+        Assert.False(Ok(await expired.Controller.VerifyCode(late, false, "/Dashboard")));
     }
 
     [SqlFact]
@@ -226,7 +256,7 @@ public sealed class AccountEmailSqlTests
         var input = Login(user);
         input.ReturnUrl = "/Interviews/Create";
         Assert.Equal(input.ReturnUrl, Assert.IsType<LocalRedirectResult>(await request.Controller.Login(input)).Url);
-        Assert.Single(app.Mail.Messages);
+        Assert.Contains("12:30:00, 12/10/2026", Assert.Single(app.Mail.Messages).Text);
         Assert.True(request.Context.Response.Headers.SetCookie.Count > 0);
     }
 
@@ -254,6 +284,9 @@ public sealed class AccountEmailSqlTests
     };
     private static LoginModel Login(ApplicationUser user) => new() { Email = user.Email!, Password = SqlIntegrationTests.SqlDatabase.Password };
     private static ConfirmEmailResultModel Result(IActionResult result) => Assert.IsType<ConfirmEmailResultModel>(Assert.IsType<ViewResult>(result).Model);
+    private static string Code(MailMessage mail) => Regex.Match(mail.Text, @"\b\d{6}\b").Value;
+    private static bool Ok(IActionResult result) => JsonSerializer.Serialize(Assert.IsType<JsonResult>(result).Value).Contains("\"ok\":true");
+    private static string TwoFactorCookie(RequestScope request) => string.Join("; ", request.Context.Response.Headers.SetCookie.Select(x => x!.Split(';')[0]));
     private static Uri ConfirmationLink(MailMessage mail) => new(mail.Text.Split('\n').Single(x => x.StartsWith("https://", StringComparison.Ordinal)));
 
     private sealed record MailMessage(string Recipient, string Subject, string Html, string Text);
@@ -279,7 +312,7 @@ public sealed class AccountEmailSqlTests
     {
         public MemoryMail Mail => mail;
         public TestClock Clock => clock;
-        public RequestScope Request() => new(services.CreateScope());
+        public RequestScope Request(string? cookie = null) => new(services.CreateScope(), cookie);
         public static Harness Create(SqlIntegrationTests.SqlDatabase sql, TimeSpan? tokenLifetime = null)
         {
             using var db = sql.Context();
@@ -292,7 +325,8 @@ public sealed class AccountEmailSqlTests
             {
                 options.User.RequireUniqueEmail = true;
                 options.SignIn.RequireConfirmedAccount = true;
-            }).AddEntityFrameworkStores<AppDbContext>().AddDefaultTokenProviders();
+            }).AddEntityFrameworkStores<AppDbContext>().AddDefaultTokenProviders()
+                .AddTokenProvider<LoginCodeTokenProvider>(LoginCodeTokenProvider.Name).AddSignInManager<StudentSignInManager>();
             collection.AddScoped<IUserConfirmation<ApplicationUser>, AccountEmailConfirmation>();
             collection.Configure<DataProtectionTokenProviderOptions>(options => options.TokenLifespan = tokenLifetime ?? TimeSpan.FromHours(24));
             collection.Configure<EmailOptions>(options => options.PublicBaseUrl = "https://interview.example.test");
@@ -314,12 +348,13 @@ public sealed class AccountEmailSqlTests
         public SignInManager<ApplicationUser> SignIn { get; }
         public AppDbContext Db { get; }
         public AccountEmailService Email { get; }
-        public RequestScope(IServiceScope scope)
+        public RequestScope(IServiceScope scope, string? cookie)
         {
             this.scope = scope;
             var services = scope.ServiceProvider;
             Context = new DefaultHttpContext { RequestServices = services };
             Context.Request.Host = new HostString("untrusted-host.example.test");
+            if (cookie != null) Context.Request.Headers.Cookie = cookie;
             services.GetRequiredService<IHttpContextAccessor>().HttpContext = Context;
             Users = services.GetRequiredService<UserManager<ApplicationUser>>();
             SignIn = services.GetRequiredService<SignInManager<ApplicationUser>>();

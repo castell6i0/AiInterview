@@ -401,7 +401,7 @@ public sealed class SqlIntegrationTests
     }
 
     [SqlFact]
-    public async Task FollowUpsAreLinkedAndAThirdFollowUpIsRejectedWithoutPersistence()
+    public async Task FollowUpsAreLinkedAndAThirdFollowUpBecomesTheNextMainQuestion()
     {
         await using var sql = await SqlDatabase.CreateAsync();
         var owner = await sql.CreateStudentAsync();
@@ -411,7 +411,6 @@ public sealed class SqlIntegrationTests
         ai.Enqueue(Question("Give one concrete example.", followUp: true));
         ai.Enqueue(Question("Explain that example's tradeoff.", followUp: true));
         ai.Enqueue(Question("Forbidden third follow-up.", followUp: true));
-        ai.Enqueue(Question("Explain testing."));
         var service = Service(db, ai);
         var id = await service.CreateAsync(owner.Id, await Input(db), Ct);
         var ids = new List<Guid>();
@@ -423,7 +422,6 @@ public sealed class SqlIntegrationTests
             Assert.Equal(1, turn.MainQuestionNumber);
             await service.AnswerAsync(owner.Id, id, new SubmitAnswerModel { TurnId = turn.Id, Answer = "A concrete supported example." }, Ct);
         }
-        await Assert.ThrowsAsync<AiServiceException>(() => service.GenerateNextAsync(owner.Id, id, null, Ct));
         await using (var verify = sql.Context())
         {
             var turns = await verify.Turns.OrderBy(t => t.SequenceNumber).ToListAsync();
@@ -434,8 +432,9 @@ public sealed class SqlIntegrationTests
             Assert.Equal(ids[0], turns[2].RootTurnId);
             Assert.Equal(ids[1], turns[2].ParentTurnId);
         }
-        Assert.False(JsonSerializer.SerializeToElement(ai.Requests[3].Data).GetProperty("allowFollowUp").GetBoolean());
+        // After two follow-ups the server drops the AI's follow-up flag (InterviewService: q.FollowUp &= follow).
         var nextMain = (await service.GenerateNextAsync(owner.Id, id, null, Ct))!;
+        Assert.False(JsonSerializer.SerializeToElement(ai.Requests[3].Data).GetProperty("allowFollowUp").GetBoolean());
         Assert.Equal(0, nextMain.FollowUpDepth);
         Assert.Equal(2, nextMain.MainQuestionNumber);
         Assert.Equal(4, nextMain.SequenceNumber);

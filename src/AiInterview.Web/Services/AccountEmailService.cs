@@ -52,6 +52,15 @@ public sealed class AccountEmailService(UserManager<ApplicationUser> users, AppD
         return await SendAsync(user.Email!, "InterviewLab · Đăng nhập thành công", html, text, ct);
     }
 
+    public async Task<AccountMailResult> SendLoginCodeAsync(ApplicationUser user, CancellationToken ct = default)
+    {
+        if (!sender.IsConfigured) return AccountMailResult.NotConfigured;
+        var code = await users.GenerateTwoFactorTokenAsync(user, LoginCodeTokenProvider.Name);
+        var text = $"Chào {user.FullName},\nMã đăng nhập InterviewLab của bạn: {code}\nMã có hiệu lực 2 phút và chỉ dùng được một lần. Không chia sẻ mã này. Nếu không phải bạn đăng nhập, hãy đổi mật khẩu ngay.";
+        var html = Frame("Mã đăng nhập", $"<p>Chào {HtmlEncoder.Default.Encode(user.FullName)},</p><p>Nhập mã này vào khung đăng nhập:</p><div style=\"background:#000;color:#00ff66;font:700 38px/1 'Courier New',Consolas,monospace;letter-spacing:12px;padding:26px 0 26px 12px;text-align:center;border-radius:10px;margin:24px 0\">{code}</div><p>Mã có hiệu lực <strong>2 phút</strong> và chỉ dùng được một lần.</p><p>Không chia sẻ mã này. Nếu không phải bạn đăng nhập, hãy đổi mật khẩu ngay.</p>");
+        return await SendAsync(user.Email!, "InterviewLab · Mã đăng nhập", html, text, ct);
+    }
+
     private async Task<AccountMailResult> SendAsync(string email, string subject, string html, string text, CancellationToken ct)
     {
         try { await sender.SendAsync(email, subject, html, text, ct); return AccountMailResult.Sent; }

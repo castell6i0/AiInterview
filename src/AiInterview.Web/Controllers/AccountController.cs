@@ -26,6 +26,12 @@ public sealed class AccountController(UserManager<ApplicationUser> users, SignIn
         if (!ModelState.IsValid) return View(model);
         var user = await users.FindByEmailAsync(model.Email.Trim());
         var result = user is null ? Microsoft.AspNetCore.Identity.SignInResult.Failed : await signIn.PasswordSignInAsync(user, model.Password, model.RememberMe, lockoutOnFailure: true);
+        if (result.RequiresTwoFactor)
+        {
+            // Password was right; the view opens the 6-digit code popup.
+            ViewData["LoginCode"] = await email.SendLoginCodeAsync(user!, HttpContext.RequestAborted) == AccountMailResult.Sent ? "sent" : "failed";
+            return View(model);
+        }
         if (!result.Succeeded)
         {
             ModelState.AddModelError("", result.IsLockedOut
@@ -33,13 +39,34 @@ public sealed class AccountController(UserManager<ApplicationUser> users, SignIn
                 : "Chưa thể đăng nhập. Kiểm tra email, mật khẩu và xác nhận email nếu bạn vừa đăng ký.");
             return View(model);
         }
-        var notification = await email.SendLoginNotificationAsync(user!, HttpContext.RequestAborted);
-        if (notification != AccountMailResult.Sent)
+        // Students get the login code email instead of this notification.
+        if (!await users.IsInRoleAsync(user!, Roles.Student)
+            && await email.SendLoginNotificationAsync(user!, HttpContext.RequestAborted) != AccountMailResult.Sent)
             TempData["Message"] = "Bạn đã đăng nhập thành công. Email thông báo chưa gửi được; bạn vẫn có thể sử dụng ứng dụng.";
         if (Url.IsLocalUrl(model.ReturnUrl)) return LocalRedirect(model.ReturnUrl!);
         if (await users.IsInRoleAsync(user!, Roles.Admin)) return RedirectToAction("Index", "Admin");
         if (await users.IsInRoleAsync(user!, Roles.Lecturer)) return RedirectToAction("Index", "Lecturer");
         return RedirectToAction("Index", "Dashboard");
+    }
+    // Called by fetch from the code popup. "Remember me" also remembers this browser, so the code is not asked again.
+    [HttpPost, AllowAnonymous]
+    public async Task<IActionResult> VerifyCode(string? code, bool rememberMe, string? returnUrl)
+    {
+        if (code is not { Length: 6 } || !code.All(char.IsAsciiDigit))
+            return Json(new { ok = false, error = "Nhập đủ 6 chữ số." });
+        var result = await signIn.TwoFactorSignInAsync(LoginCodeTokenProvider.Name, code, rememberMe, rememberClient: rememberMe);
+        if (result.Succeeded)
+            return Json(new { ok = true, redirect = Url.IsLocalUrl(returnUrl) ? returnUrl : Url.Action("Index", "Dashboard") });
+        return Json(new { ok = false, error = result.IsLockedOut
+            ? "Sai quá nhiều lần. Tài khoản tạm khóa 10 phút."
+            : "Mã không đúng hoặc đã hết hạn. Thử lại hoặc gửi lại mã." });
+    }
+    [HttpPost, AllowAnonymous]
+    public async Task<IActionResult> ResendCode()
+    {
+        var user = await signIn.GetTwoFactorAuthenticationUserAsync();
+        var sent = user is not null && await email.SendLoginCodeAsync(user, HttpContext.RequestAborted) == AccountMailResult.Sent;
+        return Json(new { ok = sent, error = sent ? null : "Chưa gửi được mã. Đăng nhập lại nếu lỗi tiếp tục." });
     }
     [AllowAnonymous] public IActionResult Register()
     {

@@ -57,8 +57,8 @@ public static class RequestProtection
         if (!HttpMethods.IsPost(method)) return null;
         return (controller, action) switch
         {
-            ("Account", "Login" or "Register") => "auth",
-            ("Account", "ResendConfirmation") => "email",
+            ("Account", "Login" or "Register" or "VerifyCode") => "auth",
+            ("Account", "ResendConfirmation" or "ResendCode") => "email",
             ("AiSettings", _) => "ai-settings",
             ("Interviews", "Stream") => "ai-stream",
             ("Interviews", "Answer") => "answer",
