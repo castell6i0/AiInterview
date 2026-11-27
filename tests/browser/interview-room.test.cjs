@@ -19,50 +19,48 @@ function timers() {
     };
 }
 
-function speechHarness() {
-    const clock = timers(), instances = [];
-    class Recognition {
-        constructor() { instances.push(this); }
-        start() { this.starts = (this.starts || 0) + 1; }
-        stop() { this.stops = (this.stops || 0) + 1; }
-        abort() { this.aborted = true; }
-    }
-    const context = { window: { SpeechRecognition: Recognition }, setTimeout: clock.setTimeout, clearTimeout: clock.clearTimeout };
+function speechHarness({ language = 'vi-VN', failLoad = false, gate = null } = {}) {
+    const context = { window: { navigator: { mediaDevices: { getUserMedia() {} } }, AudioContext: class {} }, crossOriginIsolated: true, setTimeout, clearTimeout };
     vm.runInNewContext(source('speech.js'), context);
-    const results = [], errors = [];
-    const adapter = new context.window.InterviewSpeech.BrowserSpeechToText('vi-VN', { result: text => results.push(text), error: text => errors.push(text) });
-    const result = text => { const row = [{ transcript: text }]; row.isFinal = true; return { results: [row] }; };
-    return { clock, adapter, instances, results, errors, result };
+    const Speech = context.window.InterviewSpeech.MoonshineSpeechToText, mics = [], events = [];
+    class MicTranscriber {
+        constructor() { mics.push(this); }
+        useTranscriber(value) { this.transcriber = value; return this; } onText(fn) { this.textCb = fn; return this; } onLine(fn) { this.lineCb = fn; return this; }
+        async start() { this.running = true; }
+        async stop() { if (this.running) this.lineCb({ text: 'phần cuối' }); this.running = false; }
+    }
+    const Transcriber = { async load(options) { await gate?.promise; if (failLoad) throw new Error('offline'); return options; } };
+    Speech.loadModule = async () => [{ MicTranscriber, wrapProgress: fn => fn }, { ModelArch: { Base: 1, TinyStreaming: 2 } }, { Transcriber }];
+    const adapter = new Speech(language, { start: () => events.push('start'), end: () => events.push('end'), speechStart: () => events.push('speechStart'), speechEnd: () => events.push('speechEnd'),
+        result: (final, interim) => events.push(['result', final, interim]), error: message => events.push(['error', message]) });
+    return { adapter, mics, events };
 }
 
-test('speech reserves the start immediately and waits for the final result before resolving stop', async () => {
+test('moonshine streams Vietnamese text and flushes the final line before stop resolves', async () => {
     const h = speechHarness();
-    assert.equal(h.adapter.start(), true);
-    assert.equal(h.adapter.start(), false);
-    assert.equal(h.instances.length, 1);
-    const recognition = h.instances[0];
-    const first = h.adapter.stop(), second = h.adapter.stop();
-    assert.equal(first, second);
-    assert.equal(recognition.stops, 1);
-    let finished = false; first.then(() => { finished = true; }); await flush();
-    assert.equal(finished, false);
-    recognition.onresult(h.result('câu trả lời cuối'));
-    recognition.onend();
-    assert.equal(await first, true);
-    recognition.onresult(h.result('kết quả đến muộn'));
-    assert.deepEqual(h.results, ['câu trả lời cuối']);
+    assert.equal(h.adapter.start(), true); assert.equal(h.adapter.start(), false); await flush();
+    const mic = h.mics[0];
+    assert.equal(mic.transcriber.language, 'vi'); assert.equal(mic.transcriber.modelArch, 1); assert.equal(mic.transcriber.options.vad_threshold, '0.35');
+    mic.textCb('xin'); mic.lineCb({ text: 'xin chào' }); mic.textCb('tôi là');
+    assert.equal(await h.adapter.stop(), true); mic.lineCb({ text: 'muộn' });
+    assert.deepEqual(h.events, ['start', 'speechStart', ['result', '', 'xin'], 'speechEnd', ['result', 'xin chào', ''], 'speechStart', ['result', 'xin chào', 'tôi là'],
+        'speechEnd', ['result', 'xin chào phần cuối', ''], 'end']);
     assert.equal(h.adapter.listening, false);
-    assert.equal(h.clock.pending.size, 0);
 });
 
-test('speech timeout aborts the old run and prevents late callbacks from touching a new run', async () => {
-    const h = speechHarness(); h.adapter.start(); const old = h.instances[0];
-    const stopped = h.adapter.stop(); await h.clock.run(2500);
-    assert.equal(await stopped, false); assert.equal(old.aborted, true);
-    h.adapter.start(); old.onend(); old.onresult(h.result('stale'));
-    assert.equal(h.adapter.listening, true); assert.deepEqual(h.results, []);
-    h.instances[1].onresult(h.result('new')); h.instances[1].onend();
-    assert.deepEqual(h.results, ['new']); assert.equal(h.errors.length, 1);
+test('a failed model download reports an error, ends the run and can be retried', async () => {
+    const h = speechHarness({ failLoad: true });
+    h.adapter.start(); await flush();
+    assert.match(h.events[0][1], /Chưa tải được/); assert.equal(h.events[1], 'end'); assert.equal(h.adapter.listening, false);
+    assert.equal(h.adapter.start(), true); await flush(); assert.equal(h.events.length, 4); assert.equal(h.mics.length, 0);
+});
+
+test('stopping while the model downloads never opens the microphone, and English uses the small streaming model', async () => {
+    const gate = deferred(), h = speechHarness({ language: 'en-US', gate });
+    h.adapter.start(); await flush(); assert.equal(await h.adapter.stop(), true);
+    gate.resolve(); await flush();
+    assert.equal(h.mics[0].running, undefined); assert.deepEqual(h.events, ['end']);
+    assert.equal(h.mics[0].transcriber.language, 'en'); assert.equal(h.mics[0].transcriber.modelArch, 2);
 });
 
 const ok = () => ({ ok: true, redirected: false });
@@ -80,7 +78,7 @@ function roomHarness({ coding = false, pending = true, main = 1, completed = 0, 
     let now = Date.now();
     class ClockDate extends Date { static now() { return now; } }
     function node(id) {
-        if (!nodes.has(id)) nodes.set(id, { id, value: '', textContent: '', hidden: false, disabled: false, checked: false, style: {}, events: {}, classList: { add() {}, remove() {}, toggle() {} }, addEventListener(name, fn) { this.events[name] = fn; } });
+        if (!nodes.has(id)) nodes.set(id, { id, value: '', textContent: '', hidden: false, disabled: false, checked: false, style: {}, events: {}, classList: { add() {}, remove() {}, toggle() {} }, attributes: {}, setAttribute(name, value) { this.attributes[name] = value; }, addEventListener(name, fn) { this.events[name] = fn; } });
         return nodes.get(id);
     }
     const turn = { id: 'turn-1', isCoding: coding, codeLanguage: 'csharp', question: 'Câu hỏi?', mainQuestionNumber: main, followUpDepth: 0, answer: '' };
@@ -90,6 +88,7 @@ function roomHarness({ coding = false, pending = true, main = 1, completed = 0, 
     let speech, editor, resolveMonaco, interval;
     class FakeSpeech {
         constructor(language, callbacks) { this.callbacks = callbacks; this.supported = true; this.listening = false; speech = this; }
+        load() { return Promise.resolve(this); }
         start() { this.listening = true; this.callbacks.start(); return true; }
         stop() { if (!this.listening) return Promise.resolve(true); this.stopping ??= deferred(); return this.stopping.promise; }
         finish(text) { if (text) this.callbacks.result(text, ''); this.listening = false; this.callbacks.end(); this.stopping?.resolve(true); }
@@ -100,7 +99,7 @@ function roomHarness({ coding = false, pending = true, main = 1, completed = 0, 
             editor = { value: options.value, options, getValue() { return this.value; }, setValue(value) { this.value = value; this.changed?.(); }, updateOptions(value) { Object.assign(this.options, value); }, onDidChangeModelContent(fn) { this.changed = fn; }, getModel() { return {}; }, layout() {} }; return editor;
         }, setModelLanguage() {}
     } };
-    const window = { InterviewSpeech: { BrowserSpeechToText: FakeSpeech, BrowserTextToSpeech: FakeTts }, confirm: () => true, addEventListener() {}, location: { assign() {} }, monaco,
+    const window = { InterviewSpeech: { MoonshineSpeechToText: FakeSpeech, BrowserTextToSpeech: FakeTts }, confirm: () => true, addEventListener() {}, location: { assign() {} }, monaco,
         require(dependencies, done) { resolveMonaco = done; } };
     window.require.config = () => {};
     const context = { window, Date: ClockDate, document: { querySelectorAll: () => [], getElementById: node, querySelector: () => ({ value: 'antiforgery' }), createElement: () => ({}), head: { appendChild: value => scripts.push(value) } },

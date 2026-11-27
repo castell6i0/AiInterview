@@ -138,6 +138,74 @@ public sealed class GeminiAiService(HttpClient http, DbContextOptions<AppDbConte
         throw GeminiProtocol.Malformed();
     }
 
+    public static readonly string[] SpeechModels = ["gemini-3.8-flash-lite-tts", "gemini-3.8-flash-tts", "gemini-3.1-flash-tts-preview"];
+
+    public async Task<byte[]> SpeakAsync(string userId, Guid sessionId, string text, CancellationToken ct)
+    {
+        if (!IsConfigured) throw new AiServiceException("not_configured", "Chưa có API key Gemini dùng được.");
+        AiServiceException? busy = null;
+        foreach (var model in SpeechModels)
+        {
+            if (SpeechExhausted.TryGetValue((userId, model), out var until) && until > DateTimeOffset.UtcNow) continue;
+            try { return await SpeakWithAsync(model, userId, sessionId, text, ct); }
+            catch (AiServiceException error) when (error.Code == "quota") { busy = error; }
+            catch (AiServiceException error) when (error.Code == "quota_daily") { SpeechExhausted[(userId, model)] = NextQuotaReset(DateTimeOffset.UtcNow); }
+        }
+        throw busy ?? new AiServiceException("quota_daily", $"Giọng Gemini đã hết lượt hôm nay, sẽ có lại lúc {NextQuotaReset(DateTimeOffset.UtcNow).ToOffset(TimeSpan.FromHours(7)):HH:mm} (giờ Việt Nam).");
+    }
+
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<(string, string), DateTimeOffset> SpeechExhausted = new();
+
+    public static DateTimeOffset NextQuotaReset(DateTimeOffset now)
+    {
+        var zone = TimeZoneInfo.FindSystemTimeZoneById("America/Los_Angeles");
+        var midnight = TimeZoneInfo.ConvertTime(now, zone).Date.AddDays(1);
+        return new DateTimeOffset(midnight, zone.GetUtcOffset(midnight));
+    }
+
+    private async Task<byte[]> SpeakWithAsync(string model, string userId, Guid sessionId, string text, CancellationToken ct)
+    {
+        using var callLease = limiter.EnterCall(userId, systemKey);
+        await using var logDb = new AppDbContext(dbOptions);
+        var log = await limiter.ReserveAsync(logDb, new AiRequest(userId, sessionId, "speech", "", "", new { }), Provider, model, systemKey, options.MaxRequestsPerMinute, 1, ct);
+        var watch = Stopwatch.StartNew();
+        try
+        {
+            using var timeout = CancellationTokenSource.CreateLinkedTokenSource(ct);
+            timeout.CancelAfter(TimeSpan.FromSeconds(options.TimeoutSeconds));
+            using var message = new HttpRequestMessage(HttpMethod.Post, "https://generativelanguage.googleapis.com/v1beta/interactions");
+            message.Headers.Add("x-goog-api-key", options.ApiKey.Trim());
+            message.Content = JsonContent.Create(new
+            {
+                model,
+                input = new[] { new { type = "user_input", content = new[] { new { type = "text", text,
+                    annotations = new[] { new { type = "speech_metadata", style = "a calm, friendly job interviewer speaking at a natural, unhurried pace, pausing briefly between ideas" } } } } } },
+                response_format = new { type = "audio" },
+                generation_config = new { speech_config = new[] { new { voice = "Sulafat" } } }
+            });
+            await limiter.MarkDispatchedAsync(logDb, log, timeout.Token);
+            using var response = await http.SendAsync(message, timeout.Token);
+            var body = await response.Content.ReadAsStringAsync(timeout.Token);
+            if (!response.IsSuccessStatusCode) throw GeminiProtocol.Error(response.StatusCode, body);
+            using var json = JsonDocument.Parse(body);
+            var audio = json.RootElement.GetProperty("steps").EnumerateArray()
+                .SelectMany(step => step.TryGetProperty("content", out var content) ? content.EnumerateArray() : Enumerable.Empty<JsonElement>())
+                .LastOrDefault(part => part.TryGetProperty("type", out var type) && type.GetString() == "audio");
+            if (audio.ValueKind != JsonValueKind.Object) throw GeminiProtocol.Malformed();
+            log.Status = "success";
+            return audio.GetProperty("data").GetBytesFromBase64();
+        }
+        catch (AiServiceException error) { log.Status = error.Code; throw AiRequestLimiter.DescribeProviderError(error, systemKey); }
+        catch (Exception error) when (error is JsonException or KeyNotFoundException or InvalidOperationException or FormatException) { log.Status = "invalid_response"; throw GeminiProtocol.Malformed(); }
+        catch (Exception error) when (error is HttpRequestException or IOException or OperationCanceledException) { log.Status = "network"; throw new AiServiceException("network", "Không kết nối được tới Gemini TTS."); }
+        finally
+        {
+            log.DurationMs = watch.ElapsedMilliseconds;
+            using var logTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+            try { await logDb.SaveChangesAsync(logTimeout.Token); } catch (Exception e) when (e is DbUpdateException or OperationCanceledException or System.Data.Common.DbException) { }
+        }
+    }
+
     internal HttpRequestMessage BuildMessage(AiRequest request, bool streaming, int attempt)
     {
         var operation = streaming ? "streamGenerateContent?alt=sse" : "generateContent";

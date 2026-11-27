@@ -8,7 +8,7 @@ const source = fs.readFileSync(path.join(__dirname, '../../src/AiInterview.Web/w
 const voice = (name, lang, extra = {}) => ({ name, lang, voiceURI: `${lang}:${name}`, default: false, ...extra });
 const flush = async () => { for (let i = 0; i < 6; i++) await Promise.resolve(); };
 
-function harness({ voices = [], language = 'vi-VN', storage = new Map(), storageFails = false } = {}) {
+function harness({ voices = [], language = 'vi-VN', storage = new Map(), storageFails = false, Audio, fetch } = {}) {
     let installed = voices, timerId = 0;
     const timers = new Map(), listeners = new Map(), spoken = [], notices = [];
     const synth = {
@@ -18,9 +18,9 @@ function harness({ voices = [], language = 'vi-VN', storage = new Map(), storage
         cancel() { this.cancelled++; },
         speak: utterance => spoken.push(utterance)
     };
-    const window = { speechSynthesis: synth, SpeechSynthesisUtterance: class { constructor(text) { this.text = text; } },
+    const window = { Audio, fetch, speechSynthesis: synth, SpeechSynthesisUtterance: class { constructor(text) { this.text = text; } },
         localStorage: { getItem: key => { if (storageFails) throw new Error('Denied'); return storage.get(key); }, setItem: (key, value) => { if (storageFails) throw new Error('Denied'); storage.set(key, value); } } };
-    vm.runInNewContext(source, { window, setTimeout(fn, ms) { const id = ++timerId; timers.set(id, { fn, ms }); return id; }, clearTimeout: id => timers.delete(id) });
+    vm.runInNewContext(source, { window, URL: { createObjectURL: () => 'blob:audio', revokeObjectURL() {} }, setTimeout(fn, ms) { const id = ++timerId; timers.set(id, { fn, ms }); return id; }, clearTimeout: id => timers.delete(id) });
     const adapter = new window.InterviewSpeech.BrowserTextToSpeech(language);
     const element = () => ({ value: '', disabled: false, textContent: '', children: [], events: {}, ownerDocument: { createElement: () => ({}) },
         addEventListener(name, callback) { this.events[name] = callback; }, replaceChildren() { this.children = []; }, appendChild(value) { this.children.push(value); } });
@@ -100,6 +100,43 @@ test('English speech expands technical notation without changing the visible sou
     const h = harness({ language: 'en-US' }); const input = 'Explain C#, C++, ASP.NET, OOP and API.';
     assert.equal(h.adapter.normalize(input), 'Explain C sharp, C plus plus, A S P dot net, object oriented programming and A P I.');
     assert.equal(input, 'Explain C#, C++, ASP.NET, OOP and API.');
+});
+
+test('line breaks, dashes and slashes become natural spoken pauses and words', () => {
+    const vi = harness(); const en = harness({ language: 'en-US' });
+    assert.equal(vi.adapter.normalize('Bối cảnh dự án\n- Thiết kế REST/GraphQL\n- Kiểm thử — ví dụ cụ thể\nBạn chọn gì?'),
+        'Bối cảnh dự án. Thiết kế REST hoặc GraphQL. Kiểm thử, ví dụ cụ thể. Bạn chọn gì?');
+    assert.equal(en.adapter.normalize('Context: a legacy service\nCompare input / output - then decide.'),
+        'Context: a legacy service. Compare input or output, then decide.');
+    assert.equal(vi.adapter.normalize('Tỉ lệ 1/2 vẫn giữ nguyên.'), 'Tỉ lệ 1/2 vẫn giữ nguyên.');
+});
+
+test('a long sentence is split at commas before falling back to word boundaries', async () => {
+    const h = harness({ voices: [voice('Vietnamese', 'vi-VN')] });
+    const clause = 'mình muốn nghe cách bạn xử lý tình huống này trong dự án thực tế';
+    const input = `${Array(6).fill(clause).join(', ')}.`;
+    await h.adapter.speak(input); h.drain();
+    assert.ok(h.spoken.length > 1); assert.ok(h.spoken.every(item => item.text.length <= 240));
+    assert.ok(h.spoken.slice(0, -1).every(item => item.text.endsWith(',')));
+    assert.equal(h.spoken.map(item => item.text).join(' '), h.adapter.normalize(input));
+});
+
+test('Gemini audio plays first, a busy quota waits instead of switching voices, and only a missing AI voice falls back', async () => {
+    const created = [], responses = [];
+    class Audio { constructor(src) { this.src = src; created.push(this); } play() { return Promise.resolve(); } pause() { this.paused = true; } }
+    const h = harness({ voices: [voice('Vietnamese', 'vi-VN')], Audio, fetch: async () => responses.shift() });
+    const ok = { ok: true, status: 200, blob: async () => 'wav' }, busy = { ok: false, status: 503, headers: { get: () => '20' } };
+    responses.push(ok);
+    assert.equal(await h.adapter.speak('Câu hỏi.', '/s'), true); assert.equal(created.length, 1); assert.equal(h.spoken.length, 0);
+    responses.push(busy, ok);
+    const waiting = h.adapter.speak('Câu hỏi.', '/s'); await flush();
+    assert.equal(created[0].paused, true); assert.match(h.notices.at(-1), /20 giây/); assert.equal(h.spoken.length, 0);
+    await h.timeout(); assert.equal(await waiting, true); assert.equal(created.length, 2); assert.equal(h.spoken.length, 0);
+    responses.push({ ok: false, status: 503, json: async () => ({ code: 'quota_daily', message: 'Giọng Gemini đã hết lượt hôm nay, sẽ có lại lúc 15:00.' }) }, ok);
+    assert.equal(await h.adapter.speak('Câu hỏi.', '/s'), true); assert.match(h.notices.at(-1), /15:00/); assert.equal(responses.length, 1); assert.equal(h.spoken.length, 0);
+    responses.length = 0;
+    responses.push({ ok: false, status: 404 });
+    assert.equal(await h.adapter.speak('Câu hỏi.', '/s'), true); assert.equal(h.spoken.length, 1);
 });
 
 test('long questions are spoken sequentially without cutting words or queuing duplicate sentences', async () => {

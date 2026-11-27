@@ -178,4 +178,10 @@ public class GeminiProtocolTests
         Assert.Null(usage.Cost(new GeminiOptions { InputPricePerMillionTokensUsd = 1, OutputPricePerMillionTokensUsd = 1 }));
         Assert.Equal(0m, usage.Cost(new GeminiOptions { IsFreeTier = true }));
     }
+
+    [Theory]
+    [InlineData("2026-11-27T07:20:00Z", "2026-11-27T08:00:00Z")]
+    [InlineData("2026-07-01T10:00:00Z", "2026-07-02T07:00:00Z")]
+    public void Speech_quota_resets_at_next_pacific_midnight(string now, string reset)
+        => Assert.Equal(DateTimeOffset.Parse(reset), GeminiAiService.NextQuotaReset(DateTimeOffset.Parse(now)));
 }

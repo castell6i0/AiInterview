@@ -7,38 +7,30 @@ class ISpeechToText {
     start(){throw new Error('Nhận dạng giọng nói chưa được hỗ trợ.');}
     stop(){return Promise.resolve(true);}
 }
-class BrowserSpeechToText extends ISpeechToText {
-    constructor(language,callbacks){super();this.language=language;this.callbacks=callbacks;this.Recognition=window.SpeechRecognition||window.webkitSpeechRecognition;this.recognition=null;this.listening=false;this.run=null;}
-    get supported(){return !!this.Recognition;}
+const VAD_OPTIONS={vad_threshold:'0.35',vad_window_duration:'1.0',vad_look_behind_sample_count:'16000',vad_max_segment_duration:'20'};
+class MoonshineSpeechToText extends ISpeechToText {
+    static loadModule=()=>Promise.all([import('/lib/moonshine/mic-transcriber.js'),import('/lib/moonshine/enums.js'),import('/lib/moonshine/transcriber.js')]);
+    constructor(language,callbacks){super();this.language=String(language).toLowerCase().startsWith('vi')?'vi':'en';this.callbacks=callbacks;this.mic=null;this.loading=null;this.listening=false;this.run=null;this.lines=[];this.speaking=false;}
+    get supported(){return !!(globalThis.crossOriginIsolated&&window.navigator?.mediaDevices?.getUserMedia&&window.AudioContext);}
+    load(){
+        return this.loading??=MoonshineSpeechToText.loadModule().then(async([{MicTranscriber,wrapProgress},{ModelArch},{Transcriber}])=>{
+            const transcriber=await Transcriber.load({language:this.language,modelArch:this.language==='vi'?ModelArch.Base:ModelArch.TinyStreaming,options:VAD_OPTIONS,onProgress:wrapProgress(fraction=>this.callbacks.loading?.(fraction))});
+            return this.mic=new MicTranscriber().useTranscriber(transcriber).onText(text=>this.text(text)).onLine(line=>this.line(line.text));
+        }).catch(error=>{this.loading=null;throw error;});
+    }
     start(){
         if(!this.supported||this.run)return false;
-        const recognition=new this.Recognition();
-        const run={recognition,timer:null,stopPromise:null,resolveStop:null};
-        this.run=run;this.recognition=recognition;this.listening=true;
-        const active=()=>this.run===run;
-        const finish=(completed=true)=>{
-            if(!active())return;
-            clearTimeout(run.timer);this.run=null;this.recognition=null;this.listening=false;
-            try{this.callbacks.end?.();}finally{run.resolveStop?.(completed);}
-        };
-        run.finish=finish;
-        recognition.lang=this.language;recognition.continuous=true;recognition.interimResults=true;
-        recognition.onstart=()=>{if(active())this.callbacks.start?.();};
-        recognition.onspeechstart=()=>{if(active())this.callbacks.speechStart?.();};
-        recognition.onspeechend=()=>{if(active())this.callbacks.speechEnd?.();};
-        recognition.onresult=e=>{if(!active())return;let final='',interim='';for(let i=0;i<e.results.length;i++){const result=e.results[i];if(result.isFinal)final+=result[0].transcript+' ';else interim+=result[0].transcript;}this.callbacks.result?.(final.trim(),interim.trim());};
-        recognition.onerror=e=>{if(!active())return;const messages={'not-allowed':'Microphone chưa được cấp quyền. Bạn vẫn có thể nhập văn bản.','audio-capture':'Không tìm thấy microphone. Hãy nhập văn bản hoặc kiểm tra thiết bị.','network':'Dịch vụ nhận dạng giọng nói chưa kết nối được. Bạn có thể nhập văn bản.','no-speech':'Chưa nghe thấy giọng nói. Bạn có thể bấm nói lại.','language-not-supported':'Trình duyệt chưa hỗ trợ ngôn ngữ này. Hãy nhập văn bản.'};if(e.error!=='aborted')this.callbacks.error?.(messages[e.error]||'Nhận dạng giọng nói đã dừng. Bạn có thể thử lại hoặc nhập văn bản.');finish(false);};
-        recognition.onend=()=>finish();
-        try{recognition.start();return true;}catch{this.callbacks.error?.('Chưa bật được microphone. Bạn có thể thử lại hoặc nhập văn bản.');finish();return false;}
+        const run=this.run={capturing:false};this.listening=true;this.lines=[];this.speaking=false;
+        (async()=>{
+            try{const mic=await this.load();if(this.run!==run)return;run.capturing=true;await mic.start();if(this.run!==run){await mic.stop();return;}this.callbacks.start?.();}
+            catch(error){if(this.run!==run)return;const name=error?.name;this.callbacks.error?.(name==='NotAllowedError'?'Microphone chưa được cấp quyền. Bạn vẫn có thể nhập văn bản.':name==='NotFoundError'?'Không tìm thấy microphone. Hãy nhập văn bản hoặc kiểm tra thiết bị.':'Chưa tải được bộ nhận dạng giọng nói. Kiểm tra mạng rồi bấm nói lại, hoặc nhập văn bản.');this.finish(run);}
+        })();
+        return true;
     }
-    stop(){
-        const run=this.run;if(!run)return Promise.resolve(true);if(run.stopPromise)return run.stopPromise;
-        run.stopPromise=new Promise(resolve=>{run.resolveStop=resolve;});
-        // stop() can produce one final result before onend. Keep this run active until then.
-        run.timer=setTimeout(()=>{if(this.run!==run)return;run.finish(false);try{run.recognition.abort();}catch{}this.callbacks.error?.('Nhận dạng đã dừng quá thời gian chờ. Hãy kiểm tra transcript trước khi gửi.');},2500);
-        try{run.recognition.stop();}catch{run.finish(false);try{run.recognition.abort();}catch{}}
-        return run.stopPromise;
-    }
+    async stop(){const run=this.run;if(!run)return true;this.listening=false;try{if(run.capturing)await this.mic.stop();}catch{}this.finish(run);return true;}
+    finish(run){if(this.run!==run)return;this.run=null;this.listening=false;if(this.speaking){this.speaking=false;this.callbacks.speechEnd?.();}this.callbacks.end?.();}
+    text(text){if(!this.run?.capturing)return;if(text&&!this.speaking){this.speaking=true;this.callbacks.speechStart?.();}this.callbacks.result?.(this.lines.join(' '),text);}
+    line(text){if(!this.run?.capturing)return;if(text?.trim())this.lines.push(text.trim());if(this.speaking){this.speaking=false;this.callbacks.speechEnd?.();}this.callbacks.result?.(this.lines.join(' '),'');}
 }
 class BrowserTextToSpeech {
     constructor(language){
@@ -85,7 +77,7 @@ class BrowserTextToSpeech {
         this.refreshVoices();if(this.voices.length)return Promise.resolve();
         return new Promise(resolve=>{let timer;const finish=()=>{clearTimeout(timer);this.waiters.delete(finish);resolve();};this.waiters.add(finish);timer=setTimeout(finish,1800);});
     }
-    stop(){this.generation++;this.utterance=null;roomStage('idle','speaking');if(this.supported)window.speechSynthesis.cancel();for(const finish of [...this.waiters])finish();}
+    stop(){this.generation++;this.utterance=null;this.audio?.pause();this.audio=null;roomStage('idle','speaking');if(this.supported)window.speechSynthesis.cancel();for(const finish of [...this.waiters])finish();}
     normalize(text){
         const vi=this.baseLanguage==='vi';
         return String(text||'').normalize('NFC')
@@ -98,19 +90,49 @@ class BrowserTextToSpeech {
             .replace(/\bASP\.NET\b/gi,vi?'A S P chấm nét':'A S P dot net').replace(/\.NET\b/gi,vi?'chấm nét':'dot net')
             .replace(/\bOOP\b/g,vi?'lập trình hướng đối tượng':'object oriented programming')
             .replace(/\b(API|HTTP|HTTPS|HTML|CSS|SQL|QA|UI|UX|JSON)\b/g,word=>word.split('').join(' '))
+            .replace(/(\p{L})\s?\/\s?(?=\p{L})/gu,vi?'$1 hoặc ':'$1 or ')
+            .replace(/[ \t]+[–—-][ \t]+/g,', ')
+            .split(/\r?\n/).map(line=>line.trim()).filter(Boolean).map(line=>/[.!?;:,…。][)"'”’\]]*$/u.test(line)?line:`${line}.`).join(' ')
             .replace(/\s+/g,' ').trim();
     }
     chunks(text){
-        const parts=[];let current='';
+        const parts=[],limit=240;
+        const pack=(pieces,split)=>{let current='';for(const piece of pieces){if(piece.length>limit&&split){if(current)parts.push(current);current='';split(piece);continue;}if(current&&current.length+piece.length+1>limit){parts.push(current);current='';}current+=(current?' ':'')+piece;}if(current)parts.push(current);};
+        const words=clause=>pack(clause.split(/\s+/),null);
         // Bound utterances at whitespace, preserving every word and punctuation mark.
-        for(const sentence of text.split(/(?<=[.!?。;:])\s+/u)){
-            for(const word of sentence.split(/\s+/)){if(current&&current.length+word.length+1>240){parts.push(current);current='';}current+=(current?' ':'')+word;}
-            if(current){parts.push(current);current='';}
-        }
+        for(const sentence of text.split(/(?<=[.!?。;:])\s+/u))pack(sentence.split(/(?<=[,，])\s+/u),words);
         return parts.filter(Boolean);
     }
-    async speak(text){
+    prefetch(url){window.fetch?.(url,{credentials:'same-origin'}).catch(()=>{});}
+    async playAudio(url,generation){
+        if(typeof window.fetch!=='function'||typeof window.Audio!=='function')return false;
+        for(let attempt=1;;attempt++){
+            const response=await window.fetch(url,{credentials:'same-origin'}).catch(()=>null);
+            if(generation!==this.generation)return true;
+            if(response?.status===404)return false;
+            if(response?.ok){
+                const src=URL.createObjectURL(await response.blob());
+                if(generation!==this.generation){URL.revokeObjectURL(src);return true;}
+                const audio=new window.Audio(src);this.audio=audio;audio.playbackRate=this.rate;
+                audio.onended=()=>{URL.revokeObjectURL(src);if(this.audio===audio){this.audio=null;roomStage('idle','speaking');}};
+                try{await audio.play();if(generation===this.generation)roomStage('speaking');}catch{if(this.audio===audio)this.audio=null;this.controls?.notice?.('Trình duyệt chặn phát âm thanh. Bấm Đọc câu hỏi để nghe.');}
+                return true;
+            }
+            const failure=await response?.json?.().catch(()=>null);
+            if(generation!==this.generation)return true;
+            if(failure?.code==='quota_daily'){this.controls?.notice?.(failure.message);return true;}
+            if(attempt>=4){this.controls?.notice?.('Giọng đọc AI đang quá tải. Bấm Đọc câu hỏi để thử lại sau ít phút.');return true;}
+            const wait=Math.min(60,Number(response?.headers?.get('Retry-After'))||15);
+            this.controls?.notice?.(`Giọng đọc AI đang bận, tự thử lại sau ${wait} giây…`);
+            await new Promise(resolve=>setTimeout(resolve,wait*1000));
+            if(generation!==this.generation)return true;
+        }
+    }
+    async speak(text,audioUrl){
         this.stop();const generation=this.generation;
+        if(audioUrl&&await this.playAudio(audioUrl,generation))return true;
+        if(generation!==this.generation)return false;
+        if(audioUrl)this.controls?.notice?.('Buổi này chưa có giọng Gemini, đang dùng giọng đọc của trình duyệt.');
         const normalized=this.normalize(text);if(!this.supported||!normalized)return false;
         await this.waitForVoices();if(generation!==this.generation)return false;this.refreshVoices();
         const voice=this.selectedVoice;
@@ -127,4 +149,4 @@ class BrowserTextToSpeech {
         next();return true;
     }
 }
-window.InterviewSpeech={ISpeechToText,BrowserSpeechToText,BrowserTextToSpeech};
+window.InterviewSpeech={ISpeechToText,MoonshineSpeechToText,BrowserTextToSpeech};

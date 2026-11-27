@@ -1,12 +1,15 @@
 using System.Security.Claims;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using AiInterview.Application.Interfaces;
 using AiInterview.Domain.Entities;
+using AiInterview.Infrastructure.AI;
 using AiInterview.Infrastructure.Persistence;
 using AiInterview.Web.Services;
 using AiInterview.Web.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.EntityFrameworkCore;
 
 namespace AiInterview.Web.Controllers;
@@ -85,6 +88,33 @@ public sealed class InterviewsController(InterviewService interviews, AppDbConte
         catch (KeyNotFoundException) { await Send("error", new { message = "Không tìm thấy buổi phỏng vấn." }); }
         catch (InvalidOperationException ex) { await Send("error", new { message = ex.Message }); }
         catch (Exception) { await Send("error", new { message = "Chưa thể hoàn tất xử lý. Dữ liệu đã lưu được giữ lại, hãy thử lại.", code = "server_error" }); }
+    }
+    [Authorize(Roles = Roles.Student)]
+    public async Task<IActionResult> Speech(Guid id, Guid turnId, CancellationToken ct)
+    {
+        var question = await db.Turns.Where(t => t.Id == turnId && t.SessionId == id && t.Session.StudentId == UserId && t.Session.AiProvider == "Gemini")
+            .Select(t => t.Question).SingleOrDefaultAsync(ct);
+        if (question is null || ai is not GeminiAiService gemini || !ai.IsConfigured) return NotFound();
+        var cache = HttpContext.RequestServices.GetRequiredService<IMemoryCache>();
+        var key = $"speech:{turnId}";
+        var user = UserId;
+        var speaking = cache.GetOrCreate(key, entry =>
+        {
+            entry.SlidingExpiration = TimeSpan.FromHours(2);
+            return gemini.SpeakAsync(user, id, Regex.Replace(question, @"```[\s\S]*?(```|$)", " "), CancellationToken.None);
+        })!;
+        try
+        {
+            var audio = await speaking.WaitAsync(ct);
+            Response.Headers.CacheControl = "private, max-age=86400";
+            return File(audio, "audio/wav");
+        }
+        catch (AiServiceException ex)
+        {
+            cache.Remove(key);
+            if (ex.Code is "quota" or "rate_limit" or "system_concurrency") Response.Headers.RetryAfter = "20";
+            return StatusCode(503, new { message = ex.Message, code = ex.Code });
+        }
     }
     [HttpPost, ValidateAntiForgeryToken, Authorize(Roles = Roles.Student)]
     public async Task<IActionResult> Answer(Guid id, [FromBody] SubmitAnswerModel model, CancellationToken ct)

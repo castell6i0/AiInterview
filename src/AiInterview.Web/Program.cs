@@ -59,6 +59,7 @@ builder.Services.Configure<AiProviderOptions>(builder.Configuration.GetSection("
 var selectedAiProvider = builder.Configuration["AI:Provider"] ?? "Gemini";
 if (selectedAiProvider is not ("Gemini" or "OpenAI")) throw new InvalidOperationException("AI:Provider chỉ nhận Gemini hoặc OpenAI.");
 builder.Services.AddSingleton<AiRequestLimiter>();
+builder.Services.AddMemoryCache();
 builder.Services.AddHttpClient(nameof(GeminiAiService), client => client.Timeout = Timeout.InfiniteTimeSpan)
     .RedactLoggedHeaders(["x-goog-api-key"]);
 builder.Services.AddHttpClient(nameof(OpenAiService), client => client.Timeout = Timeout.InfiniteTimeSpan)
@@ -104,6 +105,11 @@ app.Use(async (context, next) =>
     context.Response.Headers["X-Frame-Options"] = "DENY";
     context.Response.Headers["Referrer-Policy"] = "same-origin";
     context.Response.Headers["Permissions-Policy"] = "microphone=(self), camera=()";
+    if (context.Request.Path.StartsWithSegments("/Interviews/Room") || context.Request.Path.StartsWithSegments("/lib"))
+    {
+        context.Response.Headers["Cross-Origin-Opener-Policy"] = "same-origin";
+        context.Response.Headers["Cross-Origin-Embedder-Policy"] = "require-corp";
+    }
     try { await next(); }
     catch (KeyNotFoundException) when (!context.Response.HasStarted) { context.Response.StatusCode = 404; await context.Response.WriteAsync("Không tìm thấy nội dung hoặc bạn không có quyền truy cập."); }
 });
