@@ -67,6 +67,36 @@ Server=(localdb)\MSSQLLocalDB;Database=AiInterview;Trusted_Connection=True;Multi
 
 Bạn có thể thay bằng SQL Server/SQL Express đang dùng trong `Configure.ps1`. `TrustServerCertificate=True` phục vụ môi trường phát triển cục bộ; khi triển khai hãy dùng chứng chỉ SQL Server được tin cậy.
 
+### Chuyển từ LocalDB sang SQL Server Express
+
+Dùng khi muốn chạy trên SQL Server Express (instance `SQLEXPRESS`) thay cho LocalDB mà vẫn giữ dữ liệu cũ. Chỉ đổi cấu hình trên máy của bạn; source vẫn mặc định dùng LocalDB.
+
+1. Cài SQL Server Express và bản Cumulative Update mới nhất. Phiên bản SQL Express phải **bằng hoặc mới hơn** LocalDB (xem bằng `SELECT @@VERSION`), nếu không sẽ không restore được.
+2. Backup database từ LocalDB và cho service SQL Express quyền đọc thư mục backup:
+
+   ```powershell
+   New-Item -ItemType Directory -Force C:\SqlBackup
+   sqlcmd -S "(localdb)\MSSQLLocalDB" -E -C -Q "BACKUP DATABASE [AiInterview] TO DISK = N'C:\SqlBackup\AiInterview.bak' WITH COPY_ONLY, CHECKSUM"
+   icacls C:\SqlBackup /grant 'NT SERVICE\MSSQL$SQLEXPRESS:(OI)(CI)RX'
+   ```
+
+3. Restore vào SQL Express (đổi thư mục `DATA` nếu máy bạn khác):
+
+   ```powershell
+   sqlcmd -S ".\SQLEXPRESS" -E -C -Q "RESTORE DATABASE [AiInterview] FROM DISK = N'C:\SqlBackup\AiInterview.bak' WITH MOVE N'AiInterview' TO N'C:\Program Files\Microsoft SQL Server\MSSQL17.SQLEXPRESS\MSSQL\DATA\AiInterview.mdf', MOVE N'AiInterview_log' TO N'C:\Program Files\Microsoft SQL Server\MSSQL17.SQLEXPRESS\MSSQL\DATA\AiInterview_log.ldf', CHECKSUM"
+   ```
+
+   Muốn database mới thay vì giữ dữ liệu cũ thì bỏ qua bước 2 và 3; `Run.ps1` sẽ tự tạo database và seed.
+4. Đặt connection string trong user-secrets (hoặc nhập qua `Configure.ps1`):
+
+   ```powershell
+   dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Server=.\SQLEXPRESS;Database=AiInterview;Trusted_Connection=True;MultipleActiveResultSets=true;Encrypt=True;TrustServerCertificate=True" --project src/AiInterview.Web
+   ```
+
+5. Chạy `.\Run.ps1 -MigrateOnly`, rồi `.\Run.ps1` và đăng nhập để kiểm tra dữ liệu cũ.
+
+Muốn quay lại LocalDB thì chạy `dotnet user-secrets remove "ConnectionStrings:DefaultConnection" --project src/AiInterview.Web`. File `.bak` chứa toàn bộ dữ liệu (hash mật khẩu, key AI đã mã hóa): giữ nó ngoài thư mục source và không gửi kèm ZIP.
+
 ### Chạy bằng Visual Studio
 
 1. Mở **AiInterview.sln**. Vào **View → Solution Explorer** nếu chưa thấy danh sách project.
